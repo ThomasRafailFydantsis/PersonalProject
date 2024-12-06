@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PersonalProject.Server.Data;
@@ -22,41 +20,64 @@ namespace PersonalProject.Server.Controllers
             _context = context;
         }
 
-        // GET: api/Certs
-        //[Authorize]
+        
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Certs>>> GetCertsData()
+        public async Task<ActionResult<IEnumerable<CertDto>>> GetCertsData()
         {
-            return await _context.CertsData.ToListAsync();
+            var certs = await _context.Certs.ToListAsync();
+            return Ok(certs.Select(c => new CertDto
+            {
+                CertId = c.CertId,
+                CertName = c.CertName,
+                Description = c.Description,
+                Image = c.Image
+            }));
         }
 
-        // GET: api/Certs/5
         
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Certs>> GetCerts(int? id)
+        [HttpGet("{userId}/certificates")]
+        public async Task<IActionResult> GetUserCertificates(string userId)
         {
-            var certs = await _context.CertsData.FindAsync(id);
+            var userCertificates = await _context.UserCertificates
+                .Where(uc => uc.UserId == userId)
+                .Include(uc => uc.Certificate)
+                .ToListAsync();
 
-            if (certs == null)
+            if (userCertificates == null || !userCertificates.Any())
             {
-                return NotFound();
+                return NotFound(new { message = "No certificates found for the user." });
             }
 
-            return certs;
+            return Ok(userCertificates.Select(uc => new
+            {
+                uc.Certificate.CertId,
+                uc.Certificate.CertName,
+                uc.Certificate.Description,
+                uc.Certificate.Image,
+                uc.DateAdded
+            }));
         }
 
-        // PUT: api/Certs/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        
+        // PUT: api/Certs/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCerts(int? id, Certs certs)
+        public async Task<IActionResult> PutCerts(int id, [FromBody] CertDto certDto)
         {
-            if (id != certs.CertId)
+            if (id != certDto.CertId)
             {
-                return BadRequest();
+                return BadRequest(new { message = "ID mismatch." });
             }
 
-            _context.Entry(certs).State = EntityState.Modified;
+            var cert = await _context.Certs.FindAsync(id);
+            if (cert == null)
+            {
+                return NotFound(new { message = $"Certificate with ID {id} not found." });
+            }
+
+            cert.CertName = certDto.CertName;
+            cert.Description = certDto.Description;
+            cert.Image = certDto.Image;
+
+            _context.Entry(cert).State = EntityState.Modified;
 
             try
             {
@@ -66,49 +87,64 @@ namespace PersonalProject.Server.Controllers
             {
                 if (!CertsExists(id))
                 {
-                    return NotFound();
+                    return NotFound(new { message = "Certificate not found during update." });
                 }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
 
             return NoContent();
         }
 
         // POST: api/Certs
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-       
         [HttpPost]
-        public async Task<ActionResult<Certs>> PostCerts(Certs certs)
+        public async Task<ActionResult<CertDto>> PostCerts([FromBody] CertDto certDto)
         {
-            _context.CertsData.Add(certs);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var cert = new Certs
+            {
+                CertName = certDto.CertName,
+                Description = certDto.Description,
+                Image = certDto.Image
+            };
+
+            _context.Certs.Add(cert);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCerts", new { id = certs.CertId }, certs);
+            certDto.CertId = cert.CertId; // Update DTO with ID from database
+            return CreatedAtAction(nameof(GetCertsData), new { id = certDto.CertId }, certDto);
         }
 
-        // DELETE: api/Certs/5
-        
+        // DELETE: api/Certs/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCerts(int? id)
         {
-            var certs = await _context.CertsData.FindAsync(id);
+            var certs = await _context.Certs.FindAsync(id);
             if (certs == null)
             {
                 return NotFound();
             }
 
-            _context.CertsData.Remove(certs);
+            _context.Certs.Remove(certs);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool CertsExists(int? id)
+        private bool CertsExists(int id)
         {
-            return _context.CertsData.Any(e => e.CertId == id);
+            return _context.Certs.Any(e => e.CertId == id);
         }
+    }
+
+    public class CertDto
+    {
+        public int CertId { get; set; }
+        public string? CertName { get; set; }
+        public string? Description { get; set; }
+        public string? Image { get; set; }
     }
 }

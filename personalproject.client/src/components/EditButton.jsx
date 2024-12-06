@@ -12,7 +12,7 @@ function EditButton({ cert, onUpdate }) {
     const handleSave = async () => {
         try {
             const updatedCert = await certsService.updateCert(editedCert.certId, editedCert);
-            onUpdate(updatedCert); 
+            onUpdate(updatedCert);
         } catch (error) {
             console.error("Error updating certificate:", error);
         }
@@ -21,22 +21,22 @@ function EditButton({ cert, onUpdate }) {
 
     return (
         <div>
-            <form >
-            <input
-                type="text"
-                name="certName"
-                value={editedCert.certName}
-                onChange={handleChange}
-                placeholder="Certificate Name"
-            />
-            <input
-                type="text"
-                name="key"
-                value={editedCert.key}
-                onChange={handleChange}
-                placeholder="Key"
-            />
-            <button onClick={handleSave}>Save</button>    
+            <form onChange={handleChange}>
+                <input
+                    type="text"
+                    name="certName"
+                    value={editedCert.certName || ''}
+                    onChange={handleChange}
+                    placeholder="Certificate Name"
+                />
+                <input
+                    type="text"
+                    name="description"
+                    value={editedCert.description || ''}
+                    onChange={handleChange}
+                    placeholder="description"
+                />
+                <button onClick={handleSave}>Save</button>
             </form>
         </div>
     );

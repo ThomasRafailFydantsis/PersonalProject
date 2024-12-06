@@ -6,34 +6,50 @@ const RegisterPage = () => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [isRegistered, setIsRegistered] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const response = await AuthService.register(username, email, password);  // Call register method from AuthService
+            const response = await AuthService.register(username, email, password, firstName, lastName);
 
             if (response) {
-                setIsRegistered(true);
-                navigate('/login'); // Navigate to login after successful registration
+                navigate('/login'); 
             }
         } catch (error) {
             setErrorMessage(error.response?.data || 'Registration failed');
         }
     };
 
-    if (isRegistered) {
-        return navigate('/login');
-    }
-
     return (
         <div>
             <h2>Register</h2>
             {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
             <form onSubmit={handleSubmit}>
+                <div>
+                    <label htmlFor="firstName">First Name:</label>
+                    <input
+                        type="text"
+                        id="firstName"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                    />
+                </div>
+                <div>
+                    <label htmlFor="lastName">Last Name:</label>
+                    <input
+                        type="text"
+                        id="lastName"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                    />
+                </div>
                 <div>
                     <label htmlFor="username">Username:</label>
                     <input

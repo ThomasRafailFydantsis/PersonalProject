@@ -5,7 +5,7 @@
 namespace PersonalProject.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class FixIdentitySchema1 : Migration
+    public partial class InitialCreate2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

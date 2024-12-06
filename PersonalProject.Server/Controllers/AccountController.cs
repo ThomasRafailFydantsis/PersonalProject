@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PersonalProject.Server.Models;
 using System.ComponentModel.DataAnnotations;
@@ -16,15 +19,17 @@ namespace PersonalProject.Server.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
+        private readonly RoleManager<IdentityRole> roleManager;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            this.roleManager = roleManager;
         }
 
- 
+
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserData()
         {
@@ -34,8 +39,7 @@ namespace PersonalProject.Server.Controllers
                 return Unauthorized("User is not authenticated.");
             }
 
-            try
-            {
+           
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
 
@@ -64,38 +68,90 @@ namespace PersonalProject.Server.Controllers
 
                 var userData = new
                 {
+                    user.Id,
                     user.UserName,
-                    user.Email
+                    user.Email,
+                    user.FirstName,
+                    user.LastName
                 };
 
                 return Ok(userData);
-            }
-            catch (Exception ex)
-            {
-               
-                return Unauthorized("Invalid or expired token.");
-            }
+          
+        }
+
+        [HttpPost("assign-role")]
+        [Authorize(Roles = "Admin")] 
+        public async Task<IActionResult> AssignRole([FromBody] RoleAssignmentDto model)
+        {
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+                return NotFound("User not found.");
+
+            if (await _userManager.IsInRoleAsync(user, model.Role))
+                return BadRequest("User already has this role.");
+
+            await _userManager.AddToRoleAsync(user, model.Role);
+            return Ok($"Role {model.Role} assigned to user {user.UserName}.");
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (model == null)
+            {
+                return BadRequest("Invalid client request");
+            }
+
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                return BadRequest("Email is already in use");
+            }
 
             var user = new ApplicationUser
             {
                 UserName = model.Username,
-                Email = model.Email
+                Email = model.Email,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                EmailConfirmed = true 
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (!result.Succeeded)
+            {
                 return BadRequest(result.Errors);
+            }
 
-            return Ok(new { message = "User registered successfully." });
+          
+            var roleResult = await _userManager.AddToRoleAsync(user, "User");
+
+            if (!roleResult.Succeeded)
+            {
+                return BadRequest("Failed to assign default role to user.");
+            }
+
+            return Ok("User registered successfully.");
         }
+        //public async Task<IActionResult> Register([FromBody] RegisterDto model)
+        //{
+        //    if (!ModelState.IsValid)
+        //        return BadRequest(ModelState);
+
+        //    var user = new ApplicationUser
+        //    {
+        //        UserName = model.Username,
+        //        Email = model.Email
+        //    };
+
+        //    var result = await _userManager.CreateAsync(user, model.Password);
+
+        //    if (!result.Succeeded)
+        //        return BadRequest(result.Errors);
+
+        //    return Ok(new { message = "User registered successfully." });
+        //}
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
@@ -167,7 +223,7 @@ namespace PersonalProject.Server.Controllers
             }
             catch (Exception)
             {
-                return Unauthorized("Invalid token");
+                return Unauthorized(new { error = "User is not authenticated.", code = "AUTH_ERROR" });
             }
         }
 
@@ -192,6 +248,12 @@ namespace PersonalProject.Server.Controllers
         [Required]
         [MinLength(6)]
         public string Password { get; set; }
+
+        [Required]
+        public string FirstName { get; set; }
+
+        [Required]
+        public string LastName { get; set; }
     }
 
     public class LoginDto
@@ -201,5 +263,13 @@ namespace PersonalProject.Server.Controllers
 
         [Required]
         public string Password { get; set; }
+    }
+    public class RoleAssignmentDto
+    {
+        [Required]
+        public string UserId { get; set; }
+
+        [Required]
+        public string Role { get; set; }
     }
 }

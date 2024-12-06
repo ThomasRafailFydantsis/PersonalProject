@@ -7,7 +7,8 @@ namespace PersonalProject.Server.Models
         [Key]
         public int CertId { get; set; }
         public string? CertName { get; set; }
-        public string? Key { get; set; }
+        public string? Description { get; set; }
+        public string? Image { get; set; }
 
     }
 }

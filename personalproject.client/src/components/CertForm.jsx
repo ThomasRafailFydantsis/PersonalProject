@@ -52,8 +52,8 @@ const CertForm = () => {
                     Issued To:
                     <input
                         type="text"
-                        name="Key"
-                        value={cert.Key}
+                        name="Description"
+                        value={cert.Description}
                         onChange={handleChange}
                         required
                     />

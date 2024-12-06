@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './components/Dashboard';
 import UserProfile from './pages/UserProfile';
+import UserCertificates from './pages/UserCertificates';
 //import ProtectedRoute from './components/ProtectedRoute';
 
 
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" caseSensitive={false} element={<Dashboard />} />
         <Route path="/userProfile" caseSensitive={false} element={<UserProfile />} />
+        <Route path="/userCertificates" caseSensitive={false} element={<UserCertificates />} />
       </Routes>
     </Router>
   );

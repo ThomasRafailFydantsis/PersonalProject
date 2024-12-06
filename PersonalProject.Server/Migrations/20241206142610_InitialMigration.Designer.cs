@@ -12,8 +12,8 @@ using PersonalProject.Server.Data;
 namespace PersonalProject.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241203193757_FixIdentitySchema2")]
-    partial class FixIdentitySchema2
+    [Migration("20241206142610_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -178,11 +178,9 @@ namespace PersonalProject.Server.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
@@ -240,52 +238,47 @@ namespace PersonalProject.Server.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CertId"));
 
                     b.Property<string>("CertName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Key")
+                    b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("CertId");
 
-                    b.ToTable("CertsData");
+                    b.ToTable("Certs");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            CertId = 1,
-                            CertName = "Sql",
-                            Key = "one"
-                        },
-                        new
-                        {
-                            CertId = 2,
-                            CertName = "Sql",
-                            Key = "one"
-                        },
-                        new
-                        {
-                            CertId = 3,
-                            CertName = "Sql",
-                            Key = "one"
-                        },
-                        new
-                        {
-                            CertId = 4,
-                            CertName = "Sql",
-                            Key = "one"
-                        },
-                        new
-                        {
-                            CertId = 5,
-                            CertName = "Sql",
-                            Key = "one"
-                        },
-                        new
-                        {
-                            CertId = 6,
-                            CertName = "Sql",
-                            Key = "one"
-                        });
+            modelBuilder.Entity("PersonalProject.Server.Models.UserCertificate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CertId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CertId");
+
+                    b.HasIndex("UserId", "CertId")
+                        .IsUnique();
+
+                    b.ToTable("UserCertificates");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -337,6 +330,30 @@ namespace PersonalProject.Server.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.UserCertificate", b =>
+                {
+                    b.HasOne("PersonalProject.Server.Models.Certs", "Certificate")
+                        .WithMany()
+                        .HasForeignKey("CertId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PersonalProject.Server.Models.ApplicationUser", "User")
+                        .WithMany("UserCertificates")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Certificate");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("UserCertificates");
                 });
 #pragma warning restore 612, 618
         }
