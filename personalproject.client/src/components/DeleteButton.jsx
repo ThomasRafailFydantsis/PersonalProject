@@ -1,4 +1,5 @@
 import certsService from '/MVC/PersonalProject/personalproject.client/CertsService';
+//import ProtectedComponent from './ProtectedComponent';
 
 function DeleteButton({ certId, onDelete }) {
     const handleDelete = async () => {
@@ -11,7 +12,9 @@ function DeleteButton({ certId, onDelete }) {
     };
 
     return (
-        <button onClick={handleDelete}>Delete</button>
+    
+            <button  onClick={handleDelete}>Delete</button>
+     
     );
 
 }

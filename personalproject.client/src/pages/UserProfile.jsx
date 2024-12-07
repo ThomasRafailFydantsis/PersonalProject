@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AuthService from '/MVC/PersonalProject/personalproject.client/AuthService';
 import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
 
 
 const UserProfile = () => {
@@ -52,12 +53,17 @@ const UserProfile = () => {
     const { email } = userData || {};
 
     return (
-        <div>
-            <h1>User Profile</h1>
-            <p><strong>Username:</strong> {userName}</p>
-            <p><strong>Email:</strong> {email}</p>
-            <button onClick={() => navigate('/dashboard')}>Back</button>
-        </div>
+        <>
+            <Header />
+            <main>
+                <div>
+                    <h1>User Profile</h1>
+                    <p style={{ fontSize: '30px' }}><strong>Username:</strong> {userName}</p>
+                    <p style={{ fontSize: '30px' }}><strong>Email:</strong> {email}</p>
+                    <button className='green-button' onClick={() => navigate('/dashboard')}>Back</button>
+                </div>
+            </main>
+        </>
     );
 };
 

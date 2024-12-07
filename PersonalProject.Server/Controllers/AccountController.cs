@@ -17,16 +17,43 @@ namespace PersonalProject.Server.Controllers
     public class AccountController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly RoleManager<IdentityRole> roleManager;
 
         public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _configuration = configuration;
             this.roleManager = roleManager;
+        }
+        [HttpGet("roles")]
+        //[Authorize]
+        public async Task<IActionResult> GetUserRoles()
+        {
+   
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return Unauthorized("User not found.");
+            }
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return Ok(roles);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = _userManager.Users.Select(user => new
+            {
+                user.Id,
+                user.UserName,
+                user.Email,
+                user.FirstName,
+                user.LastName,
+            }).ToList();
+
+            return Ok(users);
         }
 
 
@@ -39,48 +66,47 @@ namespace PersonalProject.Server.Controllers
                 return Unauthorized("User is not authenticated.");
             }
 
-           
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
 
-                var claimsPrincipal = tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidIssuer = _configuration["Jwt:Issuer"],
-                    ValidAudience = _configuration["Jwt:Audience"],
-                    ValidateLifetime = true,
-                }, out SecurityToken validatedToken);
+            var claimsPrincipal = tokenHandler.ValidateToken(token, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidIssuer = _configuration["Jwt:Issuer"],
+                ValidAudience = _configuration["Jwt:Audience"],
+                ValidateLifetime = true,
+            }, out SecurityToken validatedToken);
 
-                var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return Unauthorized("User is not authenticated.");
-                }
+            var userId = claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("User is not authenticated.");
+            }
 
-                var user = await _userManager.FindByIdAsync(userId);
-                if (user == null)
-                {
-                    return NotFound("User not found.");
-                }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
 
-                var userData = new
-                {
-                    user.Id,
-                    user.UserName,
-                    user.Email,
-                    user.FirstName,
-                    user.LastName
-                };
+            var roles = await _userManager.GetRolesAsync(user);
 
-                return Ok(userData);
-          
+            var userData = new
+            {
+                user.Id,
+                user.UserName,
+                user.Email,
+                Roles = roles
+            };
+
+            return Ok(userData);
         }
 
         [HttpPost("assign-role")]
-        [Authorize(Roles = "Admin")] 
+       
         public async Task<IActionResult> AssignRole([FromBody] RoleAssignmentDto model)
         {
             var user = await _userManager.FindByIdAsync(model.UserId);
@@ -172,7 +198,10 @@ namespace PersonalProject.Server.Controllers
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim("Email", user.Email ?? "")
+                    new Claim("Email", user.Email ?? ""),
+                    new Claim(ClaimTypes.Role, "Admin"),
+                    new Claim(ClaimTypes.Role, "User"),
+                    new Claim(ClaimTypes.Role, "Marker"),
                 }),
                 Expires = DateTime.UtcNow.AddHours(1),
                 Issuer = _configuration["Jwt:Issuer"],

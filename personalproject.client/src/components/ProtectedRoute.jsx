@@ -1,32 +1,38 @@
-import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import AuthService from '/MVC/PersonalProject/personalproject.client/AuthService';
+import { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
 
-const ProtectedRoute = ({ children }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(null);
+
+const RoleContext = createContext();
+
+
+export const RoleProvider = ({ children }) => {
+    const [roles, setRoles] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchAuthStatus = async () => {
+        const fetchRoles = async () => {
             try {
-                const status = await AuthService.getAuthStatus(); 
-                setIsAuthenticated(status);
+                const response = await axios.get("https://localhost:7295/api/account/me", {
+                    withCredentials: true,
+                });
+                setRoles(response.data.Roles || []);
             } catch (error) {
-                setIsAuthenticated(false);
-                console.error('Error fetching auth status:', error);
+                console.error("Error fetching roles:", error);
+            } finally {
+                setIsLoading(false);
             }
         };
-        fetchAuthStatus();
+
+        fetchRoles();
     }, []);
 
-    if (isAuthenticated === null) {
-        return <div>Loading...</div>; 
-    }
-
-    if (!isAuthenticated) {
-        return <Navigate to="/login" />;
-    }
-
-    return children; 
+    return (
+        <RoleContext.Provider value={{ roles, isLoading }}>
+            {children}
+        </RoleContext.Provider>
+    );
 };
 
-export default ProtectedRoute;
+export const useRoles = () => {
+    return useContext(RoleContext);
+};

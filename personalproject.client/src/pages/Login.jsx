@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import AuthService from '/MVC/PersonalProject/personalproject.client/AuthService';
 import { useNavigate } from 'react-router-dom';
+import OflineHeader from '../components/OflineHeader';
 
 const LoginPage = () => {
     const [username, setUsername] = useState('');
@@ -22,7 +23,8 @@ const LoginPage = () => {
 
     return (
         <div>
-            <h2>Login</h2>
+            <OflineHeader />
+            <h2 style={{ textAlign: 'center' }}>Login</h2>
             {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
             <form onSubmit={handleSubmit}>
                 <div>
@@ -46,7 +48,8 @@ const LoginPage = () => {
                         required
                     />
                 </div>
-                <button type="submit">Login</button>
+                <button className='green-button' type="submit">Login</button>
+                <button className='green-button' onClick={() => navigate("/register")}>Register</button>
             </form>
         </div>
     );

@@ -65,7 +65,7 @@ namespace PersonalProject.Server.Controllers
 
                 if (existingAssociation != null)
                 {
-                    return BadRequest("Certificate is already associated with this user.");
+                    return BadRequest("Already associated.");
                 }
 
                 var userCertificate = new UserCertificate
@@ -79,7 +79,7 @@ namespace PersonalProject.Server.Controllers
                 _context.UserCertificates.Add(userCertificate);
                 await _context.SaveChangesAsync();
 
-                return Ok("Certificate added successfully.");
+                return Ok("Done.");
             }
             catch (Exception ex)
             {

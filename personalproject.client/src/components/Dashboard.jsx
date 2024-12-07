@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import CertsList from './CertsList';
-import CertForm from './CertForm';
-import Logout from './Logout';
+//import CertForm from './CertForm';
+//import Logout from './Logout';
 //import AuthService from '/MVC/PersonalProject/personalproject.client/AuthService';
 import { useNavigate } from 'react-router-dom';
+import Header from './Header';
+//import ProtectedComponent from './ProtectedComponent';
 
 function Dashboard() {
     const [userData, setUserData] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(null);
     const [error, setError] = useState(null);
+    const [roles, setRoles] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -32,6 +35,7 @@ function Dashboard() {
                     if (response.ok) {
                         const data = await response.json();
                         setUserData(data);
+                        setRoles(data.roles);
                     } else {
                         setError('Failed to fetch user data');
                     }
@@ -66,12 +70,18 @@ function Dashboard() {
     const { id } = userData || {};
     return (
         <div>
-            <h1>Welcome Back, {userName}!</h1>
-            <Logout />
-            <CertForm />
+            <Header />
+            <div className='wrapper'>
+            <h2 style={{ fontSize: '40px' }} className='welcome'>Welcome Back, {userName}!</h2>
+            {roles.includes("Admin") && <p>You have Admin access.</p>}
+            {roles.includes("User") && <p>You have User access.</p>}
+            <div className='dashboard-certificates'>
             <CertsList id={id} />
+            </div>
             <button name="userProfile" onClick={() => navigate('/userProfile')}>User Profile</button>
             <button name="userProfile" onClick={() => navigate('/userCertificates')}>Your Certificates</button>
+            {roles.includes("Admin") && <button name="userTable" onClick={() => navigate('/userTable')}>User Table</button>}
+            </div>
         </div>
     );
 }

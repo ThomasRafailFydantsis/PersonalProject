@@ -76,12 +76,12 @@ internal class Program
             if (adminUser == null)
             {
                 adminUser = new ApplicationUser { UserName = "admin", Email = "admin@example.com", EmailConfirmed = true };
-                await userManager.CreateAsync(adminUser, "6979298516tomA@");
+                await userManager.CreateAsync(adminUser, "password1234@ABC");
                 await userManager.AddToRoleAsync(adminUser, "Admin");
             }
         }
 
-            if (app.Environment.IsDevelopment())
+        if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();

@@ -18,6 +18,7 @@ function EditButton({ cert, onUpdate }) {
         }
         console.log("Certificate updated successfully!");
     };
+    
 
     return (
         <div>
@@ -37,6 +38,7 @@ function EditButton({ cert, onUpdate }) {
                     placeholder="description"
                 />
                 <button onClick={handleSave}>Save</button>
+                <button type="button" onClick={() => onUpdate(cert)}>Cancel</button>
             </form>
         </div>
     );
