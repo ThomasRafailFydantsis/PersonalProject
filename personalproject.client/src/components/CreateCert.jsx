@@ -4,7 +4,7 @@ import CertForm from './CertForm';
 const CreateCertPage = () => {
     const handleSuccess = () => {
         console.log('Certificate created successfully!');
-        // Optionally navigate or refresh data
+  
     };
 
     return (

@@ -15,7 +15,7 @@ const UserTable = () => {
     useEffect(() => {
         const fetchUserDetails = async () => {
             try {
-                // Check authentication status
+           
                 const authResponse = await axios.get("https://localhost:7295/api/Account/auth-status", {
                     withCredentials: true,
                 });
@@ -23,7 +23,7 @@ const UserTable = () => {
                 if (authResponse.data.isAuthenticated) {
                     setIsAuthenticated(true);
 
-                    // Fetch user details
+                    
                     const userResponse = await axios.get("https://localhost:7295/api/Account/me", {
                         withCredentials: true,
                     });
@@ -31,7 +31,7 @@ const UserTable = () => {
                     const userData = userResponse.data;
                     setUserData(userData);
 
-                    // Check if user has the Admin role
+                    
                     if (userData.roles && userData.roles.includes("Admin")) {
                         setIsAdmin(true);
                     }
@@ -49,7 +49,7 @@ const UserTable = () => {
 
     useEffect(() => {
         if (isAdmin) {
-            // Fetch all users if the logged-in user is an admin
+          
             axios
                 .get("https://localhost:7295/api/Account", { withCredentials: true })
                 .then((response) => {
@@ -73,7 +73,7 @@ const UserTable = () => {
     }
 
     if (!isAuthenticated) {
-        navigate("/login"); // Redirect to login if not authenticated
+        navigate("/login"); 
         return <div>You are not logged in. Redirecting to login...</div>;
     }
 
