@@ -75,6 +75,10 @@ namespace PersonalProject.Server.Controllers
                     DateAdded = DateTime.Now
 
                 };
+                if (string.IsNullOrEmpty(model.UserId) || model.CertId == 0)
+                {
+                    return BadRequest("Invalid UserId or CertId.");
+                }
 
                 _context.UserCertificates.Add(userCertificate);
                 await _context.SaveChangesAsync();
@@ -83,8 +87,10 @@ namespace PersonalProject.Server.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 return StatusCode(500, "An error occurred while adding the certificate.");
             }
+
         }
         [HttpDelete("remove")]
         public async Task<IActionResult> RemoveCertificateFromUser([FromBody] RemoveCertificateDto model)

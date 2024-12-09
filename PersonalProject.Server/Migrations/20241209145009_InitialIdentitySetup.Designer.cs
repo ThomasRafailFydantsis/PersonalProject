@@ -12,8 +12,8 @@ using PersonalProject.Server.Data;
 namespace PersonalProject.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241206162633_InitialCreate1")]
-    partial class InitialCreate1
+    [Migration("20241209145009_InitialIdentitySetup")]
+    partial class InitialIdentitySetup
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -158,6 +158,31 @@ namespace PersonalProject.Server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PersonalProject.Server.Models.AnswerOption", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("AnswerOptions");
+                });
+
             modelBuilder.Entity("PersonalProject.Server.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -253,6 +278,32 @@ namespace PersonalProject.Server.Migrations
                     b.ToTable("Certs");
                 });
 
+            modelBuilder.Entity("PersonalProject.Server.Models.Question", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CertId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CorrectAnswer")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CertId");
+
+                    b.ToTable("Questions");
+                });
+
             modelBuilder.Entity("PersonalProject.Server.Models.UserCertificate", b =>
                 {
                     b.Property<int>("Id")
@@ -266,6 +317,12 @@ namespace PersonalProject.Server.Migrations
 
                     b.Property<DateTime>("DateAdded")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateTaken")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -332,12 +389,34 @@ namespace PersonalProject.Server.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PersonalProject.Server.Models.AnswerOption", b =>
+                {
+                    b.HasOne("PersonalProject.Server.Models.Question", "Question")
+                        .WithMany("AnswerOptions")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.Question", b =>
+                {
+                    b.HasOne("PersonalProject.Server.Models.Certs", "Certs")
+                        .WithMany("Questions")
+                        .HasForeignKey("CertId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Certs");
+                });
+
             modelBuilder.Entity("PersonalProject.Server.Models.UserCertificate", b =>
                 {
                     b.HasOne("PersonalProject.Server.Models.Certs", "Certificate")
                         .WithMany()
                         .HasForeignKey("CertId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PersonalProject.Server.Models.ApplicationUser", "User")
@@ -354,6 +433,16 @@ namespace PersonalProject.Server.Migrations
             modelBuilder.Entity("PersonalProject.Server.Models.ApplicationUser", b =>
                 {
                     b.Navigation("UserCertificates");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.Certs", b =>
+                {
+                    b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.Question", b =>
+                {
+                    b.Navigation("AnswerOptions");
                 });
 #pragma warning restore 612, 618
         }

@@ -5,6 +5,8 @@ using PersonalProject.Server.Data;
 using PersonalProject.Server.Models;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using System.Text.Json;
+using PersonalProject.Server.Filters;
 
 internal class Program
 {
@@ -16,7 +18,7 @@ internal class Program
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("FinalProject")));
 
-      
+        builder.Services.AddScoped<CustomJsonSerializationFilter>();
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowReactApp", policy =>
@@ -49,15 +51,32 @@ internal class Program
                     IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
             });
-
-      
+       
+        builder.Services.AddScoped<ExamService>();
         builder.Services.AddAuthorization();
-        
+        //builder.Services.AddSingleton<JsonSerializerOptions>(provider =>
+        //{
+        //    return new JsonSerializerOptions
+        //    {
+        //        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve,
+        //        MaxDepth = 64
+        //    };
+        //});
+
         builder.Services.AddControllers();
+    //.AddJsonOptions(options =>
+    //{
+
+    //    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    //    options.JsonSerializerOptions.MaxDepth = 64;
+    //});
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
         var app = builder.Build();
+        app.UseAuthentication();
+        app.UseAuthorization();
+
         using (var scope = app.Services.CreateScope())
         {
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -92,8 +111,8 @@ internal class Program
         app.UseSwaggerUI();
         app.UseHttpsRedirection();
         app.UseCors("AllowReactApp");
-        app.UseAuthentication();
-        app.UseAuthorization();
+       
+        
         app.MapControllers();
         app.MapFallbackToFile("/index.html");
 
