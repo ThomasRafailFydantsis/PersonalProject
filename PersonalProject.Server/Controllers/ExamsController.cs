@@ -58,31 +58,69 @@ namespace PersonalProject.Server.Controllers
         [ServiceFilter(typeof(CustomJsonSerializationFilter))]
         public async Task<IActionResult> SubmitExam([FromBody] SubmitExamDto submitDto)
         {
-            if (submitDto == null || !submitDto.AnswerIds.Any())
+           
+            // Validate input
+            if (submitDto == null || submitDto.AnswerIds == null || !submitDto.AnswerIds.Any())
             {
-                return BadRequest("No answers provided.");
+                return BadRequest("Invalid request. Please provide answers.");
             }
 
-            var userCertificate = await _examService.SubmitExamAsync(submitDto.UserId, submitDto.CertId, submitDto.AnswerIds);
-
-            var resultDto = new UserCertificateDto
+            try
             {
-                CertName = userCertificate.Certificate.CertName,
-                Score = userCertificate.Score,
-                DateTaken = userCertificate.DateTaken
-            };
+                // Print received data to console for inspection
+                Console.WriteLine($"Received SubmitExam request: UserId = {submitDto.UserId}, CertId = {submitDto.CertId}, AnswerIds = {string.Join(", ", submitDto.AnswerIds)}");
 
-            return Ok(resultDto);
+                var userCertificate = await _examService.SubmitExamAsync(submitDto.UserId, submitDto.CertId, submitDto.AnswerIds);
+
+                // Print the userCertificate details to ensure it's correct
+                Console.WriteLine($"User Certificate: {userCertificate.UserId}, {userCertificate.CertId}, Score: {userCertificate.Score}, DateTaken: {userCertificate.DateTaken}");
+
+                // Return formatted response with nullable DateTime handled
+                var result = new
+                {
+                    CertName = userCertificate.Certificate?.CertName ?? "Unknown Certificate",
+                    Score = userCertificate.Score,
+                    DateTaken = userCertificate.DateTaken?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Date not available"
+                };
+
+                return Ok(result);
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine($"DbUpdateException: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+                throw; // Re-throw to ensure proper response
+            }
+            catch (ArgumentException ex)
+            {
+                // If we hit this exception, return the error message.
+                Console.WriteLine($"ArgumentException: {ex.Message}");
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                // Print out error if exam is not found.
+                Console.WriteLine($"KeyNotFoundException: {ex.Message}");
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Handle any unexpected errors and print details.
+                Console.WriteLine($"Exception: {ex.Message}");
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
         }
 
         // Get User Exam Results (GET)
         [HttpGet("results/{userId}")]
-        [ServiceFilter(typeof(CustomJsonSerializationFilter))]
         public async Task<IActionResult> GetUserResults(string userId)
         {
             var results = await _examService.GetUserResultsAsync(userId);
 
-            if (results == null || !results.Any())
+            if (results == null || results.Count == 0)
             {
                 return NotFound("No results found for this user.");
             }
@@ -94,7 +132,7 @@ namespace PersonalProject.Server.Controllers
                 DateTaken = r.DateTaken
             }).ToList();
 
-            return Ok(resultDtos);
+            return Ok(resultDtos); // Default serialization (no `$id` or `$values`)
         }
     }
 
@@ -105,9 +143,10 @@ namespace PersonalProject.Server.Controllers
     }
     public class UserCertificateDto
     {
+        public string UserId { get; set; }
         public string CertName { get; set; }
-        public int Score { get; set; }
-        public DateTime DateTaken { get; set; }
+        public int? Score { get; set; }
+        public DateTime? DateTaken { get; set; }
     }
     public class SubmitExamDto
     {

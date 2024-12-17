@@ -90,7 +90,6 @@ namespace PersonalProject.Server.Controllers
                 Console.WriteLine(ex);
                 return StatusCode(500, "An error occurred while adding the certificate.");
             }
-
         }
         [HttpDelete("remove")]
         public async Task<IActionResult> RemoveCertificateFromUser([FromBody] RemoveCertificateDto model)

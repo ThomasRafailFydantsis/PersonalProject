@@ -13,5 +13,6 @@ namespace PersonalProject.Server.Models
      public ClaimsIdentity? Username { get; internal set; }
      public ICollection<UserCertificate>? UserCertificates { get; set; }
     
+    
  }
 }

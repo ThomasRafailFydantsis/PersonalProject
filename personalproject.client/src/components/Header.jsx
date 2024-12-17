@@ -1,5 +1,7 @@
 import Logout from "./Logout";
+import { useNavigate } from "react-router-dom";
 function Header() {
+    const navigate = useNavigate();
     return (
         <header className="header">
         <>
@@ -8,8 +10,8 @@ function Header() {
             <>
                 <nav className="header-nav">
                        <button><a href="/home">Home</a></button>
-                       <button><a href="/contact">Contact</a></button>
-                       <button><a href="/about">About</a></button>
+                    <button><a href="/contact">Contact</a></button>
+                    <button name="userProfile" onClick={() => navigate('/userCertificates')}>Cart</button>
                         <Logout />
                 </nav>
         </>

@@ -51,6 +51,9 @@ namespace PersonalProject.Server.Controllers
                 user.Email,
                 user.FirstName,
                 user.LastName,
+                
+                
+               
             }).ToList();
 
             return Ok(users);
@@ -94,11 +97,14 @@ namespace PersonalProject.Server.Controllers
 
             var roles = await _userManager.GetRolesAsync(user);
 
+           
             var userData = new
             {
                 user.Id,
                 user.UserName,
                 user.Email,
+                user.FirstName,
+                user.LastName,
                 Roles = roles
             };
 

@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PersonalProject.Server.Filters
 {
@@ -10,17 +11,17 @@ namespace PersonalProject.Server.Filters
         {
             // No action required before execution
         }
+
         public void OnActionExecuted(ActionExecutedContext context)
         {
             if (context.Result is ObjectResult objectResult)
             {
                 var options = new JsonSerializerOptions
                 {
-                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve,
-                    MaxDepth = 64
+                    WriteIndented = false,
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles // Enable cycle handling
                 };
 
-                // Serialize the object with custom settings
                 var json = JsonSerializer.Serialize(objectResult.Value, options);
                 context.Result = new ContentResult
                 {

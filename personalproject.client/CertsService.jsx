@@ -27,9 +27,36 @@ const deleteCert = async (id) => {
 
 const fetchCertificates = async (userId) => {
     const response = await axios.get(`${BASE_URL}/${userId}/certificates`);
-    return response.data; // Ensure the fetched data is returned
+    return response.data; 
+};
+ const fetchExamById = async (certId) => {
+    try {
+        const response = await axios.get(`https://localhost:7295/api/Exam/${certId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching exam:', error);
+        throw error;
+    }
 };
 
+ const submitExam = async (userId, certId, answerIds) => {
+    try {
+        const response = await axios.post('https://localhost:7295/api/Exam/submit', {
+            userId,
+            certId,
+            answerIds,
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error submitting exam:', error);
+        throw error.response?.data || error.message;
+    }
+};
+
+//const fetchScores = async (userId) => {
+//  const response =  await axios.get(`${BASE_URL2}/${userId}`);
+//    return response.data;
+//};
 export default {
     getCerts,
     getCertById,
@@ -37,4 +64,8 @@ export default {
     updateCert,
     deleteCert,
     fetchCertificates,
+    fetchExamById,
+    submitExam
+
+    //fetchScores
 };

@@ -11,6 +11,7 @@ function UserCertificates() {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
+    // Fetch user data
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -27,7 +28,7 @@ function UserCertificates() {
                         const data = await response.json();
                         setUserData(data);
                     } else {
-                        setError('Failed to fetch user data.');
+                        throw new Error('Failed to fetch user data.');
                     }
                 } else {
                     console.log('User not authenticated');
@@ -41,6 +42,7 @@ function UserCertificates() {
         fetchUserData();
     }, []);
 
+    
     useEffect(() => {
         const fetchCertificates = async () => {
             if (!isAuthenticated || !userData?.id) {
@@ -62,6 +64,29 @@ function UserCertificates() {
         }
     }, [isAuthenticated, userData]);
 
+    // Delete certificate
+    const handleDelete = async (certId) => {
+        try {
+            await axios.delete('https://localhost:7295/api/certificates/remove', {
+                data: {
+                    UserId: userData.id,
+                    CertId: certId,
+                },
+            });
+
+            setCertificates(certificates.filter((cert) => cert.certId !== certId));
+            alert('Certificate removed successfully.');
+        } catch (error) {
+            console.error('Error removing certificate:', error);
+            alert('Failed to remove certificate.');
+        }
+    };
+
+    // Navigate to exam page
+    const handleTakeExam = (certId) => {
+        navigate(`/take-exam/${certId}`, { state: { userId: userData.id } });
+    };
+
     if (isAuthenticated === null) {
         return (
             <div>
@@ -75,6 +100,7 @@ function UserCertificates() {
         return (
             <div>
                 <Header />
+                <h1>User Certificates</h1>
                 <p>{typeof error === 'string' ? error : error.message || 'An unknown error occurred.'}</p>
                 <button className="green-button" onClick={() => navigate('/dashboard')}>
                     Back to Dashboard
@@ -88,29 +114,10 @@ function UserCertificates() {
             <div>
                 <Header />
                 <div>You are not logged in. Please log in.</div>
-                <div>
-                    <button className="green-button" onClick={() => navigate('/login')}>Login</button>
-                </div>
+                <button className="green-button" onClick={() => navigate('/login')}>Login</button>
             </div>
         );
     }
-
-    const handleDelete = async (certId) => {
-        try {
-            const response = await axios.delete('https://localhost:7295/api/certificates/remove', {
-                data: {
-                    UserId: userData.id,
-                    CertId: certId,
-                },
-            });
-
-            alert(response.data);
-            setCertificates(certificates.filter((cert) => cert.certId !== certId));
-        } catch (error) {
-            console.error('Error removing certificate:', error);
-            alert('Failed to remove certificate.');
-        }
-    };
 
     return (
         <div>
@@ -123,10 +130,12 @@ function UserCertificates() {
             ) : (
                 <ul>
                     {certificates.map((certificate) => (
-                        <li style={{ fontSize: '25px' }} className="certList" key={certificate.certId}>
+                        <li style={{ fontSize: '25px' }} key={certificate.certId}>
                             <h3>{certificate.certName}</h3>
-                            <p>{certificate.description}</p>
-                            <button onClick={() => handleDelete(certificate.certId)}>Remove Certificate</button>
+                            <div>
+                                <button className="green-button" onClick={() => handleTakeExam(certificate.certId)}>Take Exam</button>
+                                <button className="green-button" onClick={() => handleDelete(certificate.certId)}>Remove Certificate</button>
+                            </div>
                         </li>
                     ))}
                 </ul>

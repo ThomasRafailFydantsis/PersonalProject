@@ -14,11 +14,13 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("FinalProject")));
 
+     
+
         builder.Services.AddScoped<CustomJsonSerializationFilter>();
+
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("AllowReactApp", policy =>
@@ -51,25 +53,12 @@ internal class Program
                     IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
             });
-       
+
         builder.Services.AddScoped<ExamService>();
         builder.Services.AddAuthorization();
-        //builder.Services.AddSingleton<JsonSerializerOptions>(provider =>
-        //{
-        //    return new JsonSerializerOptions
-        //    {
-        //        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve,
-        //        MaxDepth = 64
-        //    };
-        //});
 
         builder.Services.AddControllers();
-    //.AddJsonOptions(options =>
-    //{
 
-    //    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-    //    options.JsonSerializerOptions.MaxDepth = 64;
-    //});
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
@@ -111,12 +100,12 @@ internal class Program
         app.UseSwaggerUI();
         app.UseHttpsRedirection();
         app.UseCors("AllowReactApp");
-       
-        
+
+
         app.MapControllers();
         app.MapFallbackToFile("/index.html");
 
         app.Run();
     }
-   
+
 }

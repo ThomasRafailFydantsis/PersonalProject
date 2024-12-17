@@ -7,6 +7,8 @@ import UserProfile from './pages/UserProfile';
 import UserCertificates from './pages/UserCertificates';
 import NotAuthorized from './pages/NotAuthorized';
 import UserTable from './pages/UserTable';
+import ExamPage from './pages/ExamPage';
+//import Scores from './pages/Scores';
 
 
 const App = () => {
@@ -21,6 +23,8 @@ const App = () => {
         <Route path="/dashboard" caseSensitive={false} element={<Dashboard />} />
         <Route path="/userProfile" caseSensitive={false} element={<UserProfile />} />
         <Route path="/userCertificates" caseSensitive={false} element={<UserCertificates />} />
+        <Route path="/take-exam/:certId" caseSensitive={false} element={<ExamPage />} />
+     {/*<Route path="/scores" caseSensitive={false} element={<Scores />} />*/}
       </Routes>
     </Router>
   );

@@ -60,7 +60,7 @@ function CertsList({ id: userId }) {
             }
         };
         fetchCerts();
-    }, []);
+    }, [ ]);
 
     const handleDelete = (certId) => {
         setCerts(certs.filter((cert) => cert.certId !== certId));

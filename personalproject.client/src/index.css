@@ -250,3 +250,13 @@ form p a:hover {
 .header-logo{
   text-decoration: none;
 }
+.exam-page {
+  margin: 20px;
+}
+
+.exam-details, .submit-exam {
+  margin-bottom: 30px;
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 8px;
+}

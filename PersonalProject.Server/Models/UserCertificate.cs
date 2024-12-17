@@ -20,8 +20,8 @@ namespace PersonalProject.Server.Models
 
      public DateTime DateAdded { get; set; } = DateTime.UtcNow;
     
-     public int Score { get; set; }
-     public DateTime DateTaken { get; set; }
+     public int? Score { get; set; }
+     public DateTime? DateTaken { get; set; }
 
      
  }
