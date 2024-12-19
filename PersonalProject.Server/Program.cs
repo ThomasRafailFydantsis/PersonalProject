@@ -23,7 +23,7 @@ internal class Program
 
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowReactApp", policy =>
+            options.AddPolicy("AllowAll", policy =>
             {
                 policy.WithOrigins("https://localhost:52384")
                       .AllowCredentials()
@@ -99,7 +99,7 @@ internal class Program
         app.UseSwagger();
         app.UseSwaggerUI();
         app.UseHttpsRedirection();
-        app.UseCors("AllowReactApp");
+        app.UseCors("AllowAll");
 
 
         app.MapControllers();

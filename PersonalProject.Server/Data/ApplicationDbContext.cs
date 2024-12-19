@@ -14,6 +14,7 @@ namespace PersonalProject.Server.Data{
         public DbSet<AnswerOption> AnswerOptions { get; set; }
 
         public DbSet<UserCertificate> UserCertificates { get; set; }
+        public DbSet<CertificateDescription> CertificateDescriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -65,6 +66,10 @@ namespace PersonalProject.Server.Data{
                       .WithOne(a => a.Question)
                       .HasForeignKey(a => a.QuestionId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+            
+                      
         } 
+        
     }
 }

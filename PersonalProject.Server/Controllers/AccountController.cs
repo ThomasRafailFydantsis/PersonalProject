@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PersonalProject.Server.Models;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -44,22 +45,26 @@ namespace PersonalProject.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            var users = _userManager.Users.Select(user => new
+            var users = _userManager.Users.ToList();
+
+            var userList = new List<object>();
+
+            foreach (var user in users)
             {
-                user.Id,
-                user.UserName,
-                user.Email,
-                user.FirstName,
-                user.LastName,
-                
-                
-               
-            }).ToList();
+                var roles = await _userManager.GetRolesAsync(user);
+                userList.Add(new
+                {
+                    user.Id,
+                    user.UserName,
+                    user.Email,
+                    user.FirstName,
+                    user.LastName,
+                    Roles = roles
+                });
+            }
 
-            return Ok(users);
+            return Ok(userList);
         }
-
-
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserData()
         {
@@ -110,21 +115,41 @@ namespace PersonalProject.Server.Controllers
 
             return Ok(userData);
         }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound("User not found.");
 
-        [HttpPost("assign-role")]
-       
-        public async Task<IActionResult> AssignRole([FromBody] RoleAssignmentDto model)
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+                return BadRequest("Failed to delete user.");
+
+            return Ok("User deleted successfully.");
+        }
+        [HttpPut("update-role")]
+        public async Task<IActionResult> UpdateUserRole([FromBody] RoleAssignmentDto model)
         {
             var user = await _userManager.FindByIdAsync(model.UserId);
             if (user == null)
                 return NotFound("User not found.");
 
-            if (await _userManager.IsInRoleAsync(user, model.Role))
-                return BadRequest("User already has this role.");
+            var currentRoles = await _userManager.GetRolesAsync(user);
 
-            await _userManager.AddToRoleAsync(user, model.Role);
-            return Ok($"Role {model.Role} assigned to user {user.UserName}.");
+            // Remove user from all current roles
+            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            if (!removeResult.Succeeded)
+                return BadRequest("Failed to remove current roles.");
+
+            // Add user to the new role
+            var addResult = await _userManager.AddToRoleAsync(user, model.Role);
+            if (!addResult.Succeeded)
+                return BadRequest("Failed to assign new role.");
+
+            return Ok($"User role updated to {model.Role}.");
         }
+
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
@@ -268,6 +293,27 @@ namespace PersonalProject.Server.Controllers
             Response.Cookies.Delete("authToken");
             return Ok(new { message = "Logged out successfully." });
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto model)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound("User not found.");
+
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Email = model.Email;
+            user.UserName = model.Username;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                return BadRequest("Failed to update user.");
+
+            return Ok("User updated successfully.");
+        }
+
+
     }
 
     public class RegisterDto
@@ -306,5 +352,20 @@ namespace PersonalProject.Server.Controllers
 
         [Required]
         public string Role { get; set; }
+    }
+    public class UpdateUserDto
+    {
+        [Required]
+        public string FirstName { get; set; }
+
+        [Required]
+        public string LastName { get; set; }
+
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [Required]
+        public string Username { get; set; }
     }
 }

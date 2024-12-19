@@ -9,6 +9,8 @@ const UserProfile = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(null);
     const [error, setError] = useState(null);
     const [scores, setScores] = useState([]);
+    const [isEditing, setIsEditing] = useState(false);
+    const [updatedData, setUpdatedData] = useState({});
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -26,11 +28,15 @@ const UserProfile = () => {
                     if (response.ok) {
                         const data = await response.json();
                         setUserData(data);
+                        setUpdatedData({
+                            firstName: data.firstName,
+                            lastName: data.lastName,
+                            email: data.email,
+                            username: data.userName,
+                        });
                     } else {
                         throw new Error('Failed to fetch user data.');
                     }
-                } else {
-                    console.log('User not authenticated');
                 }
             } catch (err) {
                 console.error('Error checking authentication status or fetching user data:', err);
@@ -40,24 +46,42 @@ const UserProfile = () => {
         checkAuthStatus();
     }, []);
 
-    const { userName, email, firstName, lastName, id } = userData || {};
+    const fetchScores = async () => {
+        if (!userData?.id) return;
+        try {
+            const response = await axios.get(`https://localhost:7295/api/Exam/results/${userData.id}`);
+            setScores(response.data);
+        } catch (err) {
+            console.error('Error fetching scores:', err);
+            setScores([]);
+        }
+    };
 
     useEffect(() => {
-        const fetchScores = async () => {
-            if (!userData?.id) return;
-            try {
-                const response = await axios.get(`https://localhost:7295/api/Exam/results/${id}`);
-                console.log('API Response:', response.data);
+        if (userData) fetchScores();
+    }, [userData]);
 
-                const scoresArray = response.data;
-                setScores(scoresArray);
-            } catch (err) {
-                console.error('Error fetching certificates:', err);
-                setScores([]);
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setUpdatedData({ ...updatedData, [name]: value });
+    };
+
+    const handleSaveChanges = async () => {
+        try {
+            const response = await axios.put(`https://localhost:7295/api/Account/${userData.id}`, updatedData, {
+                withCredentials: true,
+            });
+
+            if (response.status === 200) {
+                
+                setUserData({ ...userData, ...updatedData });
+                setIsEditing(false);
             }
-        };
-        fetchScores();
-    }, [userData?.id]);
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            
+        }
+    };
 
     if (isAuthenticated === null) {
         return <div>Loading...</div>;
@@ -71,21 +95,74 @@ const UserProfile = () => {
         return <div>You are not logged in. Please log in.</div>;
     }
 
+    if (!userData) {
+        return <div>Loading user data...</div>;
+    }
+
     return (
         <>
             <Header />
             <main>
-                <div>
+                <div style={{ margin: '20px auto', maxWidth: '800px' }}>
                     <h1>User Profile</h1>
-                    <p style={{ fontSize: '30px' }}><strong>First Name:</strong> {firstName}</p>
-                    <p style={{ fontSize: '30px' }}><strong>Last Name:</strong> {lastName}</p>
-                    <p style={{ fontSize: '30px' }}><strong>Username:</strong> {userName}</p>
-                    <p style={{ fontSize: '30px' }}><strong>Email:</strong> {email}</p>
-
+                    {isEditing ? (
+                        <div>
+                            <label>
+                                First Name:
+                                <input
+                                    type="text"
+                                    name="firstName"
+                                    value={updatedData.firstName || ''}
+                                    onChange={handleInputChange}
+                                />
+                            </label>
+                            <br />
+                            <label>
+                                Last Name:
+                                <input
+                                    type="text"
+                                    name="lastName"
+                                    value={updatedData.lastName || ''}
+                                    onChange={handleInputChange}
+                                />
+                            </label>
+                            <br />
+                            <label>
+                                Email:
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={updatedData.email || ''}
+                                    onChange={handleInputChange}
+                                />
+                            </label>
+                            <br />
+                            <label>
+                                Username:
+                                <input
+                                    type="text"
+                                    name="username"
+                                    value={updatedData.username || ''}
+                                    onChange={handleInputChange}
+                                />
+                            </label>
+                            <br />
+                            <button onClick={handleSaveChanges}>Save Changes</button>
+                            <button onClick={() => setIsEditing(false)}>Cancel</button>
+                        </div>
+                    ) : (
+                        <div>
+                            <p><strong>First Name:</strong> {userData.firstName}</p>
+                            <p><strong>Last Name:</strong> {userData.lastName}</p>
+                            <p><strong>Email:</strong> {userData.email}</p>
+                            <p><strong>Username:</strong> {userData.userName}</p>
+                            <button onClick={() => setIsEditing(true)}>Edit Profile</button>
+                        </div>
+                    )}
                     <button className="green-button" onClick={() => navigate('/dashboard')}>Back</button>
                 </div>
 
-                <div>
+                <div style={{ margin: '20px auto', maxWidth: '800px' }}>
                     <h1>Scores</h1>
                     <table border="1" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
                         <thead>
@@ -98,9 +175,9 @@ const UserProfile = () => {
                         <tbody>
                             {scores.map((score, index) => (
                                 <tr key={index}>
-                                    <td>{score.certName || "N/A"}</td>
-                                    <td>{score.score != null ? score.score : "N/A"}</td>
-                                    <td>{score.dateTaken ? new Date(score.dateTaken).toLocaleString() : "N/A"}</td>
+                                    <td>{score.certName || 'N/A'}</td>
+                                    <td>{score.score != null ? score.score : 'N/A'}</td>
+                                    <td>{score.dateTaken ? new Date(score.dateTaken).toLocaleString() : 'N/A'}</td>
                                 </tr>
                             ))}
                         </tbody>

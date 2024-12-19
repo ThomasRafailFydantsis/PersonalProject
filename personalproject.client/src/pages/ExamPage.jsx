@@ -29,7 +29,6 @@ const ExamPage = () => {
                 setLoading(false);
             }
         };
-
         if (certId) fetchExamById(certId);
     }, [certId]);
 

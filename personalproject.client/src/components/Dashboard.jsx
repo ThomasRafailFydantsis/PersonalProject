@@ -74,12 +74,15 @@ function Dashboard() {
             <div className='wrapper'>
             <h2 style={{ fontSize: '40px' }} className='welcome'>Welcome Back, {userName}!</h2>
             {roles.includes("Admin") && <p>You have Admin access.</p>}
-            {roles.includes("User") && <p>You have User access.</p>}
+                {roles.includes("User") && <p>You have User access.</p>}
+                {roles.includes("Marker") && <p>You have Marker access.</p>}
             <div className='dashboard-certificates'>
             <CertsList id={id} />
             </div>
             <button name="userProfile" onClick={() => navigate('/userProfile')}>User Profile</button>
             <button name="userProfile" onClick={() => navigate('/userCertificates')}>Your Certificates</button>
+                {roles.includes("Admin") && <button name="certForm" onClick={() => navigate('/CreateCert')}>Add Certificate</button>}
+                {roles.includes("Marker") && <button name="certForm" onClick={() => navigate('/CreateCert')}>Add Certificate</button>}
             {roles.includes("Admin") && <button name="userTable" onClick={() => navigate('/userTable')}>User Table</button>}
             </div>
         </div>

@@ -2,16 +2,18 @@ import { useState, useEffect } from 'react';
 import DeleteButton from './DeleteButton';
 import certsService from '/MVC/PersonalProject/personalproject.client/CertsService';
 import axios from 'axios';
-import EditButton from './EditButton';
+import { useNavigate } from 'react-router-dom';
 
 function CertsList({ id: userId }) {
     const [certs, setCerts] = useState([]);
-    const [editingId, setEditingId] = useState(null);
+    
     const [addStatus, setAddStatus] = useState({}); 
     const [userData, setUserData] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [error, setError] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [isMarker, setIsMarker] = useState(false);
+    const navigate = useNavigate();
     
 
     useEffect(() => {
@@ -36,6 +38,9 @@ function CertsList({ id: userId }) {
                   
                     if (userData.roles && userData.roles.includes("Admin")) {
                         setIsAdmin(true);
+                    }
+                    if (userData.roles && userData.roles.includes("Marker")) {
+                        setIsMarker(true);
                     }
                 } else {
                     setIsAuthenticated(false);
@@ -66,16 +71,7 @@ function CertsList({ id: userId }) {
         setCerts(certs.filter((cert) => cert.certId !== certId));
     };
 
-    const handleUpdate = (updatedCert) => {
-        if (!updatedCert || !updatedCert.certId) {
-            console.error("Invalid certificate object:", updatedCert);
-            return;
-        }
-        setCerts((prevCerts) =>
-            prevCerts.map((cert) => (cert.certId === updatedCert.certId ? updatedCert : cert))
-        );
-        setEditingId(null);
-    };
+ 
 
     const addCertificateToUser = async (certId) => {
         setAddStatus((prev) => ({
@@ -120,6 +116,9 @@ function CertsList({ id: userId }) {
 
         console.log("User is not authenticated. Redirecting to login page...");
     }
+    const handleUpdateExam = (certId) => {
+        navigate(`/certForm/${certId}`);
+    };
 
     return (
         <div>
@@ -127,14 +126,8 @@ function CertsList({ id: userId }) {
             <ul>
                 {certs.map((cert) => (
                     <li key={cert.certId} className="certList">
-                        {editingId === cert.certId ? (
-                            <EditButton
-                                cert={cert}
-                                onUpdate={handleUpdate}
-                            />
-                        ) : (
                             <>
-                                <div>{cert.certName}, {cert.description}</div>
+                                <div>{cert.certName}</div>
                                     {isAdmin && <DeleteButton certId={cert.certId} onDelete={handleDelete} />}
                                     <button 
                                     onClick={() => addCertificateToUser(cert.certId)}
@@ -142,9 +135,10 @@ function CertsList({ id: userId }) {
                                 >
                                     {addStatus[cert.certId]?.isLoading ? 'Adding...' : 'Add Certificate'}
                                 </button>
-                                    {isAdmin && <button onClick={() => setEditingId(cert.certId)}>Edit</button>}
+                            {isAdmin && <button onClick={() => handleUpdateExam(cert.certId)}>Edit</button>}
+                            {isMarker && <button onClick={() => handleUpdateExam(cert.certId)}>Edit</button>}
                             </>
-                        )}
+                        
                         {addStatus[cert.certId]?.successMessage && (
                             <div style={{ color: 'green' }}>{addStatus[cert.certId]?.successMessage}</div>
                         )}

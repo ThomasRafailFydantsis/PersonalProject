@@ -15,9 +15,9 @@ namespace PersonalProject.Server.Models
         public async Task<Certs> GetExamByIdAsync(int certId)
         {
             var exam = await _context.Certs 
-                                     .Include(e => e.Questions)    // Load questions for this exam
-                                         .ThenInclude(q => q.AnswerOptions)  // Load answer options for each question
-                                     .FirstOrDefaultAsync(e => e.CertId == certId);  // Ensure we're using the correct property name (CertId)
+                                     .Include(e => e.Questions)  
+                                         .ThenInclude(q => q.AnswerOptions)
+                                     .FirstOrDefaultAsync(e => e.CertId == certId); 
 
             if (exam == null)
             {
@@ -29,27 +29,26 @@ namespace PersonalProject.Server.Models
 
         public async Task<UserCertificate> SubmitExamAsync(string userId, int certId, List<int> answerIds)
         {
-            // Check if a certificate already exists for the user and certId
+            
             var existingCertificate = await _context.UserCertificates
                 .FirstOrDefaultAsync(c => c.UserId == userId && c.CertId == certId);
 
             if (existingCertificate != null)
             {
-                // Option 1: Update the existing record with the new score and date
+                
                 existingCertificate.Score = CalculateScore(answerIds, certId);
                 existingCertificate.DateTaken = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
                 return existingCertificate;
 
-                // Option 2: Return the existing record without any changes (if you don't want to overwrite)
-                // return existingCertificate;
+               
             }
 
-            // Calculate the score (this logic can be extracted into a helper function)
+         
             var score = CalculateScore(answerIds, certId);
 
-            // Create a new certificate
+           
             var userCertificate = new UserCertificate
             {
                 UserId = userId,
@@ -76,7 +75,6 @@ namespace PersonalProject.Server.Models
             return userCertificate;
         }
 
-        // Example helper function for score calculation
         private int? CalculateScore(List<int> answerIds, int certId)
         {
             var exam = _context.Certs.Include(e => e.Questions)
@@ -135,12 +133,14 @@ namespace PersonalProject.Server.Models
     }
     public class QuestionDto
     {
+        public int Id { get; set; }
         public string Text { get; set; }
         public string CorrectAnswer { get; set; }
         public List<AnswerOptionDto> AnswerOptions { get; set; }
     }
     public class AnswerOptionDto
     {
+        public int Id { get; set; }
         public string Text { get; set; }
         public bool IsCorrect { get; set; }
     }

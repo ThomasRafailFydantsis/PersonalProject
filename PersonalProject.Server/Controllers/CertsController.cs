@@ -31,7 +31,6 @@ namespace PersonalProject.Server.Controllers
             {
                 CertId = c.CertId,
                 CertName = c.CertName,
-                Description = c.Description,
                 Image = c.Image
             }));
         }
@@ -54,7 +53,6 @@ namespace PersonalProject.Server.Controllers
             {
                 uc.Certificate.CertId,
                 uc.Certificate.CertName,
-                uc.Certificate.Description,
                 uc.Certificate.Image,
                 uc.DateAdded
             }));
@@ -76,7 +74,6 @@ namespace PersonalProject.Server.Controllers
             }
 
             cert.CertName = certDto.CertName;
-            cert.Description = certDto.Description;
             cert.Image = certDto.Image;
 
             _context.Entry(cert).State = EntityState.Modified;
@@ -109,7 +106,6 @@ namespace PersonalProject.Server.Controllers
             var cert = new Certs
             {
                 CertName = certDto.CertName,
-                Description = certDto.Description,
                 Image = certDto.Image
             };
 

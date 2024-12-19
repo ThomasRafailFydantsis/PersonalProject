@@ -1,70 +1,189 @@
-import  { useState } from 'react';
-import certsService from '/MVC/PersonalProject/personalproject.client/CertsService';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
 
-const CertForm = () => {
-    const [cert, setCert] = useState({
-        CertName: '',
-        Key: '',});
-    
+const ExamForm = () => {
+    const { certId } = useParams();
+    const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        e.target.value;
-        setCert({ ...cert, [e.target.name]: e.target.value });
+    const [certName, setCertName] = useState("");
+    const [questions, setQuestions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (certId) {
+            fetchExam(certId);
+        } else {
+            setLoading(false); 
+        }
+    }, [certId]);
+
+    const fetchExam = async (certId) => {
+        const parsedCertId = parseInt(certId, 10); // Ensure certId is an integer
+        if (isNaN(parsedCertId)) {
+            setError("Invalid certificate ID");
+            setLoading(false);
+            return;
+        }
+        try {
+            const response = await axios.get(`https://localhost:7295/api/Exam/${certId}`); 
+            const { CertName, Questions } = response.data;
+            setCertName(CertName);
+            setQuestions(
+                Questions.map((q) => ({
+                    id: q.Id,
+                    text: q.Text,
+                    correctAnswer: q.CorrectAnswer,
+                    answerOptions: q.AnswerOptions.map((a) => ({
+                        id: a.Id,
+                        text: a.Text,
+                        isCorrect: a.IsCorrect,
+                    })),
+                }))
+            );
+            setLoading(false);
+        } catch (err) {
+            console.error("Error fetching exam:", err);
+            setError("Failed to fetch exam.");
+            setLoading(false);
+
+        }
+    };
+
+    const handleCertNameChange = (e) => {
+        setCertName(e.target.value);
+    };
+
+    const handleQuestionChange = (index, key, value) => {
+        const updatedQuestions = [...questions];
+        updatedQuestions[index][key] = value;
+        setQuestions(updatedQuestions);
+    };
+
+    const handleAnswerChange = (questionIndex, answerIndex, key, value) => {
+        const updatedQuestions = [...questions];
+        updatedQuestions[questionIndex].answerOptions[answerIndex][key] = value;
+        setQuestions(updatedQuestions);
+    };
+
+    const addQuestion = () => {
+        setQuestions([
+            ...questions,
+            { id: null, text: "", correctAnswer: "", answerOptions: [{ id: null, text: "", isCorrect: false }] },
+        ]);
+    };
+
+    const addAnswerOption = (questionIndex) => {
+        const updatedQuestions = [...questions];
+        updatedQuestions[questionIndex].answerOptions.push({ id: null, text: "", isCorrect: false });
+        setQuestions(updatedQuestions);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        try {
-            //if (certToEdit) {
-            //    // Update the certificate
-            //    await certsService.updateCert(certToEdit.certId, cert);
-            //    console.log('Certificate updated successfully');
-            //} else {
-                // Create a new certificate
-                await certsService.createCert(cert);
-                console.log('Certificate created successfully');
-            //}
+        const payload = {
+            certName,
+            questions: questions.map((q) => ({
+                id: q.id || 0,
+                text: q.text,
+                correctAnswer: q.correctAnswer,
+                answerOptions: q.answerOptions.map((a) => ({
+                    id: a.id || 0,
+                    text: a.text,
+                    isCorrect: a.isCorrect,
+                })),
+            })),
+        };
 
-            //if (onSuccess) onSuccess(); // Callback for parent to refresh data or show a message
-        } catch (error) {
-            console.error('Error submitting certificate:', error.message);
+        const url = certId
+            ? `https://localhost:7295/api/Exam/update/${certId}`
+            : "https://localhost:7295/api/Exam/create";
+
+        try {
+            const method = certId ? "put" : "post";
+            const response = await axios[method](url, payload);
+            console.log("Response:", response.data); // Log success response
+            alert(certId ? "Exam updated successfully!" : "Exam created successfully!");
+            navigate(-1);
+        } catch (err) {
+            if (err.response) {
+                console.error("Backend error:", err.response.data); // Log backend error details
+                alert(`Error: ${err.response.data}`);
+            } else {
+                console.error("Error submitting exam:", err.message);
+                alert("Failed to submit the exam.");
+            }
         }
     };
+
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error}</p>;
 
     return (
         <form onSubmit={handleSubmit}>
             <div>
-            <h1>Create Certificate</h1>
-                <label>
-                    Name:
+                <label>Exam Title:</label>
+                <input type="text" value={certName} onChange={handleCertNameChange} required />
+            </div>
+
+            {questions.map((question, questionIndex) => (
+                <div key={questionIndex}>
+                    <h4>Question {questionIndex + 1}</h4>
+                    <label>Text:</label>
                     <input
                         type="text"
-                        name="CertName"
-                        value={cert.CertName}
-                        onChange={handleChange}
+                        value={question.text}
+                        onChange={(e) => handleQuestionChange(questionIndex, "text", e.target.value)}
                         required
                     />
-                </label>
-            </div>
-            <div>
-                <label>
-                    Issued To:
+                    <br />
+                    <label>Correct Answer:</label>
                     <input
                         type="text"
-                        name="Description"
-                        value={cert.Description}
-                        onChange={handleChange}
+                        value={question.correctAnswer}
+                        onChange={(e) => handleQuestionChange(questionIndex, "correctAnswer", e.target.value)}
                         required
                     />
-                </label>
-            </div>
+                    <h5>Answer Options</h5>
+                    {question.answerOptions.map((option, optionIndex) => (
+                        <div key={optionIndex}>
+                            <label>Text:</label>
+                            <input
+                                type="text"
+                                value={option.text}
+                                onChange={(e) =>
+                                    handleAnswerChange(questionIndex, optionIndex, "text", e.target.value)
+                                }
+                                required
+                            />
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={option.isCorrect}
+                                    onChange={(e) =>
+                                        handleAnswerChange(questionIndex, optionIndex, "isCorrect", e.target.checked)
+                                    }
+                                />
+                                Is Correct
+                            </label>
+                        </div>
+                    ))}
+                    <button type="button" onClick={() => addAnswerOption(questionIndex)}>
+                        Add Answer Option
+                    </button>
+                </div>
+            ))}
+
+            <button type="button" onClick={addQuestion}>
+                Add Question
+            </button>
+            <br />
             <button type="submit">Submit</button>
-            {/*<button type="submit">*/}
-            {/*    {certToEdit ? 'Update Certificate' : 'Create Certificate'}*/}
-            {/*</button>*/}
+            <button type="button" onClick={() => navigate(-1)}>Back</button>
         </form>
     );
 };
 
-export default CertForm;
+export default ExamForm;

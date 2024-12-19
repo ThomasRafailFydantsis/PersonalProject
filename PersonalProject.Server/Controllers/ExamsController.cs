@@ -4,7 +4,7 @@ using PersonalProject.Server.Models;
 using PersonalProject.Server.Data;
 using System.ComponentModel.DataAnnotations;
 using PersonalProject.Server.Filters;
-
+using NuGet.Packaging;
 
 namespace PersonalProject.Server.Controllers
 {
@@ -13,11 +13,14 @@ namespace PersonalProject.Server.Controllers
     public class ExamController : ControllerBase
     {
         private readonly ExamService _examService;
+        private readonly ApplicationDbContext _context;
 
-        public ExamController(ExamService examService)
+        public ExamController(ExamService examService, ApplicationDbContext context)
         {
             _examService = examService;
+            this._context = context;
         }
+
         [HttpGet("{CertId}")]
         [ServiceFilter(typeof(CustomJsonSerializationFilter))]
         public async Task<IActionResult> GetExamById(int CertId)
@@ -32,7 +35,6 @@ namespace PersonalProject.Server.Controllers
             return Ok(exam);  // Return the exam data
         }
 
-        
         [HttpPost("create")]
         [ServiceFilter(typeof(CustomJsonSerializationFilter))]
         public async Task<IActionResult> CreateExam([FromBody] ExamCreationDto examDto)
@@ -49,17 +51,99 @@ namespace PersonalProject.Server.Controllers
                 return BadRequest("An error occurred while creating the exam.");
             }
 
-            // Ensure you're returning the correct examId in the route
             return CreatedAtAction(nameof(GetExamById), new { certId = exam.CertId }, exam);
         }
 
-        // Submit Exam (POST)
+        [HttpPut("update/{certId}")]
+        public async Task<IActionResult> UpdateExam(int certId, [FromBody] ExamUpdateDto examUpdateDto)
+        {
+            if (examUpdateDto == null || string.IsNullOrEmpty(examUpdateDto.CertName) || !examUpdateDto.Questions.Any())
+            {
+                return BadRequest("Invalid exam data.");
+            }
+            if (certId <= 0)
+            {
+                return BadRequest("Invalid CertId");
+            }
+            try
+            {
+                var cert = await _context.Certs.Include(c => c.Questions)
+                                               .ThenInclude(q => q.AnswerOptions)
+                                               .FirstOrDefaultAsync(c => c.CertId == certId);
+
+                if (cert == null)
+                {
+                    return NotFound("Exam not found.");
+                }
+
+                cert.CertName = examUpdateDto.CertName;
+
+                // Update questions and answer options
+                foreach (var questionDto in examUpdateDto.Questions)
+                {
+                    var existingQuestion = cert.Questions.FirstOrDefault(q => q.Id == questionDto.Id);
+
+                    if (existingQuestion != null)
+                    {
+                        existingQuestion.Text = questionDto.Text;
+                        existingQuestion.CorrectAnswer = questionDto.CorrectAnswer;
+
+                        existingQuestion.AnswerOptions.Clear();
+                        foreach (var answerDto in questionDto.AnswerOptions)
+                        {
+                            existingQuestion.AnswerOptions.Add(new AnswerOption
+                            {
+                                Id = answerDto.Id,
+                                Text = answerDto.Text,
+                                IsCorrect = answerDto.IsCorrect,
+                            });
+                        }
+                    }
+                    else
+                    {
+                        cert.Questions.Add(new Question
+                        {
+                            Text = questionDto.Text,
+                            CorrectAnswer = questionDto.CorrectAnswer,
+                            AnswerOptions = questionDto.AnswerOptions.Select(a => new AnswerOption
+                            {
+                                Text = a.Text,
+                                IsCorrect = a.IsCorrect,
+                            }).ToList()
+                        });
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                return Ok(new
+                {
+                    cert.CertId,
+                    cert.CertName,
+                    Questions = cert.Questions.Select(q => new
+                    {
+                        q.Id,
+                        q.Text,
+                        q.CorrectAnswer,
+                        AnswerOptions = q.AnswerOptions.Select(a => new
+                        {
+                            a.Id,
+                            a.Text,
+                            a.IsCorrect
+                        })
+                    })
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating exam: {ex.Message}");
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
         [HttpPost("submit")]
         [ServiceFilter(typeof(CustomJsonSerializationFilter))]
         public async Task<IActionResult> SubmitExam([FromBody] SubmitExamDto submitDto)
         {
-           
-            // Validate input
             if (submitDto == null || submitDto.AnswerIds == null || !submitDto.AnswerIds.Any())
             {
                 return BadRequest("Invalid request. Please provide answers.");
@@ -136,11 +220,13 @@ namespace PersonalProject.Server.Controllers
         }
     }
 
+    // DTOs for Exam Creation, Update, Submit Exam, and User Results
     public class ExamCreationDto
     {
         public string CertName { get; set; }
         public List<QuestionDto> Questions { get; set; }
     }
+
     public class UserCertificateDto
     {
         public string UserId { get; set; }
@@ -148,10 +234,24 @@ namespace PersonalProject.Server.Controllers
         public int? Score { get; set; }
         public DateTime? DateTaken { get; set; }
     }
+
     public class SubmitExamDto
     {
         public string UserId { get; set; }
         public int CertId { get; set; }
-        public List<int> AnswerIds { get; set; } 
+        public List<int> AnswerIds { get; set; }
+    }
+
+    public class ExamUpdateDto
+    {
+        public string CertName { get; set; }
+        public List<QuestionDto> Questions { get; set; }
+    }
+
+    public class AnswerOptionDto
+    {
+        public int Id { get; set; } // Ensure Id is nullable or defaults to 0 for new answers
+        public string Text { get; set; }
+        public bool IsCorrect { get; set; }
     }
 }

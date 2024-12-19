@@ -75,10 +75,10 @@ function UserCertificates() {
             });
 
             setCertificates(certificates.filter((cert) => cert.certId !== certId));
-            alert('Certificate removed successfully.');
+           
         } catch (error) {
             console.error('Error removing certificate:', error);
-            alert('Failed to remove certificate.');
+            
         }
     };
 
@@ -128,17 +128,20 @@ function UserCertificates() {
                     <p>No certificates found for the user.</p>
                 </div>
             ) : (
-                <ul>
+                    <div className='dashboard-certificates'>
+                <ul >
                     {certificates.map((certificate) => (
-                        <li style={{ fontSize: '25px' }} key={certificate.certId}>
-                            <h3>{certificate.certName}</h3>
+                        <li style={{ fontSize: '25px' }} key={certificate.certId} className="certList">
+                           
                             <div>
+                                <div style={{ fontSize: '40px' }}>{certificate.certName}</div>
                                 <button className="green-button" onClick={() => handleTakeExam(certificate.certId)}>Take Exam</button>
-                                <button className="green-button" onClick={() => handleDelete(certificate.certId)}>Remove Certificate</button>
+                                <button className="red-button" onClick={() => handleDelete(certificate.certId)}>Remove Certificate</button>
                             </div>
                         </li>
                     ))}
-                </ul>
+                        </ul>
+                </div>
             )}
             <button className="green-button" onClick={() => navigate('/dashboard')}>
                 Go to Dashboard
