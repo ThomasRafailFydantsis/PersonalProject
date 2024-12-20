@@ -391,56 +391,66 @@ namespace PersonalProject.Server.Controllers
                 XGraphics gfx = XGraphics.FromPdfPage(page);
 
                 // Set up fonts and colors
-                XFont titleFont = new XFont("Times New Roman", 48, XFontStyle.Bold);  // Prestigious font for the title
-                XFont subtitleFont = new XFont("Times New Roman", 18, XFontStyle.Bold);  // Subheading font
-                XFont textFont = new XFont("Times New Roman", 14);  // Body text font
+                XFont titleFont = new XFont("Arial", 36, XFontStyle.Bold);  // Elegant font for title
+                XFont subtitleFont = new XFont("Arial", 24, XFontStyle.Bold);  // Elegant font for CertFlix
+                XFont textFont = new XFont("Arial", 14);  // Elegant font for body text
 
                 XBrush blackBrush = new XSolidBrush(XColor.FromArgb(0, 0, 0));  // Black for text
-                XBrush goldBrush = new XSolidBrush(XColor.FromArgb(255, 223, 0));  // Gold for accents (used for company name)
+                XBrush certFlixBrush = new XSolidBrush(XColor.FromArgb(96, 125, 139));  // Color for CertFlix text
 
-                // Define the border color using XColor (Dark Red)
-                XColor darkRedColor = XColor.FromArgb(130, 0, 0);  // Dark Red for borders
-                XPen borderPen = new XPen(darkRedColor, 3);  // Pen for border color and thickness
+                // Define the border colors
+                XColor outerBorderColor = XColor.FromArgb(255, 140, 0);  // Outer border: #FF8C00 (Bright Orange)
+                XColor innerBorderColor = XColor.FromArgb(96, 125, 139);  // Inner border: #607d8b (Bluish-gray)
+
+                XPen outerBorderPen = new XPen(outerBorderColor, 6);  // Outer border with thicker pen
+                XPen innerBorderPen = new XPen(innerBorderColor, 3);  // Inner border with thinner pen
 
                 // Set page size and margins
                 page.Width = 700;
                 page.Height = 500;
-                double margin = 60;
+                double margin = 0;
+                double verticalSpacing = 20;  // Space between different sections
+                double textHeight = 50;  // Approximate height for text lines
+                double w = 14;
+                double e = 91;
 
-                // Draw elegant border using XPen (NOT XBrush)
-                gfx.DrawRectangle(borderPen, margin, margin, page.Width - 2 * margin, page.Height - 2 * margin);
+                // Draw the outer border using XPen (Bright Orange) - this is the page border
+                gfx.DrawRectangle(outerBorderPen, margin, margin, page.Width - 2 * margin, page.Height - 2 * margin);
 
-                // Title of the certificate (centered text in black color)
+                // Draw the inner border using XPen (Bluish-gray) - the second border inside the page
+                gfx.DrawRectangle(innerBorderPen, margin + 10, margin + 10, page.Width - 2 * margin - 20, page.Height - 2 * margin - 20);
+
+                // Title of the certificate ("Certificate of Achievement") - bold font
                 gfx.DrawString("Certificate of Achievement", titleFont, blackBrush,
-                    new XRect(margin, 120, page.Width - margin, 50), XStringFormats.TopCenter);
+                    new XRect(margin -5, margin + 90, page.Width - 2 * margin, textHeight), XStringFormats.TopCenter);
 
-                // Company name (CertFlix, text in gold color)
-                gfx.DrawString("CertFlix", subtitleFont, goldBrush,
-                    new XRect(margin, 180, page.Width - margin, 50), XStringFormats.TopCenter);
+                // Company name ("CertFlix") - larger font, color #607d8b (Bluish-gray)
+                gfx.DrawString("CertFlix", subtitleFont, certFlixBrush,
+                    new XRect(margin -5, margin + 150, page.Width - 2 * margin, textHeight), XStringFormats.TopCenter);
 
                 // Congratulatory message (text in black)
                 gfx.DrawString($"This certifies that", subtitleFont, blackBrush,
-                    new XRect(margin, 250, page.Width - margin, 50), XStringFormats.TopCenter);
+                    new XRect(margin - 5, margin + 210, page.Width - 2 * margin, textHeight), XStringFormats.TopCenter);
 
                 // Recipient's name (centered, large font size)
                 gfx.DrawString($"{userCertificate.User.FirstName} {userCertificate.User.LastName}", titleFont, blackBrush,
-                    new XRect(margin, 300, page.Width - margin, 50), XStringFormats.TopCenter);
+                    new XRect(margin - 5, margin + 260, page.Width - 2 * margin, textHeight), XStringFormats.TopCenter);
 
                 // Certificate description (body text in black)
                 gfx.DrawString($"Has successfully completed the {userCertificate.Certificate.CertName} exam", textFont, blackBrush,
-                    new XRect(margin, 370, page.Width - margin, 50), XStringFormats.TopCenter);
+                    new XRect(margin - 5, margin + 300, page.Width - 2 * margin, textHeight), XStringFormats.TopCenter);
 
                 // Date of issue (text in black)
                 gfx.DrawString($"Date of Issue: {DateTime.Now:MMMM dd, yyyy}", textFont, blackBrush,
-                    new XRect(margin, 400, page.Width - margin, 50), XStringFormats.TopLeft);
+                    new XRect(w, e + 300 + verticalSpacing, page.Width - 2 * margin, textHeight), XStringFormats.TopLeft);
 
                 // Signature line (text in black)
                 gfx.DrawString("Signature: ______________________", textFont, blackBrush,
-                    new XRect(margin, 440, page.Width - margin, 50), XStringFormats.TopLeft);
+                    new XRect(w, e + 330 + verticalSpacing, page.Width - 2 * margin, textHeight), XStringFormats.TopLeft);
 
                 // Owner of the certificate (text in black)
                 gfx.DrawString("Antwnhs Remos", textFont, blackBrush,
-                    new XRect(margin, 460, page.Width - margin, 50), XStringFormats.TopLeft);
+                    new XRect(w, e + 360 + verticalSpacing, page.Width - 2 * margin, textHeight), XStringFormats.TopLeft);
 
                 // Save the document to the memory stream
                 document.Save(memoryStream);

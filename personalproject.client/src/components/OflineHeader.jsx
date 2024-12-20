@@ -1,4 +1,7 @@
+import { FiUser } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 function OflineHeader() {
+    const navigate = useNavigate();
     return (
 
         <header className="header">
@@ -7,8 +10,8 @@ function OflineHeader() {
             </>
             <>
                 <nav className="header-nav">
-                    <button><a href="/contact">Contact</a></button>
-                    <button><a href="/about">About</a></button>
+                    <button className="green-button" onClick={() => navigate('/login')}><FiUser /></button>
+                   
                 </nav>
             </>
         </header>

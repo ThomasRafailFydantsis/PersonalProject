@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import AuthService from "/MVC/PersonalProject/personalproject.client/AuthService";
+import Header from "../components/Header";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const MyCertificate = () => {
     const [certificates, setCertificates] = useState([]);
@@ -84,6 +86,7 @@ const MyCertificate = () => {
 
     return (
         <div>
+            <Header/>
             <h1>User Certificates</h1>
             {certificates.length === 0 ? (
                 <p>No certificates available.</p>
@@ -117,6 +120,7 @@ const MyCertificate = () => {
                     </tbody>
                 </table>
             )}
+            <button onclick={() => navigate(-1)}>Back</button>
         </div>
     );
 };

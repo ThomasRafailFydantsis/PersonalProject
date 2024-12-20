@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Header from "../components/Header";
+import { useNavigate } from "react-router-dom";
 
 const GradeExamPage = ({ examSubmissionId }) => {
     const [submissionDetails, setSubmissionDetails] = useState(null);
@@ -59,6 +61,8 @@ const GradeExamPage = ({ examSubmissionId }) => {
 
     return (
         <div>
+            <Header />
+            <button onClick={()=> navigate(-1)}>Back</button>
             <h1>Grade Submission</h1>
             <h2>Candidate: {submissionDetails?.candidateName}</h2>
             <p>

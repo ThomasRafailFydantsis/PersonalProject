@@ -103,7 +103,10 @@ const UserProfile = () => {
 
     return (
         <>
+        <div>
             <Header />
+            <button className="green-button" onClick={() => navigate('/dashboard')}>Back</button>
+            <button className="green-button" onClick={() => navigate('/MyCertificate')}>My Certificates</button>
             <main>
                 <div style={{ margin: '20px auto', maxWidth: '800px' }}>
                     <h1>User Profile</h1>
@@ -161,32 +164,12 @@ const UserProfile = () => {
                             <button onClick={() => setIsEditing(true)}>Edit Profile</button>
                         </div>
                     )}
-                    <button className="green-button" onClick={() => navigate('/dashboard')}>Back</button>
+                    
                 </div>
 
-                <div style={{ margin: '20px auto', maxWidth: '800px' }}>
-                    <h1>Scores</h1>
-                    {/* <table border="1" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr>
-                                <th>Certificate</th>
-                                <th>Score</th>
-                                <th>Date Taken</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {scores.map((score, index) => (
-                                <tr key={index}>
-                                    <td>{score.certName || 'N/A'}</td>
-                                    <td>{score.score != null ? score.score : 'N/A'}</td>
-                                    <td>{score.dateTaken ? new Date(score.dateTaken).toLocaleString() : 'N/A'}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table> */}
-                    <button className="green-button" onClick={() => navigate('/MyCertificate')}>My Certificates</button>
-                </div>
+               
             </main>
+            </div>
         </>
     );
 };

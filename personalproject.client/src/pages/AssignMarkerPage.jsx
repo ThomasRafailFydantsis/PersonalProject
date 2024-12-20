@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
 
 const AssignMarkerPage = () => {
     const [submissions, setSubmissions] = useState([]);
@@ -8,6 +10,7 @@ const AssignMarkerPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -81,6 +84,8 @@ const AssignMarkerPage = () => {
 
     return (
         <div>
+            <Header />
+            <button className="green-button"  onClick={() => navigate(-1)}>Back</button>
             <h1>Assign Marker</h1>
             {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
 

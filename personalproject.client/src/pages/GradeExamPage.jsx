@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
+import Header from "../components/Header";
 
 const GradeExamPage = () => {
     const { examSubmissionId } = useParams(); 
@@ -106,6 +107,8 @@ const GradeExamPage = () => {
 
     return (
         <div>
+            <Header />
+            <button onClick={()=> Navigate(-1)}>Back</button>
             <h1>Grade Submission</h1>
             <h2>Candidate: {submissionDetails?.candidateName}</h2>
             <p>
