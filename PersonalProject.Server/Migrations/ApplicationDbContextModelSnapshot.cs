@@ -180,6 +180,35 @@ namespace PersonalProject.Server.Migrations
                     b.ToTable("AnswerOptions");
                 });
 
+            modelBuilder.Entity("PersonalProject.Server.Models.AnswerSubmission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ExamSubmissionId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SelectedAnswerId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExamSubmissionId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("AnswerSubmissions");
+                });
+
             modelBuilder.Entity("PersonalProject.Server.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -251,30 +280,6 @@ namespace PersonalProject.Server.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("PersonalProject.Server.Models.CertificateDescription", b =>
-                {
-                    b.Property<int>("DescriptionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DescriptionId"));
-
-                    b.Property<int>("CertId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CertsCertId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("DescriptionId");
-
-                    b.HasIndex("CertsCertId");
-
-                    b.ToTable("CertificateDescriptions");
-                });
-
             modelBuilder.Entity("PersonalProject.Server.Models.Certs", b =>
                 {
                     b.Property<int>("CertId")
@@ -294,9 +299,79 @@ namespace PersonalProject.Server.Migrations
                     b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PassingScore")
+                        .HasColumnType("int");
+
                     b.HasKey("CertId");
 
                     b.ToTable("Certs");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.ExamSubmission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CertId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsPassed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SubmissionDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CertId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ExamSubmissions");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.MarkerAssignment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AssignedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ExamSubmissionId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsMarked")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MarkerId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExamSubmissionId");
+
+                    b.HasIndex("MarkerId");
+
+                    b.ToTable("MarkerAssignments");
                 });
 
             modelBuilder.Entity("PersonalProject.Server.Models.Question", b =>
@@ -336,11 +411,20 @@ namespace PersonalProject.Server.Migrations
                     b.Property<int>("CertId")
                         .HasColumnType("int");
 
+                    b.Property<string>("CertificateFilePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("DateAdded")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DateTaken")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCertificateGenerated")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPassed")
+                        .HasColumnType("bit");
 
                     b.Property<int?>("Score")
                         .HasColumnType("int");
@@ -421,15 +505,61 @@ namespace PersonalProject.Server.Migrations
                     b.Navigation("Question");
                 });
 
-            modelBuilder.Entity("PersonalProject.Server.Models.CertificateDescription", b =>
+            modelBuilder.Entity("PersonalProject.Server.Models.AnswerSubmission", b =>
                 {
-                    b.HasOne("PersonalProject.Server.Models.Certs", "Certs")
-                        .WithMany()
-                        .HasForeignKey("CertsCertId")
+                    b.HasOne("PersonalProject.Server.Models.ExamSubmission", "ExamSubmission")
+                        .WithMany("Answers")
+                        .HasForeignKey("ExamSubmissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Certs");
+                    b.HasOne("PersonalProject.Server.Models.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ExamSubmission");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.ExamSubmission", b =>
+                {
+                    b.HasOne("PersonalProject.Server.Models.Certs", "Certificate")
+                        .WithMany()
+                        .HasForeignKey("CertId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PersonalProject.Server.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Certificate");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.MarkerAssignment", b =>
+                {
+                    b.HasOne("PersonalProject.Server.Models.ExamSubmission", "ExamSubmission")
+                        .WithMany()
+                        .HasForeignKey("ExamSubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PersonalProject.Server.Models.ApplicationUser", "Marker")
+                        .WithMany()
+                        .HasForeignKey("MarkerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ExamSubmission");
+
+                    b.Navigation("Marker");
                 });
 
             modelBuilder.Entity("PersonalProject.Server.Models.Question", b =>
@@ -448,7 +578,7 @@ namespace PersonalProject.Server.Migrations
                     b.HasOne("PersonalProject.Server.Models.Certs", "Certificate")
                         .WithMany()
                         .HasForeignKey("CertId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("PersonalProject.Server.Models.ApplicationUser", "User")
@@ -470,6 +600,11 @@ namespace PersonalProject.Server.Migrations
             modelBuilder.Entity("PersonalProject.Server.Models.Certs", b =>
                 {
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.ExamSubmission", b =>
+                {
+                    b.Navigation("Answers");
                 });
 
             modelBuilder.Entity("PersonalProject.Server.Models.Question", b =>

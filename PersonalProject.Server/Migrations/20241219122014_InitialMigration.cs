@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PersonalProject.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -59,8 +59,9 @@ namespace PersonalProject.Server.Migrations
                     CertId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CertName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PassingScore = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -174,6 +175,35 @@ namespace PersonalProject.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ExamSubmissions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CertId = table.Column<int>(type: "int", nullable: false),
+                    SubmissionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Score = table.Column<int>(type: "int", nullable: true),
+                    IsPassed = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExamSubmissions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ExamSubmissions_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ExamSubmissions_Certs_CertId",
+                        column: x => x.CertId,
+                        principalTable: "Certs",
+                        principalColumn: "CertId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Questions",
                 columns: table => new
                 {
@@ -203,8 +233,11 @@ namespace PersonalProject.Server.Migrations
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CertId = table.Column<int>(type: "int", nullable: false),
                     DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Score = table.Column<int>(type: "int", nullable: false),
-                    DateTaken = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Score = table.Column<int>(type: "int", nullable: true),
+                    DateTaken = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsPassed = table.Column<bool>(type: "bit", nullable: false),
+                    IsCertificateGenerated = table.Column<bool>(type: "bit", nullable: false),
+                    CertificateFilePath = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -220,6 +253,34 @@ namespace PersonalProject.Server.Migrations
                         column: x => x.CertId,
                         principalTable: "Certs",
                         principalColumn: "CertId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MarkerAssignments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ExamSubmissionId = table.Column<int>(type: "int", nullable: false),
+                    MarkerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsMarked = table.Column<bool>(type: "bit", nullable: false),
+                    AssignedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MarkerAssignments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MarkerAssignments_AspNetUsers_MarkerId",
+                        column: x => x.MarkerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_MarkerAssignments_ExamSubmissions_ExamSubmissionId",
+                        column: x => x.ExamSubmissionId,
+                        principalTable: "ExamSubmissions",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -244,9 +305,47 @@ namespace PersonalProject.Server.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "AnswerSubmissions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    QuestionId = table.Column<int>(type: "int", nullable: false),
+                    SelectedAnswerId = table.Column<int>(type: "int", nullable: false),
+                    IsCorrect = table.Column<bool>(type: "bit", nullable: false),
+                    ExamSubmissionId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AnswerSubmissions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AnswerSubmissions_ExamSubmissions_ExamSubmissionId",
+                        column: x => x.ExamSubmissionId,
+                        principalTable: "ExamSubmissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AnswerSubmissions_Questions_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "Questions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AnswerOptions_QuestionId",
                 table: "AnswerOptions",
+                column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AnswerSubmissions_ExamSubmissionId",
+                table: "AnswerSubmissions",
+                column: "ExamSubmissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AnswerSubmissions_QuestionId",
+                table: "AnswerSubmissions",
                 column: "QuestionId");
 
             migrationBuilder.CreateIndex(
@@ -289,6 +388,26 @@ namespace PersonalProject.Server.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ExamSubmissions_CertId",
+                table: "ExamSubmissions",
+                column: "CertId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExamSubmissions_UserId",
+                table: "ExamSubmissions",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MarkerAssignments_ExamSubmissionId",
+                table: "MarkerAssignments",
+                column: "ExamSubmissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MarkerAssignments_MarkerId",
+                table: "MarkerAssignments",
+                column: "MarkerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Questions_CertId",
                 table: "Questions",
                 column: "CertId");
@@ -312,6 +431,9 @@ namespace PersonalProject.Server.Migrations
                 name: "AnswerOptions");
 
             migrationBuilder.DropTable(
+                name: "AnswerSubmissions");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -327,6 +449,9 @@ namespace PersonalProject.Server.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "MarkerAssignments");
+
+            migrationBuilder.DropTable(
                 name: "UserCertificates");
 
             migrationBuilder.DropTable(
@@ -334,6 +459,9 @@ namespace PersonalProject.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "ExamSubmissions");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

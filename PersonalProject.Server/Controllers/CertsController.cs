@@ -31,6 +31,7 @@ namespace PersonalProject.Server.Controllers
             {
                 CertId = c.CertId,
                 CertName = c.CertName,
+                Description = c.Description,
                 Image = c.Image
             }));
         }

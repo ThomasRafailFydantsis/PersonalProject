@@ -68,6 +68,9 @@ function Dashboard() {
     }
     const { userName} = userData || {};
     const { id } = userData || {};
+    const handleUpdateExam = (id) => {
+        navigate(`/marker/assignments/${id}`);
+    };
     return (
         <div>
             <Header />
@@ -83,7 +86,9 @@ function Dashboard() {
             <button name="userProfile" onClick={() => navigate('/userCertificates')}>Your Certificates</button>
                 {roles.includes("Admin") && <button name="certForm" onClick={() => navigate('/CreateCert')}>Add Certificate</button>}
                 {roles.includes("Marker") && <button name="certForm" onClick={() => navigate('/CreateCert')}>Add Certificate</button>}
-            {roles.includes("Admin") && <button name="userTable" onClick={() => navigate('/userTable')}>User Table</button>}
+                {roles.includes("Admin") && <button name="userTable" onClick={() => navigate('/userTable')}>User Table</button>}
+                {roles.includes("Admin") && <button name="assignMarker" onClick={() => navigate('/assignMarker')}>Assign Marker</button>}
+                {roles.includes("Marker") && <button name="certForm" onClick={() => handleUpdateExam(id)}>Your Assignments</button>}
             </div>
         </div>
     );

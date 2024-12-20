@@ -7,6 +7,7 @@ const CreateCert = () => {
     const navigate = useNavigate();
 
     const [certName, setCertName] = useState("");
+    const [passingScore, setPassingScore] = useState(0);
     const [questions, setQuestions] = useState([]);
    
 
@@ -15,6 +16,9 @@ const CreateCert = () => {
 
     const handleCertNameChange = (e) => {
         setCertName(e.target.value);
+    };
+    const handlePassingScoreChange = (e) => {
+        setPassingScore(e.target.value);
     };
 
     const handleQuestionChange = (index, key, value) => {
@@ -47,6 +51,7 @@ const CreateCert = () => {
 
         const payload = {
             certName,
+            passingScore,
             questions: questions.map((q) => ({
                 id: q.id || 0,
                 text: q.text,
@@ -81,6 +86,7 @@ const CreateCert = () => {
             <div>
                 <label>Exam Title:</label>
                 <input type="text" value={certName} onChange={handleCertNameChange} required />
+                <input type="number" value={passingScore} onChange={handlePassingScoreChange} required />
             </div>
 
             {questions.map((question, questionIndex) => (

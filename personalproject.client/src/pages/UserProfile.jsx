@@ -5,13 +5,14 @@ import Header from '../components/Header';
 import axios from 'axios';
 
 const UserProfile = () => {
-    const [userData, setUserData] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(null);
+    const navigate = useNavigate();
     const [error, setError] = useState(null);
     const [scores, setScores] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [updatedData, setUpdatedData] = useState({});
-    const navigate = useNavigate();
+    const [userData, setUserData] = useState(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(null);
+   
 
     useEffect(() => {
         const checkAuthStatus = async () => {
@@ -98,6 +99,7 @@ const UserProfile = () => {
     if (!userData) {
         return <div>Loading user data...</div>;
     }
+    
 
     return (
         <>
@@ -164,7 +166,7 @@ const UserProfile = () => {
 
                 <div style={{ margin: '20px auto', maxWidth: '800px' }}>
                     <h1>Scores</h1>
-                    <table border="1" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
+                    {/* <table border="1" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr>
                                 <th>Certificate</th>
@@ -181,7 +183,8 @@ const UserProfile = () => {
                                 </tr>
                             ))}
                         </tbody>
-                    </table>
+                    </table> */}
+                    <button className="green-button" onClick={() => navigate('/MyCertificate')}>My Certificates</button>
                 </div>
             </main>
         </>

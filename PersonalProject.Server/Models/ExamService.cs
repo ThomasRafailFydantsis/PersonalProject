@@ -14,10 +14,10 @@ namespace PersonalProject.Server.Models
 
         public async Task<Certs> GetExamByIdAsync(int certId)
         {
-            var exam = await _context.Certs 
-                                     .Include(e => e.Questions)  
+            var exam = await _context.Certs
+                                     .Include(e => e.Questions)
                                          .ThenInclude(q => q.AnswerOptions)
-                                     .FirstOrDefaultAsync(e => e.CertId == certId); 
+                                     .FirstOrDefaultAsync(e => e.CertId == certId);
 
             if (exam == null)
             {
@@ -29,26 +29,32 @@ namespace PersonalProject.Server.Models
 
         public async Task<UserCertificate> SubmitExamAsync(string userId, int certId, List<int> answerIds)
         {
-            
+            Console.WriteLine($"Submitting exam for UserId: {userId}, CertId: {certId}, AnswerIds: {string.Join(", ", answerIds)}");
+
+            var certificate = await _context.Certs
+                                            .Include(c => c.Questions)
+                                            .ThenInclude(q => q.AnswerOptions)
+                                            .FirstOrDefaultAsync(c => c.CertId == certId);
+
+            if (certificate == null)
+            {
+                throw new KeyNotFoundException($"Certificate with ID {certId} not found.");
+            }
+
+            var score = CalculateScore(answerIds, certId);
+            Console.WriteLine($"Calculated Score: {score}");
+
             var existingCertificate = await _context.UserCertificates
-                .FirstOrDefaultAsync(c => c.UserId == userId && c.CertId == certId);
+                                                    .FirstOrDefaultAsync(c => c.UserId == userId && c.CertId == certId);
 
             if (existingCertificate != null)
             {
-                
-                existingCertificate.Score = CalculateScore(answerIds, certId);
+                existingCertificate.Score = score;
                 existingCertificate.DateTaken = DateTime.UtcNow;
-
                 await _context.SaveChangesAsync();
                 return existingCertificate;
-
-               
             }
 
-         
-            var score = CalculateScore(answerIds, certId);
-
-           
             var userCertificate = new UserCertificate
             {
                 UserId = userId,
@@ -56,21 +62,26 @@ namespace PersonalProject.Server.Models
                 Score = score,
                 DateTaken = DateTime.UtcNow
             };
-            if (existingCertificate != null)
-            {
-                Console.WriteLine($"Duplicate submission detected for UserId: {userId}, CertId: {certId}.");
 
-                existingCertificate.Score = score;
-                existingCertificate.DateTaken = DateTime.UtcNow;
-
-                await _context.SaveChangesAsync();
-                return existingCertificate;
-            }
-
-            // Save the new certificate
             _context.UserCertificates.Add(userCertificate);
-            await _context.SaveChangesAsync();
 
+            var examSubmission = new ExamSubmission
+            {
+                UserId = userId,
+                CertId = certId,
+                SubmissionDate = DateTime.UtcNow,
+                Score = score,
+                IsPassed = score >= certificate.PassingScore,
+                Answers = answerIds.Select(answerId => new AnswerSubmission
+                {
+                    QuestionId = certificate.Questions.FirstOrDefault(q => q.AnswerOptions.Any(a => a.Id == answerId))?.Id ?? 0,
+                    SelectedAnswerId = answerId,
+                    IsCorrect = certificate.Questions.Any(q => q.AnswerOptions.Any(a => a.Id == answerId && a.IsCorrect))
+                }).ToList()
+            };
+
+            _context.ExamSubmissions.Add(examSubmission);
+            await _context.SaveChangesAsync();
 
             return userCertificate;
         }
@@ -103,11 +114,17 @@ namespace PersonalProject.Server.Models
                                  .OrderByDescending(r => r.DateTaken) // Order by DateTaken
                                  .ToListAsync();
         }
-        public async Task<Certs> CreateExamAsync(string title, List<QuestionDto> questionDtos)
+        public async Task<Certs> CreateExamAsync(string title, int passingScore, List<QuestionDto> questionDtos)
         {
+            if (!questionDtos.Any(q => q.AnswerOptions.Any()))
+            {
+                throw new ArgumentException("Each question must have at least one answer option.");
+            }
+
             var cert = new Certs
             {
                 CertName = title,
+                PassingScore = passingScore,
                 Questions = questionDtos.Select(q => new Question
                 {
                     Text = q.Text,
@@ -125,10 +142,12 @@ namespace PersonalProject.Server.Models
 
             return cert;
         }
+    
     }
     public class ExamCreationDto
     {
         public string CertName { get; set; }
+        public int PassingScore { get; set; }
         public List<QuestionDto> Questions { get; set; }
     }
     public class QuestionDto

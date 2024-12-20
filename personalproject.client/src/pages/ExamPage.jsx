@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import ExamHdr from '../components/ExamHdr';
 import axios from 'axios';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const ExamPage = () => {
     const { certId } = useParams();
@@ -18,10 +18,15 @@ const ExamPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchExamById = async (certId) => {
+        if (!certId || !userId) {
+            setError('Missing user ID or certificate ID.');
+            setLoading(false);
+            return;
+        }
+
+        const fetchExamById = async () => {
             try {
                 const response = await axios.get(`https://localhost:7295/api/Exam/${certId}`);
-                console.log('Fetched Exam:', response.data);
                 setExam(response.data);
                 setLoading(false);
             } catch (error) {
@@ -29,8 +34,9 @@ const ExamPage = () => {
                 setLoading(false);
             }
         };
-        if (certId) fetchExamById(certId);
-    }, [certId]);
+
+        fetchExamById();
+    }, [certId, userId]);
 
     const handleAnswerChange = (questionId, answerId) => {
         setSelectedAnswers((prev) => ({
@@ -77,7 +83,7 @@ const ExamPage = () => {
 
     return (
         <div>
-        <ExamHdr/>  
+            <ExamHdr />
             <h1>Exam Page</h1>
             <h2>{exam.CertName}</h2>
             {questions.length > 0 ? (
@@ -111,9 +117,10 @@ const ExamPage = () => {
             {result && (
                 <div>
                     <h2>Result</h2>
-                    <p>Certificate: {result.CertName || "Certificate not found"}</p>
-                    <p>Score: {result.Score != null ? result.Score : "Score not available"}</p>
-                    <p>Date Taken: {result.DateTaken ? result.DateTaken : "Date not available"}</p>
+                    <p>Certificate: {result.certName || "Certificate not found"}</p>
+                    <p>Score: {result.score !== undefined ? result.Score : "Score not available"}</p>
+                    <p>Passed: {result.passed ? "Yes" : "No"}</p>
+                    <p>Date Taken: {result.dateTaken || "Date not available"}</p>
                     <button className="green-button" onClick={() => navigate(-1)}>Go Back</button>
                 </div>
             )}

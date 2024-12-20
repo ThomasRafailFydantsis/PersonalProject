@@ -21,40 +21,7 @@ namespace PersonalProject.Server.Controllers
             _userManager = userManager;
         }
 
-        //[HttpPost("add")]
-        //public async Task<IActionResult> AddCertificateToUser(AddCertificateDto model)
-        //{
-        //    try
-        //    {
-        //        // Check if the certificate is already associated with the user
-        //        var existingAssociation = await _context.UserCertificates
-        //            .FirstOrDefaultAsync(uc => uc.UserId == model.UserId && uc.CertId == model.CertId);
-
-        //        if (existingAssociation != null)
-        //        {
-        //            return BadRequest("Certificate is already associated with this user.");
-        //        }
-
-        //        // Proceed to add the new association
-        //        var userCertificate = new UserCertificate
-        //        {
-        //            UserId = model.UserId,
-        //            CertId = model.CertId,
-        //            DateAdded = DateTime.Now
-
-        //        };
-
-        //        _context.UserCertificates.Add(userCertificate);
-        //        await _context.SaveChangesAsync();
-
-        //        return Ok("Certificate added successfully.");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Log the exception and return a meaningful message
-        //        return StatusCode(500, "An error occurred while adding the certificate.");
-        //    }
-        //}
+        
         [HttpPost("add")]
         public async Task<IActionResult> AddCertificateToUser(AddCertificateDto model)
         {
