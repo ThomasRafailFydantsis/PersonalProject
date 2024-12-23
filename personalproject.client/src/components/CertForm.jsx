@@ -1,133 +1,67 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthProvider";
+import ExamImageUpload from "./ExamImageUpload";
+import ExamService from '../servicesE/ExamService';
 
-const ExamForm = () => {
+const CertForm = () => {
     const { certId } = useParams();
     const navigate = useNavigate();
+    const { isAuthenticated, roles, AuthError } = useAuth();
 
     const [certName, setCertName] = useState("");
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const isAdminOrMarker = roles.includes("Admin") || roles.includes("Marker");
+
     useEffect(() => {
-        if (certId) {
+        if (!isAuthenticated || !isAdminOrMarker) {
+            navigate("/login");
+        } else if (certId) {
             fetchExam(certId);
         } else {
-            setLoading(false); 
+            setLoading(false);
         }
-    }, [certId]);
+    }, [certId, isAuthenticated, isAdminOrMarker, navigate]);
 
     const fetchExam = async (certId) => {
-        const parsedCertId = parseInt(certId, 10); // Ensure certId is an integer
-        if (isNaN(parsedCertId)) {
-            setError("Invalid certificate ID");
-            setLoading(false);
-            return;
-        }
         try {
-            const response = await axios.get(`https://localhost:7295/api/Exam/${certId}`); 
-            const { CertName, Questions } = response.data;
-            setCertName(CertName);
-            setQuestions(
-                Questions.map((q) => ({
-                    id: q.Id,
-                    text: q.Text,
-                    correctAnswer: q.CorrectAnswer,
-                    answerOptions: q.AnswerOptions.map((a) => ({
-                        id: a.Id,
-                        text: a.Text,
-                        isCorrect: a.IsCorrect,
-                    })),
-                }))
-            );
+            setLoading(true);
+            const examData = await ExamService.fetchExam(certId);
+            setCertName(examData.certName);
+            setQuestions(examData.questions);
+        } catch (error) {
+            setError(error);
+        } finally {
             setLoading(false);
-        } catch (err) {
-            console.error("Error fetching exam:", err);
-            setError("Failed to fetch exam.");
-            setLoading(false);
-
         }
-    };
-
-    const handleCertNameChange = (e) => {
-        setCertName(e.target.value);
-    };
-
-    const handleQuestionChange = (index, key, value) => {
-        const updatedQuestions = [...questions];
-        updatedQuestions[index][key] = value;
-        setQuestions(updatedQuestions);
-    };
-
-    const handleAnswerChange = (questionIndex, answerIndex, key, value) => {
-        const updatedQuestions = [...questions];
-        updatedQuestions[questionIndex].answerOptions[answerIndex][key] = value;
-        setQuestions(updatedQuestions);
-    };
-
-    const addQuestion = () => {
-        setQuestions([
-            ...questions,
-            { id: null, text: "", correctAnswer: "", answerOptions: [{ id: null, text: "", isCorrect: false }] },
-        ]);
-    };
-
-    const addAnswerOption = (questionIndex) => {
-        const updatedQuestions = [...questions];
-        updatedQuestions[questionIndex].answerOptions.push({ id: null, text: "", isCorrect: false });
-        setQuestions(updatedQuestions);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const payload = {
-            certName,
-            questions: questions.map((q) => ({
-                id: q.id || 0,
-                text: q.text,
-                correctAnswer: q.correctAnswer,
-                answerOptions: q.answerOptions.map((a) => ({
-                    id: a.id || 0,
-                    text: a.text,
-                    isCorrect: a.isCorrect,
-                })),
-            })),
-        };
-
-        const url = certId
-            ? `https://localhost:7295/api/Exam/update/${certId}`
-            : "https://localhost:7295/api/Exam/create";
-
         try {
-            const method = certId ? "put" : "post";
-            const response = await axios[method](url, payload);
-            console.log("Response:", response.data); // Log success response
+            await ExamService.submitExam(certId, certName, questions);
             alert(certId ? "Exam updated successfully!" : "Exam created successfully!");
             navigate(-1);
-        } catch (err) {
-            if (err.response) {
-                console.error("Backend error:", err.response.data); // Log backend error details
-                alert(`Error: ${err.response.data}`);
-            } else {
-                console.error("Error submitting exam:", err.message);
-                alert("Failed to submit the exam.");
-            }
+        } catch (error) {
+            alert(error);
         }
     };
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
+    if (AuthError) return <div>{AuthError}</div>;
 
     return (
         <form onSubmit={handleSubmit}>
             <div>
                 <label>Exam Title:</label>
-                <input type="text" value={certName} onChange={handleCertNameChange} required />
+                <input type="text" value={certName} onChange={(e) => setCertName(e.target.value)} required />
+                <ExamImageUpload certId={certId} />
             </div>
-
             {questions.map((question, questionIndex) => (
                 <div key={questionIndex}>
                     <h4>Question {questionIndex + 1}</h4>
@@ -135,15 +69,22 @@ const ExamForm = () => {
                     <input
                         type="text"
                         value={question.text}
-                        onChange={(e) => handleQuestionChange(questionIndex, "text", e.target.value)}
+                        onChange={(e) => {
+                            const updatedQuestions = [...questions];
+                            updatedQuestions[questionIndex].text = e.target.value;
+                            setQuestions(updatedQuestions);
+                        }}
                         required
                     />
-                    <br />
                     <label>Correct Answer:</label>
                     <input
                         type="text"
                         value={question.correctAnswer}
-                        onChange={(e) => handleQuestionChange(questionIndex, "correctAnswer", e.target.value)}
+                        onChange={(e) => {
+                            const updatedQuestions = [...questions];
+                            updatedQuestions[questionIndex].correctAnswer = e.target.value;
+                            setQuestions(updatedQuestions);
+                        }}
                         required
                     />
                     <h5>Answer Options</h5>
@@ -153,30 +94,45 @@ const ExamForm = () => {
                             <input
                                 type="text"
                                 value={option.text}
-                                onChange={(e) =>
-                                    handleAnswerChange(questionIndex, optionIndex, "text", e.target.value)
-                                }
+                                onChange={(e) => {
+                                    const updatedQuestions = [...questions];
+                                    updatedQuestions[questionIndex].answerOptions[optionIndex].text = e.target.value;
+                                    setQuestions(updatedQuestions);
+                                }}
                                 required
                             />
                             <label>
                                 <input
                                     type="checkbox"
                                     checked={option.isCorrect}
-                                    onChange={(e) =>
-                                        handleAnswerChange(questionIndex, optionIndex, "isCorrect", e.target.checked)
-                                    }
+                                    onChange={(e) => {
+                                        const updatedQuestions = [...questions];
+                                        updatedQuestions[questionIndex].answerOptions[optionIndex].isCorrect =
+                                            e.target.checked;
+                                        setQuestions(updatedQuestions);
+                                    }}
                                 />
                                 Is Correct
                             </label>
                         </div>
                     ))}
-                    <button type="button" onClick={() => addAnswerOption(questionIndex)}>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const updatedQuestions = [...questions];
+                            updatedQuestions[questionIndex].answerOptions.push({
+                                id: null,
+                                text: "",
+                                isCorrect: false,
+                            });
+                            setQuestions(updatedQuestions);
+                        }}
+                    >
                         Add Answer Option
                     </button>
                 </div>
             ))}
-
-            <button type="button" onClick={addQuestion}>
+            <button type="button" onClick={() => setQuestions([...questions, { id: null, text: "", correctAnswer: "", answerOptions: [] }])}>
                 Add Question
             </button>
             <br />
@@ -186,4 +142,4 @@ const ExamForm = () => {
     );
 };
 
-export default ExamForm;
+export default CertForm;

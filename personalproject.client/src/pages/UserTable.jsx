@@ -2,44 +2,49 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import { useAuth } from "../components/AuthProvider";
+
 
 const UserTable = () => {
+    const { roles, isAuthenticated, AuthError, isAuthLoading,  } = useAuth();
     const [users, setUsers] = useState([]);
     const [filteredUsers, setFilteredUsers] = useState([]);
-    const [filterRole, setFilterRole] = useState("All"); // State for role filter
-    const [loading, setLoading] = useState(true);
+    const [filterRole, setFilterRole] = useState("All");
+  
     const [error, setError] = useState(null);
-    const [isAdmin, setIsAdmin] = useState(false);
     const navigate = useNavigate();
+    const isAdmin = roles.includes("Admin");
+    console.log("is admin:" + isAdmin);
+    console.log("is auth:" + isAuthenticated);
+   
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const authResponse = await axios.get("https://localhost:7295/api/Account/auth-status", { withCredentials: true });
-                if (authResponse.data.isAuthenticated) {
-                    const userResponse = await axios.get("https://localhost:7295/api/Account/me", { withCredentials: true });
-                    const userData = userResponse.data;
-                    if (userData.roles && userData.roles.includes("Admin")) {
-                        setIsAdmin(true);
-                        const usersResponse = await axios.get("https://localhost:7295/api/Account", { withCredentials: true });
-                        setUsers(usersResponse.data);
-                        setFilteredUsers(usersResponse.data); // Initialize filtered users
-                    }
-                } else {
-                    navigate("/login");
+
+        if (isAuthLoading) return;
+
+        if (!isAuthenticated || !isAdmin) {
+            console.warn("is admin and is auth:" + isAdmin + isAuthenticated);
+            navigate("/login");
+        } else {
+            const fetchUsers = async () => {
+                try {
+                    const response = await axios.get("https://localhost:7295/api/Account", {
+                        withCredentials: true,
+                    });
+                    setUsers(response.data);
+                    setFilteredUsers(response.data);
+                } catch (err) {
+                    console.error(err);
+                    setError("Failed to fetch user data.");
+                } finally {
+                    console.log("is admin and is auth:" + isAdmin + isAuthenticated);
                 }
-            } catch (err) {
-                setError("Failed to fetch data.");
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
+            };
 
-        fetchData();
-    }, [navigate]);
+            fetchUsers();
+        }
+    }, [isAuthenticated, isAdmin]);
 
-    // Filter users when `filterRole` changes
     useEffect(() => {
         if (filterRole === "All") {
             setFilteredUsers(users);
@@ -52,8 +57,8 @@ const UserTable = () => {
         try {
             await axios.delete(`https://localhost:7295/api/Account/${userId}`, { withCredentials: true });
             setUsers(users.filter((user) => user.id !== userId));
-        } catch (error) {
-            console.error("Error deleting user:", error);
+        } catch (err) {
+            console.error("Error deleting user:", err);
             setError("Failed to delete user.");
         }
     };
@@ -65,38 +70,32 @@ const UserTable = () => {
                 { userId, role },
                 { withCredentials: true }
             );
-            alert(`User role updated to "${role}".`);
             const updatedUsers = users.map((user) =>
                 user.id === userId ? { ...user, roles: [role] } : user
             );
-            setUsers(updatedUsers); // Update the UI without a full page reload
-        } catch (error) {
-            console.error("Error updating role:", error);
+            setUsers(updatedUsers);
+            alert(`User role updated to "${role}".`);
+        } catch (err) {
+            console.error("Error updating role:", err);
             setError("Failed to update role.");
         }
     };
 
-    const handleFilterChange = (e) => {
-        setFilterRole(e.target.value);
-    };
-
-    if (loading) return <div>Loading...</div>;
+    if (isAuthLoading ) return <div>Loading...</div>; 
     if (error) return <div>Error: {error}</div>;
-    if (!isAdmin) return <div>You do not have permission to view this page.</div>;
+    if (AuthError) return <div>{AuthError}</div>;
 
     return (
         <div>
             <Header />
+            <button className="green-button" onClick={() => navigate(-1)}>back</button>
             <h1>User List</h1>
-
-          
-            <div style={{ marginBottom: "10px" }}>
+            <div>
                 <label htmlFor="roleFilter">Filter by Role:</label>
                 <select
                     id="roleFilter"
                     value={filterRole}
-                    onChange={handleFilterChange}
-                    style={{ marginLeft: "10px", padding: "5px", fontSize: "14px" }}
+                    onChange={(e) => setFilterRole(e.target.value)}
                 >
                     <option value="All">All</option>
                     <option value="User">Users</option>
@@ -104,18 +103,14 @@ const UserTable = () => {
                     <option value="Marker">Markers</option>
                 </select>
             </div>
-
-            <table border="1" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+            <table>
                 <thead>
                     <tr>
-                        <th>User ID</th>
+                        <th>ID</th>
                         <th>Username</th>
-                        <th>Email</th>
-                        <th>First Name</th>
-                        <th>Last Name</th>
+                        <th>Name</th>
                         <th>Role</th>
-                        <th>Assign Role</th>
-                        <th>Delete</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -123,33 +118,33 @@ const UserTable = () => {
                         <tr key={user.id}>
                             <td>{user.id}</td>
                             <td>{user.userName}</td>
-                            <td>{user.email}</td>
-                            <td>{user.firstName}</td>
-                            <td>{user.lastName}</td>
+                            <td>
+                                <a
+                                    href="#"
+                                    onClick={() => navigate(`/profile/${user.id}`)}
+                                >
+                                    {user.firstName}
+                                </a>
+                            </td>
                             <td>{user.roles.join(", ")}</td>
                             <td>
+                                <button onClick={() => handleDelete(user.id)}>Delete</button>
                                 <select
-                                    style={{ margin: "5px", color: "black", backgroundColor: "white", border: "1px solid black" }}
                                     onChange={(e) => handleAssignRole(user.id, e.target.value)}
-                                    value={user.roles[0] || "Assign Role"}
+                                    value={user.roles[0] || ""}
                                 >
-                                    <option disabled>Assign Role</option>
+                                    <option value="">Assign Role</option>
                                     <option value="Admin">Admin</option>
                                     <option value="User">User</option>
                                     <option value="Marker">Marker</option>
                                 </select>
                             </td>
-                            <td>
-                                <button className="red-button" onClick={() => handleDelete(user.id)}>Delete</button>
-                            </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
-            <button className="green-button" onClick={() => navigate("/dashboard")}>Back</button>
         </div>
     );
 };
 
 export default UserTable;
-

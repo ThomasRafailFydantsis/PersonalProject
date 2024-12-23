@@ -2,12 +2,21 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { useAuth } from "../components/AuthProvider";
+import Header from "../components/Header";
+import { useNavigate } from "react-router-dom";
 
 const MarkerAssignmentsPage = () => {
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const { isAuthenticated, roles, AuthError, revalidateAuth } = useAuth();
     const { id } = useParams();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        revalidateAuth();
+    }, [location]);
 
     useEffect(() => {
         const fetchAssignments = async () => {
@@ -31,8 +40,22 @@ const MarkerAssignmentsPage = () => {
     if (loading) return <p>Loading...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
+    if (!roles.includes("Marker")) {
+        return <div>You do not have permission to access this page.</div>;
+    }
+
+    if (AuthError) {
+        return <div>{AuthError}</div>;
+    }
+
+    if (!isAuthenticated) {
+        return <div>You are not logged in. Please log in.</div>;
+    }
+
     return (
         <div>
+            <Header />
+            <button onClick={() => navigate("/dashboard")}>Back</button>
             <h1>Marker Assignments</h1>
             <table border="1" style={{ width: "100%", textAlign: "center" }}>
                 <thead>
@@ -46,13 +69,12 @@ const MarkerAssignmentsPage = () => {
                 </thead>
                 <tbody>
                     {assignments.map((assignment) => (
-                        <tr key={assignment.examSubmissionId}>
+                        <tr key={`${assignment.examSubmissionId}-${assignment.candidateName}`}>
                             <td>{assignment.examSubmissionId}</td>
                             <td>{assignment.candidateName}</td>
                             <td>{assignment.certificateName}</td>
                             <td>{assignment.isPassed ? "Passed" : "Failed"}</td>
                             <td>
-                                {/* Link with dynamic examSubmissionId */}
                                 <Link to={`/exam/submission/${assignment.examSubmissionId}`}>
                                     View Submission
                                 </Link>

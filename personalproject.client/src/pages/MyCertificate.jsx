@@ -1,47 +1,19 @@
 import { useState, useEffect } from "react";
-import AuthService from "/MVC/PersonalProject/personalproject.client/AuthService";
-import Header from "../components/Header";
-import axios from "axios";
+import axios from "axios";  
 import { useNavigate } from "react-router-dom";
-
+import { useAuth } from "../components/AuthProvider";
+import Header from "../components/Header";
 const MyCertificate = () => {
     const [certificates, setCertificates] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(null);
-    const [userData, setUserData] = useState(null);
+    const navigate = useNavigate();
+    const { isAuthenticated, userData, AuthError, revalidateAuth } = useAuth();
 
-    // Check authentication and fetch user data
     useEffect(() => {
-        const checkAuthStatus = async () => {
-            try {
-                const status = await AuthService.getAuthStatus();
-                setIsAuthenticated(status);
+        revalidateAuth();
+    }, [location]);
 
-                if (status) {
-                    const response = await fetch("https://localhost:7295/api/Account/me", {
-                        method: "GET",
-                        credentials: "include",
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        setUserData(data);
-                    } else {
-                        throw new Error("Failed to fetch user data.");
-                    }
-                }
-            } catch (err) {
-                console.error("Error checking authentication status or fetching user data:", err);
-                setError("Failed to check authentication or fetch user data.");
-            } finally {
-                setLoading(false);
-            }
-        };
-        checkAuthStatus();
-    }, []);
-
-    // Fetch certificates when user data is available
     useEffect(() => {
         if (!userData?.id) return;
 
@@ -60,6 +32,9 @@ const MyCertificate = () => {
 
         fetchCertificates();
     }, [userData]);
+
+    // Define hasNoPermission based on roles or conditions
+    
 
     // Handle certificate download
     const handleDownload = async (certificateId) => {
@@ -84,9 +59,19 @@ const MyCertificate = () => {
     if (loading) return <p>Loading...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
+    if (AuthError) {
+        return <div>{AuthError}</div>;
+    }
+
+    if (!isAuthenticated) {
+        return <div>You are not logged in. Please log in.</div>;
+    }
+
+    
+
     return (
         <div>
-            <Header/>
+            <Header />
             <h1>User Certificates</h1>
             {certificates.length === 0 ? (
                 <p>No certificates available.</p>
@@ -102,7 +87,7 @@ const MyCertificate = () => {
                         </tr>
                     </thead>
                     <tbody>
-                      {certificates.map((cert) => (
+                        {certificates.map((cert) => (
                             <tr key={cert.id}>
                                 <td>{cert.certificateName}</td>
                                 <td>{cert.dateTaken}</td>
@@ -120,7 +105,7 @@ const MyCertificate = () => {
                     </tbody>
                 </table>
             )}
-            <button onclick={() => navigate(-1)}>Back</button>
+            <button onClick={() => navigate(-1)}>Back</button>
         </div>
     );
 };

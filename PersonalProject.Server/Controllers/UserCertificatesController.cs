@@ -21,7 +21,6 @@ namespace PersonalProject.Server.Controllers
             _userManager = userManager;
         }
 
-        
         [HttpPost("add")]
         public async Task<IActionResult> AddCertificateToUser(AddCertificateDto model)
         {

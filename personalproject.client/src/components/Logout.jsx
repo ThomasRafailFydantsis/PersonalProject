@@ -1,17 +1,22 @@
-import { useNavigate } from 'react-router-dom';
-import AuthService from '/MVC/PersonalProject/personalproject.client/AuthService';
-
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthProvider"; 
 
 function Logout() {
+    const { handleLogout } = useAuth(); 
     const navigate = useNavigate();
 
-    const handleLogout = async () => {
-        await AuthService.logout(); 
-        navigate('/login'); 
+    const handleUserLogout = async () => {
+        try {
+            await handleLogout(); 
+            navigate("/login");
+        } catch (error) {
+            console.error("Error during logout:", error);
+            alert("Failed to log out. Please try again.");
+        }
     };
 
     return (
-        <button onClick={handleLogout}>
+        <button onClick={handleUserLogout}>
             Logout
         </button>
     );

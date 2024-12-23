@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import { useAuth } from "../components/AuthProvider";
 
 const AssignMarkerPage = () => {
     const [submissions, setSubmissions] = useState([]);
@@ -10,7 +11,12 @@ const AssignMarkerPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState("");
+    const { isAuthenticated, roles, AuthError, revalidateAuth } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+            revalidateAuth();
+        }, [location]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -81,6 +87,23 @@ const AssignMarkerPage = () => {
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
+
+    
+    if( !roles.includes("Marker")){
+        return <div>You do not have permission to access this page.</div>;
+    }
+
+    if (AuthError) {
+        return <div>{AuthError}</div>;
+    }
+
+    if (!isAuthenticated) {
+        return <div>You are not logged in. Please log in.</div>;
+    }
+
+    if (!roles.includes("Marker")|| !roles.includes("User")) { 
+        return <div>You do not have permission to access this page.</div>;
+    }
 
     return (
         <div>

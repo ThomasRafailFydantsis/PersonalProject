@@ -31,7 +31,7 @@ namespace PersonalProject.Server.Controllers
         //[Authorize]
         public async Task<IActionResult> GetUserRoles()
         {
-   
+
             var user = await _userManager.GetUserAsync(User);
 
             if (user == null)
@@ -64,6 +64,30 @@ namespace PersonalProject.Server.Controllers
             }
 
             return Ok(userList);
+        }
+        [HttpGet("get-user-profile/{userId}")]
+        public async Task<IActionResult> GetUserProfile(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var userData = new
+            {
+                user.Id,
+                user.UserName,
+                user.Email,
+                user.FirstName,
+                user.LastName,
+                user.ProfileImagePath,
+                Roles = roles
+            };
+
+            return Ok(userData);
         }
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserData()
@@ -102,7 +126,7 @@ namespace PersonalProject.Server.Controllers
 
             var roles = await _userManager.GetRolesAsync(user);
 
-           
+
             var userData = new
             {
                 user.Id,
@@ -171,7 +195,7 @@ namespace PersonalProject.Server.Controllers
                 Email = model.Email,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
-                EmailConfirmed = true 
+                EmailConfirmed = true
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -181,7 +205,7 @@ namespace PersonalProject.Server.Controllers
                 return BadRequest(result.Errors);
             }
 
-          
+
             var roleResult = await _userManager.AddToRoleAsync(user, "User");
 
             if (!roleResult.Succeeded)
@@ -246,8 +270,8 @@ namespace PersonalProject.Server.Controllers
             HttpContext.Response.Cookies.Append("authToken", tokenString, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true, 
-                SameSite = SameSiteMode.None, 
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddHours(1)
             });
 

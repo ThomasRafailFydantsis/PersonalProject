@@ -113,7 +113,7 @@ namespace PersonalProject.Server.Controllers
                     }
                     else
                     {
-                        cert.Questions.Add(new Question // Add new question
+                        cert.Questions.Add(new Question 
                         {
                             Text = questionDto.Text,
                             CorrectAnswer = questionDto.CorrectAnswer,
@@ -163,7 +163,6 @@ namespace PersonalProject.Server.Controllers
 
             try
             {
-                // Fetch the certificate and its questions
                 var certificate = await _context.Certs
                     .Include(c => c.Questions)
                     .ThenInclude(q => q.AnswerOptions)
@@ -174,7 +173,6 @@ namespace PersonalProject.Server.Controllers
                     return NotFound("Certificate not found.");
                 }
 
-                // Calculate the score
                 int score = 0;
                 var answers = new List<AnswerSubmission>();
                 foreach (var answerId in submitDto.AnswerIds)
@@ -199,7 +197,7 @@ namespace PersonalProject.Server.Controllers
                     }
                 }
                
-                bool isPassed = score >= certificate.PassingScore; // On Create / Update
+                bool isPassed = score >= certificate.PassingScore; 
 
                 var examSubmission = new ExamSubmission
                 {
@@ -214,15 +212,15 @@ namespace PersonalProject.Server.Controllers
                 _context.ExamSubmissions.Add(examSubmission);
 
                 var existingCertificate = await _context.UserCertificates
-                    .FirstOrDefaultAsync(uc => uc.UserId == submitDto.UserId && uc.CertId == submitDto.CertId); // Check if certificate already exists
+                    .FirstOrDefaultAsync(uc => uc.UserId == submitDto.UserId && uc.CertId == submitDto.CertId); 
 
-                if (existingCertificate != null) // Update existing certificate
+                if (existingCertificate != null)
                 {
                     existingCertificate.Score = score;
                     existingCertificate.DateTaken = DateTime.UtcNow;
                     existingCertificate.IsPassed = isPassed;
                 }
-                else // Add new certificate, TODO: update so the user can only take the cert till they pass
+                else 
                 {
                     var userCertificate = new UserCertificate
                     {
@@ -274,7 +272,6 @@ namespace PersonalProject.Server.Controllers
                     query = query.Where(es => es.UserId == userId);
                     Console.WriteLine($"Filter applied: UserId = {userId}");
                 }
-
                 
                 var attempts = await query
                     .Include(es => es.User)
@@ -483,7 +480,7 @@ namespace PersonalProject.Server.Controllers
             var submission = await _context.ExamSubmissions
                 .Include(es => es.User) 
                 .Include(es => es.Certificate)
-                .Include(es => es.Answers) // correct answer
+                .Include(es => es.Answers) 
                     .ThenInclude(a => a.Question)
                     .ThenInclude(q => q.AnswerOptions)
                 .FirstOrDefaultAsync(es => es.Id == examSubmissionId);

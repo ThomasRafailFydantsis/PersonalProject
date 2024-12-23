@@ -1,60 +1,19 @@
-import { useState, useEffect } from 'react';
-import DeleteButton from './DeleteButton';
-import certsService from '/MVC/PersonalProject/personalproject.client/CertsService';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "./AuthProvider";
+import certsService from "/MVC/PersonalProject/personalproject.client/CertsService";
+import AddCertificateButton from "./AddCertificateButton";
+import DeleteButton from "./DeleteButton";
 
 function CertsList({ id: userId }) {
+    const { isAuthenticated, userData, roles, AuthError } = useAuth();
     const [certs, setCerts] = useState([]);
-    
-    const [addStatus, setAddStatus] = useState({}); 
-    const [userData, setUserData] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [error, setError] = useState(null);
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [isMarker, setIsMarker] = useState(false);
     const navigate = useNavigate();
-    
 
-    useEffect(() => {
-        const fetchUserDetails = async () => {
-            try {
-               
-                const authResponse = await axios.get("https://localhost:7295/api/Account/auth-status", {
-                    withCredentials: true,
-                });
+    const isAdmin = roles.includes("Admin");
+    const isMarker = roles.includes("Marker");
 
-                if (authResponse.data.isAuthenticated) {
-                    setIsAuthenticated(true);
-
-                    
-                    const userResponse = await axios.get("https://localhost:7295/api/Account/me", {
-                        withCredentials: true,
-                    });
-
-                    const userData = userResponse.data;
-                    setUserData(userData);
-
-                  
-                    if (userData.roles && userData.roles.includes("Admin")) {
-                        setIsAdmin(true);
-                    }
-                    if (userData.roles && userData.roles.includes("Marker")) {
-                        setIsMarker(true);
-                    }
-                } else {
-                    setIsAuthenticated(false);
-                }
-            } catch (err) {
-                console.error("Error fetching user data or authentication status:", err);
-                setError("Failed to fetch user data or check authentication.");
-            }
-        };
-
-        fetchUserDetails();
-    }, []);
-
-
+    // Fetch certificates
     useEffect(() => {
         const fetchCerts = async () => {
             try {
@@ -65,60 +24,35 @@ function CertsList({ id: userId }) {
             }
         };
         fetchCerts();
-    }, [ ]);
+    }, []);
 
-    const handleDelete = (certId) => {
-        setCerts(certs.filter((cert) => cert.certId !== certId));
-    };
+    // Redirect if unauthenticated
+    useEffect(() => {
+        if (!isAuthenticated || !userData) {
+            console.log("User is not authenticated. Redirecting to login page...");
+            navigate("/login");
+        }
+    }, [isAuthenticated, userData, navigate]);
 
- 
-
-    const addCertificateToUser = async (certId) => {
-        setAddStatus((prev) => ({
-            ...prev,
-            [certId]: { isLoading: true, successMessage: '', errorMessage: '' },
-        }));
-
+    // Handle delete
+    const handleDelete = async (certId) => {
         try {
-            const response = await axios.post(
-                'https://localhost:7295/api/Certificates/add',
-                { userId, certId },
-                {
-                    headers: { 'Content-Type': 'application/json' },
-                    withCredentials: true,
-                }
-            );
-
-            setAddStatus((prev) => ({
-                ...prev,
-                [certId]: { isLoading: false, successMessage: response.data, errorMessage: '' },
-            }));
+            await certsService.deleteCert(certId); // Implement this method in your service
+            setCerts(certs.filter((cert) => cert.certId !== certId));
         } catch (error) {
-            const errorMessage = error.response?.data || 'An error occurred.';
-            setAddStatus((prev) => ({
-                ...prev,
-                [certId]: { isLoading: false, successMessage: '', errorMessage },
-            }));
+            console.error("Error deleting certificate:", error);
         }
     };
-    if (!userData) {
-        console.log("User data not available. Redirecting to login page...");
-    }
-    if (isAdmin) {
-        console.log("User is an admin. Redirecting to admin dashboard...");
-    }
 
-    if (error) {
-        return <div>Error: {error}</div>;
-    }
-
-    if (!isAuthenticated) {
-
-        console.log("User is not authenticated. Redirecting to login page...");
-    }
+    // Navigate to update exam
     const handleUpdateExam = (certId) => {
         navigate(`/certForm/${certId}`);
     };
+
+    // Render error
+    if (AuthError) {
+        return <div>Error: {AuthError}</div>;
+    }
 
     return (
         <div>
@@ -126,25 +60,24 @@ function CertsList({ id: userId }) {
             <ul>
                 {certs.map((cert) => (
                     <li key={cert.certId} className="certList">
-                            <>
-                                <div>{cert.certName}</div>
-                                    {isAdmin && <DeleteButton certId={cert.certId} onDelete={handleDelete} />}
-                                    <button 
-                                    onClick={() => addCertificateToUser(cert.certId)}
-                                    disabled={addStatus[cert.certId]?.isLoading}
-                                >
-                                    {addStatus[cert.certId]?.isLoading ? 'Adding...' : 'Add Certificate'}
-                                </button>
+                        <>
+                            <div>{cert.certName}</div>
+                            {cert.imagePath ? (
+                                <img
+                                    src={`https://localhost:7295${cert.imagePath}`} // Use full path
+                                    alt={cert.certName}
+                                    className="cert-image"
+                                    style={{ width: "130px", height: "130px" }}
+                                />
+                            ) : (
+                                <div>No image available</div>
+                            )}
+                            {isAdmin && <DeleteButton certId={cert.certId} onDelete={handleDelete} />}
                             {isAdmin && <button onClick={() => handleUpdateExam(cert.certId)}>Edit</button>}
                             {isMarker && <button onClick={() => handleUpdateExam(cert.certId)}>Edit</button>}
-                            </>
-                        
-                        {addStatus[cert.certId]?.successMessage && (
-                            <div style={{ color: 'green' }}>{addStatus[cert.certId]?.successMessage}</div>
-                        )}
-                        {addStatus[cert.certId]?.errorMessage && (
-                            <div style={{ color: 'red' }}>{addStatus[cert.certId]?.errorMessage}</div>
-                        )}
+                            <AddCertificateButton certId={cert.certId} />
+                        </>
+                       
                     </li>
                 ))}
             </ul>

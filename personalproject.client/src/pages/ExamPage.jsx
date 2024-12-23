@@ -3,6 +3,8 @@ import { useLocation, useParams } from 'react-router-dom';
 import ExamHdr from '../components/ExamHdr';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../components/AuthProvider';
+
 
 const ExamPage = () => {
     const { certId } = useParams();
@@ -16,6 +18,11 @@ const ExamPage = () => {
     const [result, setResult] = useState(null);
     const [submitError, setSubmitError] = useState(null);
     const navigate = useNavigate();
+    const { isAuthenticated, AuthError, revalidateAuth } = useAuth();
+
+    useEffect(() => {
+            revalidateAuth();
+        }, [location]);
 
     useEffect(() => {
         if (!certId || !userId) {
@@ -78,6 +85,15 @@ const ExamPage = () => {
     if (!userId) return <p>Error: User ID not found.</p>;
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
+
+    if (AuthError) {
+        return <div>{AuthError}</div>;
+    }
+
+    if (!isAuthenticated) {
+        return <div>You are not logged in. Please log in.</div>;
+    }
+
 
     const questions = exam?.Questions || [];
 

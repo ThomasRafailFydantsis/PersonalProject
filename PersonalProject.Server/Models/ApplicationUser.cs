@@ -9,6 +9,7 @@ namespace PersonalProject.Server.Models
  {
      public string? FirstName { get; set; }
      public string? LastName { get; set; }
+     public string? ProfileImagePath { get; set; }
      [NotMapped]
      public ClaimsIdentity? Username { get; internal set; }
      public ICollection<UserCertificate>? UserCertificates { get; set; }

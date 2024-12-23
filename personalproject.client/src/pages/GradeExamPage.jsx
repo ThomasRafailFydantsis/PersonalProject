@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Navigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
+import { useAuth } from "../components/AuthProvider";
 
 const GradeExamPage = () => {
-    const { examSubmissionId } = useParams(); 
+    const { examSubmissionId } = useParams();
     const [submissionDetails, setSubmissionDetails] = useState(null);
     const [gradingData, setGradingData] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { isAuthenticated, roles, AuthError, revalidateAuth } = useAuth();
+    const navigate = useNavigate();
 
+    // Revalidate authentication
+    useEffect(() => {
+        revalidateAuth();
+    }, [revalidateAuth]);
+
+    // Fetch submission details
     useEffect(() => {
         const fetchSubmissionDetails = async () => {
             try {
@@ -18,7 +27,6 @@ const GradeExamPage = () => {
                 );
                 setSubmissionDetails(response.data);
 
-                
                 const initialGradingData = response.data.answers.reduce((acc, answer) => {
                     acc[answer.questionId] = answer.isCorrect ? answer.selectedAnswerId : null;
                     return acc;
@@ -38,13 +46,13 @@ const GradeExamPage = () => {
     const handleCheckboxChange = (questionId, selectedAnswerId) => {
         setGradingData((prev) => {
             const updatedGradingData = { ...prev };
-    
+
             if (selectedAnswerId === null || selectedAnswerId === undefined) {
-                delete updatedGradingData[questionId];  
+                delete updatedGradingData[questionId];
             } else {
-                updatedGradingData[questionId] = selectedAnswerId; 
+                updatedGradingData[questionId] = selectedAnswerId;
             }
-    
+
             return updatedGradingData;
         });
     };
@@ -52,45 +60,38 @@ const GradeExamPage = () => {
     const handleSubmitGrades = async () => {
         try {
             const payload = {
-                examSubmissionId: parseInt(examSubmissionId), 
-                gradingData: {},   
+                examSubmissionId: parseInt(examSubmissionId),
+                gradingData: {},
             };
-    
-           
+
             submissionDetails.answers.forEach((answer) => {
-                const selectedAnswerId = gradingData[answer.questionId]; 
+                const selectedAnswerId = gradingData[answer.questionId];
                 if (selectedAnswerId !== undefined && selectedAnswerId !== null) {
-                   // payload object inside an object
                     payload.gradingData[answer.questionId] = selectedAnswerId;
                 } else {
                     console.warn(`No selected answer for question ${answer.questionId}`);
                 }
             });
-            
-            // Check if gradingData is populated correctly
+
             if (Object.keys(payload.gradingData).length === 0) {
                 setError("No grading data to submit.");
                 return;
             }
-    
-            // Log the payload for debugging
-            console.log("Payload before sending:", JSON.stringify(payload, null, 2));
-    
-            // Send the request with the correctly formatted data
-            const response = await axios.post("https://localhost:7295/api/Exam/grade-submission", payload);
-    
-            // The response now includes gradingData, score, and isPassed
+
+            const response = await axios.post(
+                "https://localhost:7295/api/Exam/grade-submission",
+                payload
+            );
+
             const responseData = response.data;
-            console.log("Response from server:", responseData);
-    
-            // You can now use the gradingData, score, and isPassed from the response
+
             setSubmissionDetails({
                 ...submissionDetails,
                 gradingData: responseData.gradingData,
                 score: responseData.score,
                 isPassed: responseData.isPassed,
             });
-    
+
             alert("Grading submitted successfully!");
         } catch (err) {
             if (err.response) {
@@ -105,10 +106,22 @@ const GradeExamPage = () => {
     if (loading) return <p>Loading...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
+    if (!roles.includes("Marker")) {
+        return <div>You do not have permission to access this page.</div>;
+    }
+
+    if (AuthError) {
+        return <div>{AuthError}</div>;
+    }
+
+    if (!isAuthenticated) {
+        return <div>You are not logged in. Please log in.</div>;
+    }
+
     return (
         <div>
             <Header />
-            <button onClick={()=> Navigate(-1)}>Back</button>
+            <button onClick={() => navigate(-1)}>Back</button>
             <h1>Grade Submission</h1>
             <h2>Candidate: {submissionDetails?.candidateName}</h2>
             <p>
@@ -132,7 +145,7 @@ const GradeExamPage = () => {
                 <thead>
                     <tr>
                         <th>Question</th>
-                        <th>Candidades Answer</th>
+                        <th>Candidates Answer</th>
                         <th>Correct Answer</th>
                         <th>Mark Correct?</th>
                     </tr>
@@ -148,7 +161,10 @@ const GradeExamPage = () => {
                                     type="checkbox"
                                     checked={gradingData[answer.questionId] || false}
                                     onChange={(e) =>
-                                        handleCheckboxChange(answer.questionId, e.target.checked ? answer.correctAnswerId : null)
+                                        handleCheckboxChange(
+                                            answer.questionId,
+                                            e.target.checked ? answer.correctAnswerId : null
+                                        )
                                     }
                                 />
                             </td>

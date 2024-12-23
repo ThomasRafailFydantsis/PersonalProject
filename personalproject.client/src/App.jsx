@@ -6,21 +6,21 @@ import Dashboard from './components/Dashboard';
 import UserProfile from './pages/UserProfile';
 import UserCertificates from './pages/UserCertificates';
 import NotAuthorized from './pages/NotAuthorized';
-import UserTable from './pages/UserTable';
 import ExamPage from './pages/ExamPage';
 import CertForm from './components/CertForm';
 import CreateCert from './components/CreateCert';
 import AssignMarkerPage from './pages/AssignMarkerPage';
 import MarkerAssignmentsPage from './pages/MarkerAssignmentPage';
 import GradeExamPage from './pages/GradeExamPage';
-import ExamSubmissionDetails from './pages/ExamSubmissionDetails';
 import MyCertificate from './pages/MyCertificate';
-//import Scores from './pages/Scores';
+import UserTable from './pages/UserTable';
+import UserProfileAdmin from './pages/UserProfileAdmin';
 
 
 const App = () => {
   return (
     <Router>
+
       <Routes>
         <Route path="/" caseSensitive={false} element={<HomePage />} />
         <Route path="/userTable" caseSensitive={false} element={<UserTable/>} />
@@ -36,9 +36,8 @@ const App = () => {
         <Route path="/assignMarker" caseSensitive={false} element={<AssignMarkerPage />} />
         <Route path="/marker/assignments/:id" element={<MarkerAssignmentsPage />} />
         <Route path="/exam/submission/:examSubmissionId" element={<GradeExamPage />} />
-        <Route path="/exam/submission/:examSubmissionId" element={<ExamSubmissionDetails />} />
-        <Route path="/MyCertificate" caseSensitive={false} element={<MyCertificate/>} />
-     {/*<Route path="/scores" caseSensitive={false} element={<Scores />} />*/}
+        <Route path="/MyCertificate" caseSensitive={false} element={<MyCertificate />} />
+        <Route path="/profile/:userId" element={<UserProfileAdmin />} />
       </Routes>
     </Router>
   );

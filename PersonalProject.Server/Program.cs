@@ -5,8 +5,9 @@ using PersonalProject.Server.Data;
 using PersonalProject.Server.Models;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
-using System.Text.Json;
 using PersonalProject.Server.Filters;
+using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.FileProviders;
 
 internal class Program
 {
@@ -17,13 +18,11 @@ internal class Program
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("FinalProject")));
 
-     
-
         builder.Services.AddScoped<CustomJsonSerializationFilter>();
 
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowAll", policy =>
+            options.AddPolicy("AllowSpecificOrigins", policy =>
             {
                 policy.WithOrigins("https://localhost:52384")
                       .AllowCredentials()
@@ -32,11 +31,9 @@ internal class Program
             });
         });
 
-
         builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-        .AddEntityFrameworkStores<ApplicationDbContext>()
-        .AddDefaultTokenProviders();
-
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
         var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -58,11 +55,40 @@ internal class Program
         builder.Services.AddAuthorization();
 
         builder.Services.AddControllers();
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "Personal Project API",
+                Version = "v1",
+                Description = "API documentation for the Personal Project"
+            });
+
+            options.OperationFilter<FileUploadOperationFilter>();
+            options.EnableAnnotations();
+        });
 
         var app = builder.Build();
+        var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+        var profilesPath = Path.Combine(uploadsPath, "profiles");
+        var certsPath = Path.Combine(uploadsPath, "certs");
+
+        if (!Directory.Exists(profilesPath)) Directory.CreateDirectory(profilesPath);
+        if (!Directory.Exists(certsPath)) Directory.CreateDirectory(certsPath);
+
+        Console.WriteLine($"Uploads directory initialized at: {uploadsPath}");
+
+        // Middleware
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -89,23 +115,23 @@ internal class Program
             }
         }
 
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+        app.UseRouting();
+
+        app.UseDeveloperExceptionPage();
         app.UseDefaultFiles();
-        app.UseStaticFiles();
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "uploads")),
+            RequestPath = "/uploads"
+        });
         app.UseSwagger();
         app.UseSwaggerUI();
         app.UseHttpsRedirection();
-        app.UseCors("AllowAll");
-
+        app.UseCors("AllowSpecificOrigins");
 
         app.MapControllers();
         app.MapFallbackToFile("/index.html");
 
         app.Run();
     }
-
 }

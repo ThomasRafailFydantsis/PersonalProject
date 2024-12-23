@@ -1,25 +1,35 @@
+import React, { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import Header from "./Header";
+import { useAuth } from "./AuthProvider";
+import ExamImageUpload from "./ExamImageUpload";
+
 
 const CreateCert = () => {
     const { certId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+    const { isAuthenticated, roles, AuthError, revalidateAuth } = useAuth();
 
+    // State hooks
     const [certName, setCertName] = useState("");
     const [passingScore, setPassingScore] = useState(0);
     const [questions, setQuestions] = useState([]);
-   
 
-  
-    
+    // Revalidate authentication on page load or route change
+    useEffect(() => {
+        revalidateAuth();
+    }, [location]);
 
-    const handleCertNameChange = (e) => {
-        setCertName(e.target.value);
-    };
-    const handlePassingScoreChange = (e) => {
-        setPassingScore(e.target.value);
-    };
+    // Pre-checks for rendering
+    const isLoading = isAuthenticated === null;
+    const hasNoPermission = !roles.includes("Admin") && !roles.includes("Marker");
+
+    // Handlers
+    const handleCertNameChange = (e) => setCertName(e.target.value);
+    const handlePassingScoreChange = (e) => setPassingScore(Number(e.target.value));
 
     const handleQuestionChange = (index, key, value) => {
         const updatedQuestions = [...questions];
@@ -48,7 +58,6 @@ const CreateCert = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         const payload = {
             certName,
             passingScore,
@@ -63,14 +72,15 @@ const CreateCert = () => {
                 })),
             })),
         };
-        try {     
+
+        try {
             const response = await axios.post("https://localhost:7295/api/Exam/create", payload);
-            console.log("Response:", response.data); // Log success response
+            console.log("Response:", response.data); 
             alert(certId ? "Exam updated successfully!" : "Exam created successfully!");
             navigate(-1);
         } catch (err) {
             if (err.response) {
-                console.error("Backend error:", err.response.data); // Log backend error details
+                console.error("Backend error:", err.response.data); 
                 alert(`Error: ${err.response.data}`);
             } else {
                 console.error("Error submitting exam:", err.message);
@@ -78,72 +88,93 @@ const CreateCert = () => {
             }
         }
     };
+    if(!roles.includes("Admin") && !roles.includes("Marker")){
+        return <div>You do not have permission to access this page.</div>;
+    }
 
-    
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
+    if (AuthError) {
+        return <div>{AuthError}</div>;
+    }
+
+    if (!isAuthenticated) {
+        return <div>You are not logged in. Please log in.</div>;
+    }
+
+    if (hasNoPermission) {
+        return <div>You do not have permission to access this page.</div>;
+    }
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div>
-                <label>Exam Title:</label>
-                <input type="text" value={certName} onChange={handleCertNameChange} required />
-                <input type="number" value={passingScore} onChange={handlePassingScoreChange} required />
-            </div>
-
-            {questions.map((question, questionIndex) => (
-                <div key={questionIndex}>
-                    <h4>Question {questionIndex + 1}</h4>
-                    <label>Text:</label>
-                    <input
-                        type="text"
-                        value={question.text}
-                        onChange={(e) => handleQuestionChange(questionIndex, "text", e.target.value)}
-                        required
-                    />
-                    <br />
-                    <label>Correct Answer:</label>
-                    <input
-                        type="text"
-                        value={question.correctAnswer}
-                        onChange={(e) => handleQuestionChange(questionIndex, "correctAnswer", e.target.value)}
-                        required
-                    />
-                    <h5>Answer Options</h5>
-                    {question.answerOptions.map((option, optionIndex) => (
-                        <div key={optionIndex}>
-                            <label>Text:</label>
-                            <input
-                                type="text"
-                                value={option.text}
-                                onChange={(e) =>
-                                    handleAnswerChange(questionIndex, optionIndex, "text", e.target.value)
-                                }
-                                required
-                            />
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    checked={option.isCorrect}
-                                    onChange={(e) =>
-                                        handleAnswerChange(questionIndex, optionIndex, "isCorrect", e.target.checked)
-                                    }
-                                />
-                                Is Correct
-                            </label>
-                        </div>
-                    ))}
-                    <button type="button" onClick={() => addAnswerOption(questionIndex)}>
-                        Add Answer Option
-                    </button>
+        <div>
+            <Header />
+            <form onSubmit={handleSubmit}>
+                <div>
+                    <label>Exam Title:</label>
+                    <input type="text" value={certName} onChange={handleCertNameChange} required />
+                    <ExamImageUpload certId={certId}/>
+                    <label>Passing Score:</label>
+                    <input type="number" value={passingScore} onChange={handlePassingScoreChange} required />
                 </div>
-            ))}
 
-            <button type="button" onClick={addQuestion}>
-                Add Question
-            </button>
-            <br />
-            <button type="submit">Submit</button>
-            <button type="button" onClick={() => navigate(-1)}>Back</button>
-        </form>
+                {questions.map((question, questionIndex) => (
+                    <div key={questionIndex}>
+                        <h4>Question {questionIndex + 1}</h4>
+                        <label>Text:</label>
+                        <input
+                            type="text"
+                            value={question.text}
+                            onChange={(e) => handleQuestionChange(questionIndex, "text", e.target.value)}
+                            required
+                        />
+                        <label>Correct Answer:</label>
+                        <input
+                            type="text"
+                            value={question.correctAnswer}
+                            onChange={(e) => handleQuestionChange(questionIndex, "correctAnswer", e.target.value)}
+                            required
+                        />
+                        <h5>Answer Options</h5>
+                        {question.answerOptions.map((option, optionIndex) => (
+                            <div key={optionIndex}>
+                                <label>Text:</label>
+                                <input
+                                    type="text"
+                                    value={option.text}
+                                    onChange={(e) =>
+                                        handleAnswerChange(questionIndex, optionIndex, "text", e.target.value)
+                                    }
+                                    required
+                                />
+                                <label>
+                                    <input
+                                        type="checkbox"
+                                        checked={option.isCorrect}
+                                        onChange={(e) =>
+                                            handleAnswerChange(questionIndex, optionIndex, "isCorrect", e.target.checked)
+                                        }
+                                    />
+                                    Is Correct
+                                </label>
+                            </div>
+                        ))}
+                        <button type="button" onClick={() => addAnswerOption(questionIndex)}>
+                            Add Answer Option
+                        </button>
+                    </div>
+                ))}
+
+                <button type="button" onClick={addQuestion}>
+                    Add Question
+                </button>
+                <br />
+                <button type="submit">Submit</button>
+                <button type="button" onClick={() => navigate(-1)}>Back</button>
+            </form>
+        </div>
     );
 };
 

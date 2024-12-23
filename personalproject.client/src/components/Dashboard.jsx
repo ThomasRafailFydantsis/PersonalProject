@@ -1,94 +1,62 @@
-import { useState, useEffect } from 'react';
-import CertsList from './CertsList';
-//import CertForm from './CertForm';
-//import Logout from './Logout';
-//import AuthService from '/MVC/PersonalProject/personalproject.client/AuthService';
-import { useNavigate } from 'react-router-dom';
-import Header from './Header';
-//import ProtectedComponent from './ProtectedComponent';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Header from "./Header";
+import CertsList from "./CertsList";
+import { useAuth } from "./AuthProvider";
+
 
 function Dashboard() {
-    const [userData, setUserData] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(null);
-    const [error, setError] = useState(null);
-    const [roles, setRoles] = useState([]);
+    const { isAuthenticated, userData, roles, AuthError, loading, revalidateAuth } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-    const checkAuthStatus = async () => {
-        try {
-            const statusResponse = await fetch('https://localhost:7295/api/Account/auth-status', {
-                method: 'GET',
-                credentials: 'include', 
-            });
-
-            if (statusResponse.ok) {
-                const status = await statusResponse.json();
-                setIsAuthenticated(status.isAuthenticated);
-
-                if (status.isAuthenticated) {
-                    const response = await fetch('https://localhost:7295/api/Account/me', {
-                        method: 'GET',
-                        credentials: 'include', 
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        setUserData(data);
-                        setRoles(data.roles);
-                    } else {
-                        setError('Failed to fetch user data');
-                    }
-                } else {
-                    console.log('User not authenticated');
-                }
-            } else {
-                setError('Failed to check authentication status');
-            }
-        } catch (error) {
-            console.error('Error checking authentication status or fetching user data:', error);
-            setError('Failed to check authentication or fetch user data.');
+        if (!loading && isAuthenticated && !userData) {
+            revalidateAuth();
         }
-    };
+    }, [loading, isAuthenticated, userData, revalidateAuth]);
 
-    checkAuthStatus();
-}, []);
+    if (loading) {
+        return <div>Loading...</div>; 
+    }
+
+    if (AuthError && isAuthenticated === false) {
+        return (
+            <div>
+                <h3>Error</h3>
+                <p>{AuthError}</p>
+                <button onClick={() => window.location.reload()}>Retry</button>
+            </div>
+        );
+    }
 
     if (isAuthenticated === null) {
-        return <div>Loading...</div>;
+        return <div>Authenticating...</div>;
     }
 
-    if (error) {
-        return <div>{error}</div>;
+    const hasNoPermission = !roles.includes("Admin") && !roles.includes("Marker") && !roles.includes("User");
+
+    if (hasNoPermission) {
+        return <div>You do not have permission to access this page.</div>;
     }
 
-    if (!isAuthenticated) {
-
-        return <div>You are not logged in. Please log in.</div>;
-    }
-    const { userName} = userData || {};
-    const { id } = userData || {};
-    const handleUpdateExam = (id) => {
-        navigate(`/marker/assignments/${id}`);
-    };
     return (
         <div>
             <Header />
-            <div className='wrapper'>
-            <h2 style={{ fontSize: '40px' }} className='welcome'>Welcome Back, {userName}!</h2>
-            {roles.includes("Admin") && <p>You have Admin access.</p>}
-                {roles.includes("User") && <p>You have User access.</p>}
-                {roles.includes("Marker") && <p>You have Marker access.</p>}
-            <div className='dashboard-certificates'>
-            <CertsList id={id} />
-            </div>
-            <button name="userProfile" onClick={() => navigate('/userProfile')}>User Profile</button>
-            <button name="userProfile" onClick={() => navigate('/userCertificates')}>Your Certificates</button>
-                {roles.includes("Admin") && <button name="certForm" onClick={() => navigate('/CreateCert')}>Add Certificate</button>}
-                {roles.includes("Marker") && <button name="certForm" onClick={() => navigate('/CreateCert')}>Add Certificate</button>}
-                {roles.includes("Admin") && <button name="userTable" onClick={() => navigate('/userTable')}>User Table</button>}
-                {roles.includes("Admin") && <button name="assignMarker" onClick={() => navigate('/assignMarker')}>Assign Marker</button>}
-                {roles.includes("Marker") && <button name="certForm" onClick={() => handleUpdateExam(id)}>Your Assignments</button>}
+           
+            <div className="wrapper">
+                <h2 className="welcome">Welcome Back, {userData?.userName || "User"}!</h2>
+                <div className="dashboard-certificates">
+                    <CertsList id={userData?.id} />
+                </div>
+                <button onClick={() => navigate("/userProfile")}>User Profile</button>
+                <button onClick={() => navigate("/userCertificates")}>Your Certificates</button>
+                {roles.includes("Admin") && <button onClick={() => navigate("/CreateCert")}>Add Certificate</button>}
+                {roles.includes("Marker") && <button onClick={() => navigate("/CreateCert")}>Add Certificate</button>}
+                {roles.includes("Admin") && <button onClick={() => navigate("/userTable")}>User Table</button>}
+                {roles.includes("Admin") && <button onClick={() => navigate("/assignMarker")}>Assign Marker</button>}
+                {roles.includes("Marker") && (
+                    <button onClick={() => navigate(`/marker/assignments/${userData?.id}`)}>Your Assignments</button>
+                )}
             </div>
         </div>
     );

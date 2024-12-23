@@ -1,176 +1,144 @@
-import { useEffect, useState } from 'react';
-import AuthService from '/MVC/PersonalProject/personalproject.client/AuthService';
-import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
+import { useAuth } from "../components/AuthProvider";
+import UserProfileImageUpload from "../components/UserProfileImageUpload";
 
 const UserProfile = () => {
-    const navigate = useNavigate();
-    const [error, setError] = useState(null);
-    const [scores, setScores] = useState([]);
+    const { isAuthenticated, userData, AuthError } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [updatedData, setUpdatedData] = useState({});
-    const [userData, setUserData] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(null);
-   
+    const [isLoading, setIsLoading] = useState(true);
+    const [image, setImage] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const checkAuthStatus = async () => {
+        const fetchUserData = async () => {
             try {
-                const status = await AuthService.getAuthStatus();
-                setIsAuthenticated(status);
-
-                if (status) {
-                    const response = await fetch('https://localhost:7295/api/Account/me', {
-                        method: 'GET',
-                        credentials: 'include',
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        setUserData(data);
-                        setUpdatedData({
-                            firstName: data.firstName,
-                            lastName: data.lastName,
-                            email: data.email,
-                            username: data.userName,
-                        });
-                    } else {
-                        throw new Error('Failed to fetch user data.');
-                    }
-                }
+                const response = await axios.get("https://localhost:7295/api/Account/me", {
+                    withCredentials: true,
+                });
+                setUpdatedData(response.data);
             } catch (err) {
-                console.error('Error checking authentication status or fetching user data:', err);
-                setError('Failed to check authentication or fetch user data.');
+                console.error("Error fetching user data:", err);
+            } finally {
+                setIsLoading(false);
             }
         };
-        checkAuthStatus();
-    }, []);
 
-    const fetchScores = async () => {
-        if (!userData?.id) return;
-        try {
-            const response = await axios.get(`https://localhost:7295/api/Exam/results/${userData.id}`);
-            setScores(response.data);
-        } catch (err) {
-            console.error('Error fetching scores:', err);
-            setScores([]);
+        if (isAuthenticated) {
+            fetchUserData();
+        } else {
+            setIsLoading(false);
         }
-    };
-
-    useEffect(() => {
-        if (userData) fetchScores();
-    }, [userData]);
+    }, [isAuthenticated]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setUpdatedData({ ...updatedData, [name]: value });
+        setUpdatedData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSaveChanges = async () => {
         try {
-            const response = await axios.put(`https://localhost:7295/api/Account/${userData.id}`, updatedData, {
+            if (!userData || !userData.id) {
+                alert("User data is not loaded. Cannot save changes.");
+                return;
+            }
+            await axios.put(`https://localhost:7295/api/Account/${userData.id}`, updatedData, {
                 withCredentials: true,
             });
-
-            if (response.status === 200) {
-                
-                setUserData({ ...userData, ...updatedData });
-                setIsEditing(false);
-            }
-        } catch (error) {
-            console.error('Error updating profile:', error);
-            
+            alert("Profile updated successfully!");
+            setIsEditing(false);
+        } catch (err) {
+            console.error("Error updating profile:", err);
         }
     };
 
-    if (isAuthenticated === null) {
-        return <div>Loading...</div>;
-    }
+    useEffect(() => {
+        const fetchImagePath = async () => {
+            if (!userData || !userData.id) return; // Null-check userData and userData.id
+            try {
+                const response = await axios.get(`https://localhost:7295/api/ImageUpload/get-user-profile-image/${userData.id}`);
+                setImage(response.data);
+                console.log("Image Path:", response.data);
+            } catch (err) {
+                console.error("Error fetching image path:", err);
+            }
+        };
 
-    if (error) {
-        return <div>{error}</div>;
-    }
+        fetchImagePath();
+    }, [userData]);
 
-    if (!isAuthenticated) {
-        return <div>You are not logged in. Please log in.</div>;
-    }
+    if (isLoading) return <div>Loading...</div>;
+    if (AuthError) return <div>{AuthError}</div>;
+    if (!isAuthenticated) return <div>You are not logged in. Please log in.</div>;
 
     if (!userData) {
         return <div>Loading user data...</div>;
     }
-    
 
     return (
-        <>
         <div>
             <Header />
             <button className="green-button" onClick={() => navigate('/dashboard')}>Back</button>
             <button className="green-button" onClick={() => navigate('/MyCertificate')}>My Certificates</button>
-            <main>
-                <div style={{ margin: '20px auto', maxWidth: '800px' }}>
-                    <h1>User Profile</h1>
-                    {isEditing ? (
-                        <div>
-                            <label>
-                                First Name:
-                                <input
-                                    type="text"
-                                    name="firstName"
-                                    value={updatedData.firstName || ''}
-                                    onChange={handleInputChange}
-                                />
-                            </label>
-                            <br />
-                            <label>
-                                Last Name:
-                                <input
-                                    type="text"
-                                    name="lastName"
-                                    value={updatedData.lastName || ''}
-                                    onChange={handleInputChange}
-                                />
-                            </label>
-                            <br />
-                            <label>
-                                Email:
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={updatedData.email || ''}
-                                    onChange={handleInputChange}
-                                />
-                            </label>
-                            <br />
-                            <label>
-                                Username:
-                                <input
-                                    type="text"
-                                    name="username"
-                                    value={updatedData.username || ''}
-                                    onChange={handleInputChange}
-                                />
-                            </label>
-                            <br />
-                            <button onClick={handleSaveChanges}>Save Changes</button>
-                            <button onClick={() => setIsEditing(false)}>Cancel</button>
-                        </div>
+            <h1>User Profile</h1>
+            <UserProfileImageUpload userId={userData.id} />
+            {isEditing ? (
+                <form>
+                    <label>
+                        First Name:
+                        <input
+                            type="text"
+                            name="firstName"
+                            value={updatedData.firstName || ""}
+                            onChange={handleInputChange}
+                        />
+                    </label>
+                    <label>
+                        Last Name:
+                        <input
+                            type="text"
+                            name="lastName"
+                            value={updatedData.lastName || ""}
+                            onChange={handleInputChange}
+                        />
+                    </label>
+                    <label>
+                        Email:
+                        <input
+                            type="email"
+                            name="email"
+                            value={updatedData.email || ""}
+                            onChange={handleInputChange}
+                        />
+                    </label>
+                    <button type="button" onClick={handleSaveChanges}>
+                        Save Changes
+                    </button>
+                    <button type="button" onClick={() => setIsEditing(false)}>
+                        Cancel
+                    </button>
+                </form>
+            ) : (
+                <div>
+                    {image ? (
+                        <img
+                            src={`https://localhost:7295${image}`}
+                            alt="User Profile"
+                            style={{ width: "100px", height: "100px" }}
+                        />
                     ) : (
-                        <div>
-                            <p><strong>First Name:</strong> {userData.firstName}</p>
-                            <p><strong>Last Name:</strong> {userData.lastName}</p>
-                            <p><strong>Email:</strong> {userData.email}</p>
-                            <p><strong>Username:</strong> {userData.userName}</p>
-                            <button onClick={() => setIsEditing(true)}>Edit Profile</button>
-                        </div>
+                        <p>Profile image not available</p>
                     )}
-                    
+                    <p>First Name: {userData.firstName || "N/A"}</p>
+                    <p>Last Name: {userData.lastName || "N/A"}</p>
+                    <p>Email: {userData.email || "N/A"}</p>
+                    <button onClick={() => setIsEditing(true)}>Edit</button>
                 </div>
-
-               
-            </main>
-            </div>
-        </>
+            )}
+        </div>
     );
 };
 

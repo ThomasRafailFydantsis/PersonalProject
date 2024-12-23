@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PersonalProject.Server.Data;
 using PersonalProject.Server.Models;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace PersonalProject.Server.Controllers
 {
@@ -31,12 +32,13 @@ namespace PersonalProject.Server.Controllers
             {
                 CertId = c.CertId,
                 CertName = c.CertName,
+                ImagePath = c.ImagePath,
                 Description = c.Description,
-                Image = c.Image
+               
             }));
         }
+       
 
-        
         [HttpGet("{userId}/certificates")]
         public async Task<IActionResult> GetUserCertificates(string userId)
         {
@@ -54,7 +56,6 @@ namespace PersonalProject.Server.Controllers
             {
                 uc.Certificate.CertId,
                 uc.Certificate.CertName,
-                uc.Certificate.Image,
                 uc.DateAdded
             }));
         }
@@ -75,7 +76,7 @@ namespace PersonalProject.Server.Controllers
             }
 
             cert.CertName = certDto.CertName;
-            cert.Image = certDto.Image;
+           
 
             _context.Entry(cert).State = EntityState.Modified;
 
@@ -106,8 +107,8 @@ namespace PersonalProject.Server.Controllers
 
             var cert = new Certs
             {
-                CertName = certDto.CertName,
-                Image = certDto.Image
+                CertName = certDto.CertName
+               
             };
 
             _context.Certs.Add(cert);
@@ -144,6 +145,6 @@ namespace PersonalProject.Server.Controllers
         public int CertId { get; set; }
         public string? CertName { get; set; }
         public string? Description { get; set; }
-        public string? Image { get; set; }
+        public string? ImagePath { get; set; }
     }
 }

@@ -1,48 +1,19 @@
 import { useState, useEffect } from 'react';
-import AuthService from '/MVC/PersonalProject/personalproject.client/AuthService';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
+import { useAuth } from '../components/AuthProvider';
 
 function UserCertificates() {
     const [certificates, setCertificates] = useState([]);
-    const [userData, setUserData] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(null);
     const [error, setError] = useState(null);
+    const { isAuthenticated, userData, AuthError, revalidateAuth } = useAuth();
     const navigate = useNavigate();
 
-    // Fetch user data
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const status = await AuthService.getAuthStatus();
-                setIsAuthenticated(status);
+        revalidateAuth(); // Validate authentication state
+    }, [location]);
 
-                if (status) {
-                    const response = await fetch('https://localhost:7295/api/Account/me', {
-                        method: 'GET',
-                        credentials: 'include',
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        setUserData(data);
-                    } else {
-                        throw new Error('Failed to fetch user data.');
-                    }
-                } else {
-                    console.log('User not authenticated');
-                }
-            } catch (error) {
-                console.error('Error checking authentication status:', error);
-                setError('An unexpected error occurred.');
-            }
-        };
-
-        fetchUserData();
-    }, []);
-
-    
     useEffect(() => {
         const fetchCertificates = async () => {
             if (!isAuthenticated || !userData?.id) {
@@ -64,29 +35,23 @@ function UserCertificates() {
         }
     }, [isAuthenticated, userData]);
 
-    // Delete certificate
     const handleDelete = async (certId) => {
         try {
             await axios.delete('https://localhost:7295/api/certificates/remove', {
-                data: {
-                    UserId: userData.id,
-                    CertId: certId,
-                },
+                data: { UserId: userData.id, CertId: certId },
             });
 
             setCertificates(certificates.filter((cert) => cert.certId !== certId));
-           
         } catch (error) {
             console.error('Error removing certificate:', error);
-            
         }
     };
 
-    // Navigate to exam page
     const handleTakeExam = (certId) => {
         navigate(`/take-exam/${certId}`, { state: { userId: userData.id } });
     };
 
+    // Handle different states
     if (isAuthenticated === null) {
         return (
             <div>
@@ -102,9 +67,7 @@ function UserCertificates() {
                 <Header />
                 <h1>User Certificates</h1>
                 <p>{typeof error === 'string' ? error : error.message || 'An unknown error occurred.'}</p>
-                <button className="green-button" onClick={() => navigate('/dashboard')}>
-                    Back to Dashboard
-                </button>
+                <button className="green-button" onClick={() => navigate('/dashboard')}>Back to Dashboard</button>
             </div>
         );
     }
@@ -119,33 +82,35 @@ function UserCertificates() {
         );
     }
 
+    if (AuthError) {
+        return <div>{AuthError}</div>;
+    }
+
+    // Add permission check based on roles
+   
+
     return (
         <div>
             <Header />
             <h2>User Certificates</h2>
             {certificates.length === 0 ? (
-                <div>
-                    <p>No certificates found for the user.</p>
-                </div>
+                <div>No certificates found for the user.</div>
             ) : (
-                    <div className='dashboard-certificates'>
-                <ul >
-                    {certificates.map((certificate) => (
-                        <li style={{ fontSize: '25px' }} key={certificate.certId} className="certList">
-                           
-                            <div>
-                                <div style={{ fontSize: '40px' }}>{certificate.certName}</div>
-                                <button className="green-button" onClick={() => handleTakeExam(certificate.certId)}>Take Exam</button>
-                                <button className="red-button" onClick={() => handleDelete(certificate.certId)}>Remove Certificate</button>
-                            </div>
-                        </li>
-                    ))}
-                        </ul>
+                <div className="dashboard-certificates">
+                    <ul>
+                        {certificates.map((certificate) => (
+                            <li key={certificate.certId} className="certList" style={{ fontSize: '25px' }}>
+                                <div>
+                                    <div style={{ fontSize: '40px' }}>{certificate.certName}</div>
+                                    <button className="green-button" onClick={() => handleTakeExam(certificate.certId)}>Take Exam</button>
+                                    <button className="red-button" onClick={() => handleDelete(certificate.certId)}>Remove Certificate</button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             )}
-            <button className="green-button" onClick={() => navigate('/dashboard')}>
-                Go to Dashboard
-            </button>
+            <button className="green-button" onClick={() => navigate('/dashboard')}>Go to Dashboard</button>
         </div>
     );
 }
