@@ -8,7 +8,7 @@ function Logout() {
     const handleUserLogout = async () => {
         try {
             await handleLogout(); 
-            navigate("/login");
+            navigate("/");
         } catch (error) {
             console.error("Error during logout:", error);
             alert("Failed to log out. Please try again.");

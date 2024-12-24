@@ -69,15 +69,21 @@ const MarkerAssignmentsPage = () => {
                 </thead>
                 <tbody>
                     {assignments.map((assignment) => (
-                        <tr key={`${assignment.examSubmissionId}-${assignment.candidateName}`}>
+                        <tr key={assignment.examSubmissionId}>
                             <td>{assignment.examSubmissionId}</td>
                             <td>{assignment.candidateName}</td>
                             <td>{assignment.certificateName}</td>
                             <td>{assignment.isPassed ? "Passed" : "Failed"}</td>
                             <td>
-                                <Link to={`/exam/submission/${assignment.examSubmissionId}`}>
-                                    View Submission
-                                </Link>
+                                {assignment.isMarked ? (
+                                    <button disabled style={{ color: "gray" }}>
+                                        Already Marked
+                                    </button>
+                                ) : (
+                                    <Link to={`/exam/submission/${assignment.examSubmissionId}`}>
+                                        View Submission
+                                    </Link>
+                                )}
                             </td>
                         </tr>
                     ))}

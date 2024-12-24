@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { useAuth } from "../components/AuthProvider";
+import { RxCheck } from "react-icons/rx";
 
 const AssignMarkerPage = () => {
     const [submissions, setSubmissions] = useState([]);
@@ -61,21 +62,28 @@ const AssignMarkerPage = () => {
             setError("Please select a marker before assigning.");
             return;
         }
-    
-        console.log("Assigning marker with ID:", markerId);  
-    
+
         try {
             setLoading(true);
             setError(null);
             setSuccessMessage("");
-    
+
             const payload = {
                 examSubmissionId: submissionId,
-                markerId,  
+                markerId,
             };
-    
-           
+
             await axios.post("https://localhost:7295/api/Exam/assign-marker", payload);
+
+            // Update the specific submission's state to marked
+            setSubmissions((prevSubmissions) =>
+                prevSubmissions.map((submission) =>
+                    submission.id === submissionId
+                        ? { ...submission, isMarked: true }
+                        : submission
+                )
+            );
+
             setSuccessMessage(`Marker assigned successfully for submission #${submissionId}`);
         } catch (err) {
             console.error("Error details:", err.response?.data || err.message);
@@ -87,22 +95,21 @@ const AssignMarkerPage = () => {
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
-
     
-    if( !roles.includes("Marker")){
+    
+    if (!roles.includes("Admin")) {
+        
         return <div>You do not have permission to access this page.</div>;
+
     }
 
     if (AuthError) {
+
         return <div>{AuthError}</div>;
     }
 
     if (!isAuthenticated) {
         return <div>You are not logged in. Please log in.</div>;
-    }
-
-    if (!roles.includes("Marker")|| !roles.includes("User")) { 
-        return <div>You do not have permission to access this page.</div>;
     }
 
     return (
@@ -121,36 +128,44 @@ const AssignMarkerPage = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {submissions.map((submission) => (
-                        <tr key={submission.id}>
-                            <td>
-                                {`Submission #${submission.id} - ${submission.certName} by User ${submission.userId}`}
-                            </td>
-                            <td>
-                                <select
-                                    value={selectedMarkers[submission.id] || ""} 
-                                    onChange={(e) => handleMarkerChange(submission.id, e.target.value)}
-                                >
-                                    <option value="" disabled>
-                                        Select a Marker
-                                    </option>
-                                    {markers.map((marker) => (
-                                        <option key={marker.id} value={marker.id}>
-                                            {marker.userName} ({marker.email})
+                    {submissions.map((submission) => {
+                        const isAssigned = submission.isMarked; // Assume `isMarked` is included in the API response
+                        return (
+                            <tr key={submission.id}>
+                                <td>
+                                    {`Submission #${submission.id} - ${submission.certName} by User ${submission.userId}`}
+                                </td>
+                                <td>
+                                    <select
+                                        value={selectedMarkers[submission.id] || ""}
+                                        onChange={(e) => handleMarkerChange(submission.id, e.target.value)}
+                                        disabled={isAssigned} // Disable the dropdown if already assigned
+                                    >
+                                        <option value="" disabled>
+                                            Select a Marker
                                         </option>
-                                    ))}
-                                </select>
-                            </td>
-                            <td>
-                                <button
-                                    onClick={() => handleAssignMarker(submission.id)}
-                                    disabled={!selectedMarkers[submission.id]}
-                                >
-                                    Assign Marker
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
+                                        {markers.map((marker) => (
+                                            <option key={marker.id} value={marker.id}>
+                                                {marker.userName} ({marker.email})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </td>
+                                <td>
+                                    {isAssigned ? (
+                                        <h6>Assigned <RxCheck /></h6> // Display 'Assigned' if marked
+                                    ) : (
+                                        <button
+                                            onClick={() => handleAssignMarker(submission.id)}
+                                            disabled={!selectedMarkers[submission.id]}
+                                        >
+                                                Assign Marker 
+                                        </button>
+                                    )}
+                                </td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>

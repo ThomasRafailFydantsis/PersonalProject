@@ -15,15 +15,15 @@ import GradeExamPage from './pages/GradeExamPage';
 import MyCertificate from './pages/MyCertificate';
 import UserTable from './pages/UserTable';
 import UserProfileAdmin from './pages/UserProfileAdmin';
+import AuthPage from './pages/AuthPage';
 
 
 const App = () => {
   return (
     <Router>
-
       <Routes>
         <Route path="/" caseSensitive={false} element={<HomePage />} />
-        <Route path="/userTable" caseSensitive={false} element={<UserTable/>} />
+        <Route path="/userTable" caseSensitive={false} element={<UserTable />} />
         <Route path="/login" caseSensitive={false} element={<Login />} />
         <Route path="/register" caseSensitive={false} element={<Register />} />
         <Route path="/notAuthorized" caseSensitive={false} element={<NotAuthorized />} />
@@ -38,6 +38,7 @@ const App = () => {
         <Route path="/exam/submission/:examSubmissionId" element={<GradeExamPage />} />
         <Route path="/MyCertificate" caseSensitive={false} element={<MyCertificate />} />
         <Route path="/profile/:userId" element={<UserProfileAdmin />} />
+        <Route path='/AuthPage' caseSensitive={false} element={<AuthPage />} />
       </Routes>
     </Router>
   );

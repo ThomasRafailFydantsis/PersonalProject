@@ -10,7 +10,7 @@ namespace PersonalProject.Server.Models
         [Required]
         public string UserId { get; set; }
 
-        public virtual ApplicationUser User { get; set; }  // Navigation Property
+        public virtual ApplicationUser User { get; set; } 
 
         [Required]
         public int CertId { get; set; }

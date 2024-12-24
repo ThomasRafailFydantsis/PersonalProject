@@ -59,6 +59,27 @@ namespace PersonalProject.Server.Controllers
                 uc.DateAdded
             }));
         }
+        [HttpGet("{userId}/owned")]
+        public async Task<IActionResult> GetOwnedCerts(string userId)
+        {
+            // Fetch all certificates owned by the user
+            var ownedCerts = await _context.UserCertificates
+                .Where(uc => uc.UserId == userId && uc.Certificate != null)
+                .Include(uc => uc.Certificate)  // Include certificate details
+                .ToListAsync();
+
+            if (ownedCerts == null || !ownedCerts.Any())
+            {
+                return NotFound(new { message = "No owned certificates found for the user." });
+            }
+
+            return Ok(ownedCerts.Select(uc => new
+            {
+                uc.Certificate.CertId,
+                uc.Certificate.CertName,
+                uc.DateAdded
+            }));
+        }
 
         // PUT: api/Certs/{id}
         [HttpPut("{id}")]

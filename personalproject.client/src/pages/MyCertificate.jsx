@@ -95,7 +95,7 @@ const MyCertificate = () => {
                                 <td>{cert.isPassed && cert.isMarked ? "Passed & Marked" : "Pending"}</td>
                                 <td>
                                     {cert.certificateDownloadable ? (
-                                        <button onClick={() => handleDownload(cert.id)}>Download</button>
+                                        <button className="green-button" onClick={() => handleDownload(cert.id)}>Download</button>
                                     ) : (
                                         <span>Not Available</span>
                                     )}
@@ -105,7 +105,7 @@ const MyCertificate = () => {
                     </tbody>
                 </table>
             )}
-            <button onClick={() => navigate(-1)}>Back</button>
+            <button className="green-button" onClick={() => navigate(-1)}>Back</button>
         </div>
     );
 };

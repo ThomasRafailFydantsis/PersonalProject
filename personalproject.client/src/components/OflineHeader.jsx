@@ -9,10 +9,10 @@ function OflineHeader() {
                 <a className="header-logo" href="/"><h1>Certflix</h1></a>
             </>
             <>
-                <nav className="header-nav">
+                {/* <nav className="header-nav">
                     <button className="green-button" onClick={() => navigate('/login')}><FiUser /></button>
                    
-                </nav>
+                </nav> */}
             </>
         </header>
     )

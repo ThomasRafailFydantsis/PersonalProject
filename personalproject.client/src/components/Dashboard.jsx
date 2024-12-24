@@ -36,7 +36,7 @@ function Dashboard() {
     const hasNoPermission = !roles.includes("Admin") && !roles.includes("Marker") && !roles.includes("User");
 
     if (hasNoPermission) {
-        return <div>You do not have permission to access this page.</div>;
+        return navigate ("/");
     }
 
     return (

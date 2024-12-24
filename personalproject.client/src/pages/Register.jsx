@@ -15,11 +15,25 @@ const RegisterPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!username || !email || !password || !firstName || !lastName) {
+            setErrorMessage("All fields are required.");
+            return;
+        }
+
+        if (password.length < 6) {
+            setErrorMessage("Password must be at least 6 characters long.");
+            return;
+        }
+
+        if (!/\S+@\S+\.\S+/.test(email)) {
+            setErrorMessage("Please enter a valid email.");
+            return;
+        }
+
         try {
             const response = await AuthService.register(username, email, password, firstName, lastName);
-
             if (response) {
-                navigate('/login'); 
+                navigate('/login');
             }
         } catch (error) {
             setErrorMessage(error.response?.data || 'Registration failed');
@@ -41,6 +55,7 @@ const RegisterPage = () => {
                         onChange={(e) => setFirstName(e.target.value)}
                         required
                     />
+                    {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
                 </div>
                 <div>
                     <label htmlFor="lastName">Last Name:</label>
@@ -51,9 +66,10 @@ const RegisterPage = () => {
                         onChange={(e) => setLastName(e.target.value)}
                         required
                     />
+                    {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
                 </div>
                 <div>
-                    <label htmlFor="username">Username:</label>
+                    <label htmlFor="userName">UserName:</label>
                     <input
                         type="text"
                         id="username"
@@ -61,6 +77,7 @@ const RegisterPage = () => {
                         onChange={(e) => setUsername(e.target.value)}
                         required
                     />
+                    {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
                 </div>
                 <div>
                     <label htmlFor="email">Email:</label>
@@ -71,6 +88,7 @@ const RegisterPage = () => {
                         onChange={(e) => setEmail(e.target.value)}
                         required
                     />
+                    {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
                 </div>
                 <div>
                     <label htmlFor="password">Password:</label>
@@ -81,6 +99,7 @@ const RegisterPage = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
+                    {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
                 </div>
                 <button className="green-button" type="submit">Register</button>
                 <p>Already have an account? <a href="/login">Login</a></p>

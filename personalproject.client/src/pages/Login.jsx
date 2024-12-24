@@ -15,13 +15,14 @@ const LoginPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!username || !password) {
+            setErrorMessage("Both username and password are required.");
+            return;
+        }
+
         try {
             const token = await AuthService.login(username, password);
-            console.log('Logged in with token:', token);
-
-           
             await revalidateAuth();
-
             navigate("/dashboard");
         } catch (error) {
             setErrorMessage(error.message);
@@ -57,6 +58,7 @@ const LoginPage = () => {
                 </div>
                 <button className='green-button' type="submit">Login</button>
                 <button className='green-button' onClick={() => navigate("/register")}>Register</button>
+                {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
             </form>
         </div>
     );

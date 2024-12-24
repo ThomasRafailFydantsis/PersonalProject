@@ -284,16 +284,17 @@ namespace PersonalProject.Server.Controllers
                     Console.WriteLine("No attempts found for the given filters.");
                     return NotFound(new { Message = "No attempts found for the given filters." });
                 }
-  
+
                 var result = attempts.Select(es => new
                 {
                     es.Id,
                     es.CertId,
                     UserId = es.UserId ?? "Unknown User",
-                    CertName = es.Certificate?.CertName ?? "Unknown Certificate", 
+                    CertName = es.Certificate?.CertName ?? "Unknown Certificate",
                     es.Score,
                     es.IsPassed,
                     SubmissionDate = es.SubmissionDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                    IsMarked = _context.MarkerAssignments.Any(ma => ma.ExamSubmissionId == es.Id && ma.IsMarked), 
                     Answers = es.Answers.Select(a => new
                     {
                         a.QuestionId,
@@ -313,7 +314,6 @@ namespace PersonalProject.Server.Controllers
         }
 
         [HttpPost("assign-marker")]
-       
         public async Task<IActionResult> AssignMarker([FromBody] MarkerAssignmentDto assignmentDto)
         {
             if (assignmentDto == null || string.IsNullOrEmpty(assignmentDto.MarkerId))
@@ -329,11 +329,21 @@ namespace PersonalProject.Server.Controllers
                 return NotFound("Exam submission not found.");
             }
 
+            // Check if the submission is already assigned
+            var existingAssignment = await _context.MarkerAssignments
+                .FirstOrDefaultAsync(ma => ma.ExamSubmissionId == assignmentDto.ExamSubmissionId);
+
+            if (existingAssignment != null && existingAssignment.IsMarked)
+            {
+                return BadRequest("This submission is already assigned.");
+            }
+
             var markerAssignment = new MarkerAssignment
             {
                 ExamSubmissionId = assignmentDto.ExamSubmissionId,
                 MarkerId = assignmentDto.MarkerId,
-                AssignedDate = DateTime.UtcNow
+                AssignedDate = DateTime.UtcNow,
+                IsMarked = true // Set IsMarked to true
             };
 
             _context.MarkerAssignments.Add(markerAssignment);
@@ -517,12 +527,12 @@ namespace PersonalProject.Server.Controllers
         {
             var assignments = await _context.MarkerAssignments
                 .Where(ma => ma.MarkerId == markerId)
-                .Include(ma => ma.ExamSubmission) 
-                .ThenInclude(es => es.User) 
-                .Include(ma => ma.ExamSubmission.Certificate) 
+                .Include(ma => ma.ExamSubmission)
+                .ThenInclude(es => es.User)
+                .Include(ma => ma.ExamSubmission.Certificate)
                 .Select(ma => new
                 {
-                    ma.Id, 
+                    ma.Id,
                     ma.ExamSubmissionId,
                     ma.MarkerId,
                     candidateName = ma.ExamSubmission.User.UserName,
@@ -530,7 +540,8 @@ namespace PersonalProject.Server.Controllers
                     certificateName = ma.ExamSubmission.Certificate.CertName,
                     submissionDate = ma.ExamSubmission.SubmissionDate,
                     score = ma.ExamSubmission.Score,
-                    isPassed = ma.ExamSubmission.IsPassed
+                    isPassed = ma.ExamSubmission.IsPassed,
+                    isMarked = ma.IsMarked // Ensure `IsMarked` exists in your MarkerAssignment entity
                 })
                 .ToListAsync();
 

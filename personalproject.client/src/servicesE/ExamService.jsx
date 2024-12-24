@@ -152,6 +152,10 @@ const ExamService = {
             throw 'Failed to fetch certificates.';
         }
     },
+    getOwnedCerts: async (userId) => {
+        const response = await axios.get(`https://localhost:7295/api/Certs/${userId}/owned`);
+        return response.data;
+    }
 };
 
 export default ExamService;

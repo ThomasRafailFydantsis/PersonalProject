@@ -182,6 +182,10 @@ namespace PersonalProject.Server.Controllers
             {
                 return BadRequest("Invalid client request");
             }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
             if (existingUser != null)
@@ -340,34 +344,36 @@ namespace PersonalProject.Server.Controllers
 
     }
 
-    public class RegisterDto
-    {
-        [Required]
-        [MinLength(3)]
-        public string Username { get; set; }
-
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-
-        [Required]
-        [MinLength(6)]
-        public string Password { get; set; }
-
-        [Required]
-        public string FirstName { get; set; }
-
-        [Required]
-        public string LastName { get; set; }
-    }
-
     public class LoginDto
     {
-        [Required]
+        [Required(ErrorMessage = "Username is required.")]
         public string Username { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Password is required.")]
         public string Password { get; set; }
+    }
+
+    public class RegisterDto
+    {
+        [Required(ErrorMessage = "Username is required.")]
+        [StringLength(20, MinimumLength = 3, ErrorMessage = "Username must be between 3 and 20 characters.")]
+        public string Username { get; set; }
+
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email format.")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Password is required.")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long.")]
+        public string Password { get; set; }
+
+        [Required(ErrorMessage = "First Name is required.")]
+        [StringLength(50, ErrorMessage = "First Name cannot exceed 50 characters.")]
+        public string FirstName { get; set; }
+
+        [Required(ErrorMessage = "Last Name is required.")]
+        [StringLength(50, ErrorMessage = "Last Name cannot exceed 50 characters.")]
+        public string LastName { get; set; }
     }
     public class RoleAssignmentDto
     {
