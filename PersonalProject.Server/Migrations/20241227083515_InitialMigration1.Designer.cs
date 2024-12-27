@@ -12,8 +12,8 @@ using PersonalProject.Server.Data;
 namespace PersonalProject.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241219122014_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20241227083515_InitialMigration1")]
+    partial class InitialMigration1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -220,6 +220,9 @@ namespace PersonalProject.Server.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Address1")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -260,6 +263,9 @@ namespace PersonalProject.Server.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ProfileImagePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -297,10 +303,9 @@ namespace PersonalProject.Server.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Image")
+                    b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PassingScore")
@@ -309,6 +314,36 @@ namespace PersonalProject.Server.Migrations
                     b.HasKey("CertId");
 
                     b.ToTable("Certs");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.Description", b =>
+                {
+                    b.Property<int>("DescriptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DescriptionId"));
+
+                    b.Property<int>("CertId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text1")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Text2")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Text3")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("DescriptionId");
+
+                    b.HasIndex("CertId");
+
+                    b.ToTable("Description");
                 });
 
             modelBuilder.Entity("PersonalProject.Server.Models.ExamSubmission", b =>
@@ -323,13 +358,17 @@ namespace PersonalProject.Server.Migrations
                         .HasColumnType("int");
 
                     b.Property<bool>("IsPassed")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
 
                     b.Property<int?>("Score")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("SubmissionDate")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -524,6 +563,17 @@ namespace PersonalProject.Server.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("PersonalProject.Server.Models.Description", b =>
+                {
+                    b.HasOne("PersonalProject.Server.Models.Certs", "Cert")
+                        .WithMany("Descriptions")
+                        .HasForeignKey("CertId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cert");
+                });
+
             modelBuilder.Entity("PersonalProject.Server.Models.ExamSubmission", b =>
                 {
                     b.HasOne("PersonalProject.Server.Models.Certs", "Certificate")
@@ -546,7 +596,7 @@ namespace PersonalProject.Server.Migrations
             modelBuilder.Entity("PersonalProject.Server.Models.MarkerAssignment", b =>
                 {
                     b.HasOne("PersonalProject.Server.Models.ExamSubmission", "ExamSubmission")
-                        .WithMany()
+                        .WithMany("MarkerAssignments")
                         .HasForeignKey("ExamSubmissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -599,12 +649,16 @@ namespace PersonalProject.Server.Migrations
 
             modelBuilder.Entity("PersonalProject.Server.Models.Certs", b =>
                 {
+                    b.Navigation("Descriptions");
+
                     b.Navigation("Questions");
                 });
 
             modelBuilder.Entity("PersonalProject.Server.Models.ExamSubmission", b =>
                 {
                     b.Navigation("Answers");
+
+                    b.Navigation("MarkerAssignments");
                 });
 
             modelBuilder.Entity("PersonalProject.Server.Models.Question", b =>

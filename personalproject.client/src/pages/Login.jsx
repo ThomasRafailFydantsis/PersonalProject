@@ -34,8 +34,8 @@ const LoginPage = () => {
             <OflineHeader />
             <h2 style={{ textAlign: 'center' }}>Login</h2>
             {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
-            <form onSubmit={handleSubmit}>
-                <div>
+            <form onSubmit={handleSubmit} style={{width: '380px', margin: '0 auto'}}>
+                <div >
                     <label htmlFor="username">Username:</label>
                     <input
                         type="text"

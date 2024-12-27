@@ -343,7 +343,7 @@ namespace PersonalProject.Server.Controllers
                 ExamSubmissionId = assignmentDto.ExamSubmissionId,
                 MarkerId = assignmentDto.MarkerId,
                 AssignedDate = DateTime.UtcNow,
-                IsMarked = true // Set IsMarked to true
+                IsMarked = false // Set IsMarked to true
             };
 
             _context.MarkerAssignments.Add(markerAssignment);
@@ -445,7 +445,7 @@ namespace PersonalProject.Server.Controllers
 
                 // Certificate description (body text in black)
                 gfx.DrawString($"Has successfully completed the {userCertificate.Certificate.CertName} exam", textFont, blackBrush,
-                    new XRect(margin - 5, margin + 300, page.Width - 2 * margin, textHeight), XStringFormats.TopCenter);
+                    new XRect(margin - 5, margin + 315, page.Width - 2 * margin, textHeight), XStringFormats.TopCenter);
 
                 // Date of issue (text in black)
                 gfx.DrawString($"Date of Issue: {DateTime.Now:MMMM dd, yyyy}", textFont, blackBrush,
@@ -456,7 +456,7 @@ namespace PersonalProject.Server.Controllers
                     new XRect(w, e + 330 + verticalSpacing, page.Width - 2 * margin, textHeight), XStringFormats.TopLeft);
 
                 // Owner of the certificate (text in black)
-                gfx.DrawString("Antwnhs Remos", textFont, blackBrush,
+                gfx.DrawString("Owner : Antwnhs Remos", textFont, blackBrush,
                     new XRect(w, e + 360 + verticalSpacing, page.Width - 2 * margin, textHeight), XStringFormats.TopLeft);
 
                 // Save the document to the memory stream
@@ -523,7 +523,7 @@ namespace PersonalProject.Server.Controllers
             return Ok(submissionDetails);
         }
         [HttpGet("marker-assignments/{markerId}")]
-        public async Task<IActionResult> GetMarkerAssignments(string markerId) // Markers can view their own assignments
+        public async Task<IActionResult> GetMarkerAssignments(string markerId) 
         {
             var assignments = await _context.MarkerAssignments
                 .Where(ma => ma.MarkerId == markerId)
@@ -541,7 +541,7 @@ namespace PersonalProject.Server.Controllers
                     submissionDate = ma.ExamSubmission.SubmissionDate,
                     score = ma.ExamSubmission.Score,
                     isPassed = ma.ExamSubmission.IsPassed,
-                    isMarked = ma.IsMarked // Ensure `IsMarked` exists in your MarkerAssignment entity
+                    isMarked = ma.IsMarked //Todo
                 })
                 .ToListAsync();
 

@@ -118,7 +118,7 @@ namespace PersonalProject.Server.Controllers
                 return NotFound("Profile image not found.");
             }
 
-            return Ok( imagePath );
+            return Ok(imagePath);
         }
     }
 }

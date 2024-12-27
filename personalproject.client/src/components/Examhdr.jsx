@@ -5,10 +5,10 @@ function ExamHdr({ timeLeft }) {
         : null;
 
     return (
-        <header className="header d-flex justify-content-between align-items-center p-3 bg-primary text-white">
+        <header className="header  " style={{backgroundColor: '#007bff'}}>
             <h1>Certflix</h1>
             {formattedTime && (
-                <div>
+                <div  className="header-timer">
                     <h2 className="h5 m-0">Time Left: {formattedTime}</h2>
                 </div>
             )}

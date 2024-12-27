@@ -4,27 +4,31 @@ import { useAuth } from "./AuthProvider";
 import ExamImageUpload from "./ExamImageUpload";
 import ExamService from '../servicesE/ExamService';
 
+
 const CertForm = () => {
     const { certId } = useParams();
     const navigate = useNavigate();
-    const { isAuthenticated, roles, AuthError } = useAuth();
+    const { isAuthenticated, roles, error: AuthError, isAuthLoading } = useAuth();
 
     const [certName, setCertName] = useState("");
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+
     const isAdminOrMarker = roles.includes("Admin") || roles.includes("Marker");
 
     useEffect(() => {
-        if (!isAuthenticated || !isAdminOrMarker) {
-            navigate("/login");
-        } else if (certId) {
-            fetchExam(certId);
-        } else {
-            setLoading(false);
+        if (!isAuthLoading) {
+            if (!isAuthenticated || !isAdminOrMarker) {
+                navigate("/login");
+            } else if (certId) {
+                fetchExam(certId);
+            } else {
+                setLoading(false);
+            }
         }
-    }, [certId, isAuthenticated, isAdminOrMarker, navigate]);
+    }, [certId, isAuthenticated, isAdminOrMarker, isAuthLoading, navigate]);
 
     const fetchExam = async (certId) => {
         try {
@@ -32,6 +36,7 @@ const CertForm = () => {
             const examData = await ExamService.fetchExam(certId);
             setCertName(examData.certName);
             setQuestions(examData.questions);
+          
         } catch (error) {
             setError(error);
         } finally {
@@ -41,7 +46,6 @@ const CertForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
             await ExamService.submitExam(certId, certName, questions);
             alert(certId ? "Exam updated successfully!" : "Exam created successfully!");
@@ -51,15 +55,21 @@ const CertForm = () => {
         }
     };
 
-    if (loading) return <p>Loading...</p>;
+    if (isAuthLoading || loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
     if (AuthError) return <div>{AuthError}</div>;
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="exam-form">
             <div>
                 <label>Exam Title:</label>
-                <input type="text" value={certName} onChange={(e) => setCertName(e.target.value)} required />
+                <input
+                    type="text"
+                    value={certName}
+                    onChange={(e) => setCertName(e.target.value)}
+                    required
+                    style={{ width: "100%" }}
+                />
                 <ExamImageUpload certId={certId} />
             </div>
             {questions.map((question, questionIndex) => (
@@ -74,6 +84,7 @@ const CertForm = () => {
                             updatedQuestions[questionIndex].text = e.target.value;
                             setQuestions(updatedQuestions);
                         }}
+                        style={{ width: "100%" }}
                         required
                     />
                     <label>Correct Answer:</label>
@@ -86,6 +97,7 @@ const CertForm = () => {
                             setQuestions(updatedQuestions);
                         }}
                         required
+                        style={{ width: "100%" }}
                     />
                     <h5>Answer Options</h5>
                     {question.answerOptions.map((option, optionIndex) => (
@@ -100,6 +112,7 @@ const CertForm = () => {
                                     setQuestions(updatedQuestions);
                                 }}
                                 required
+                                style={{ width: "100%" }}
                             />
                             <label>
                                 <input
@@ -111,6 +124,7 @@ const CertForm = () => {
                                             e.target.checked;
                                         setQuestions(updatedQuestions);
                                     }}
+                                    style={{ width: "100%" }}
                                 />
                                 Is Correct
                             </label>
@@ -132,12 +146,22 @@ const CertForm = () => {
                     </button>
                 </div>
             ))}
-            <button type="button" onClick={() => setQuestions([...questions, { id: null, text: "", correctAnswer: "", answerOptions: [] }])}>
+            <button
+                type="button"
+                onClick={() =>
+                    setQuestions([
+                        ...questions,
+                        { id: null, text: "", correctAnswer: "", answerOptions: [] },
+                    ])
+                }
+            >
                 Add Question
             </button>
             <br />
             <button type="submit">Submit</button>
-            <button type="button" onClick={() => navigate(-1)}>Back</button>
+            <button type="button" onClick={() => navigate(-1)}>
+                Back
+            </button>
         </form>
     );
 };

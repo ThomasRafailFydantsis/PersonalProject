@@ -79,7 +79,7 @@ const AssignMarkerPage = () => {
             setSubmissions((prevSubmissions) =>
                 prevSubmissions.map((submission) =>
                     submission.id === submissionId
-                        ? { ...submission, isMarked: true }
+                        ? { ...submission }
                         : submission
                 )
             );
@@ -115,7 +115,6 @@ const AssignMarkerPage = () => {
     return (
         <div>
             <Header />
-            <button className="green-button"  onClick={() => navigate(-1)}>Back</button>
             <h1>Assign Marker</h1>
             {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
 

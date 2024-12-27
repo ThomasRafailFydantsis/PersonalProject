@@ -44,18 +44,19 @@ function CertsList({ id: userId }) {
         }
     };
 
+
     // Navigate to update exam
     const handleUpdateExam = (certId) => {
         navigate(`/certForm/${certId}`);
     };
-
+ 
     // Render error
     if (AuthError) {
         return <div>Error: {AuthError}</div>;
     }
 
     return (
-        <div>
+        <div style={{maxWidth: "800px", margin: "0 auto"}}>
             <h1>Certificates</h1>
             <ul>
                 {certs.map((cert) => (
@@ -67,7 +68,7 @@ function CertsList({ id: userId }) {
                                     src={`https://localhost:7295${cert.imagePath}`} // Use full path
                                     alt={cert.certName}
                                     className="cert-image"
-                                    style={{ width: "130px", height: "130px" }}
+                                    style={{ width: "130px", height: "130px" ,justifySelf:"center"}}
                                 />
                             ) : (
                                 <div>No image available</div>

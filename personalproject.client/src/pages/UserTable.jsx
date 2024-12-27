@@ -88,14 +88,14 @@ const UserTable = () => {
     return (
         <div>
             <Header />
-            <button className="green-button" onClick={() => navigate(-1)}>back</button>
-            <h1>User List</h1>
-            <div>
-                <label htmlFor="roleFilter">Filter by Role:</label>
+            <h1 style={{ textAlign: "center" }}>User List</h1>
+            <div style={{justifyContent:"center", display:"flex"}}>
+                <label style={{marginTop:"15px", fontSize:"20px"}} htmlFor="roleFilter">Filter by Role:</label>
                 <select
                     id="roleFilter"
                     value={filterRole}
                     onChange={(e) => setFilterRole(e.target.value)}
+                    style={{borderRadius: "5px",height:"40px", marginTop:"10px", fontSize:"20px", marginLeft:"10px"}}
                 >
                     <option value="All">All</option>
                     <option value="User">Users</option>
@@ -103,17 +103,17 @@ const UserTable = () => {
                     <option value="Marker">Markers</option>
                 </select>
             </div>
-            <table>
-                <thead>
+            <table style={{maxWidth:'1200px', margin:'0 auto' }} >
+                <thead >
                     <tr>
-                        <th>ID</th>
-                        <th>Username</th>
-                        <th>Name</th>
-                        <th>Role</th>
-                        <th>Actions</th>
+                        <th style={{ width: "250px" }}>ID</th>
+                        <th style={{ width: "300px" }}>Username</th>
+                        <th style={{ width: "300px" }}>Name</th>
+                        <th style={{ width: "300px" }}>Role</th>
+                        <th style={{ width: "300px" }}>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody >
                     {filteredUsers.map((user) => (
                         <tr key={user.id}>
                             <td>{user.id}</td>
@@ -123,21 +123,22 @@ const UserTable = () => {
                                     href="#"
                                     onClick={() => navigate(`/profile/${user.id}`)}
                                 >
-                                    {user.firstName}
+                                    {user.firstName}, {user.lastName}
                                 </a>
                             </td>
-                            <td>{user.roles.join(", ")}</td>
-                            <td>
-                                <button onClick={() => handleDelete(user.id)}>Delete</button>
-                                <select
+                            <td> <select
                                     onChange={(e) => handleAssignRole(user.id, e.target.value)}
                                     value={user.roles[0] || ""}
+                                    style={{borderRadius: "5px", minHeight:"36px"}}
                                 >
-                                    <option value="">Assign Role</option>
+                                    <option value="" disabled>Assign Role</option>
                                     <option value="Admin">Admin</option>
                                     <option value="User">User</option>
                                     <option value="Marker">Marker</option>
-                                </select>
+                                </select></td>
+                            <td>
+                                <button class="btn btn-outline-danger" onClick={() => handleDelete(user.id)}>Delete</button>
+                               
                             </td>
                         </tr>
                     ))}

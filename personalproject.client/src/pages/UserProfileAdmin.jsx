@@ -87,7 +87,7 @@ const UserProfileAdmin = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {certificates.map((cert) => (
+                        {certificates.map((cert) => ( cert.score != null &&
                             <tr key={cert.id}>
                                 <td>{cert.certificateName}</td>
                                 <td>{cert.dateTaken}</td>

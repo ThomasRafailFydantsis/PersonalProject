@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "./AuthProvider";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaCheck  } from "react-icons/fa";
 
 const AddCertificateButton = ({ certId }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -67,7 +67,7 @@ const AddCertificateButton = ({ certId }) => {
         <>
             {isOwned ? (
                 <button className="btn btn-success" disabled>
-                    Owned   <FaCheckCircle />
+                    Owned   <FaCheck />
                 </button>
             ) : (
                 <button onClick={addCertificateToUser} disabled={isLoading}>

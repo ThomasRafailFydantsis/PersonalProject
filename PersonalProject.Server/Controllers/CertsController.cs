@@ -96,7 +96,7 @@ namespace PersonalProject.Server.Controllers
                 return NotFound(new { message = $"Certificate with ID {id} not found." });
             }
 
-            cert.CertName = certDto.CertName;
+            cert.Description= certDto.Description;
            
 
             _context.Entry(cert).State = EntityState.Modified;

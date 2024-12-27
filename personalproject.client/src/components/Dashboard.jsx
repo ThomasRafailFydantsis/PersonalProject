@@ -44,11 +44,11 @@ function Dashboard() {
             <Header />
            
             <div className="wrapper">
-                <h2 className="welcome">Welcome Back, {userData?.userName || "User"}!</h2>
-                <div className="dashboard-certificates">
+                {/* <h2 className="welcome">Welcome Back, {userData?.userName || "User"}!</h2> */}
+                <div className="dashboard-certificates" style={{marginTop: "-100px"}}>
                     <CertsList id={userData?.id} />
                 </div>
-                <button onClick={() => navigate("/userProfile")}>User Profile</button>
+                {/* <button onClick={() => navigate("/userProfile")}>User Profile</button>
                 <button onClick={() => navigate("/userCertificates")}>Your Certificates</button>
                 {roles.includes("Admin") && <button onClick={() => navigate("/CreateCert")}>Add Certificate</button>}
                 {roles.includes("Marker") && <button onClick={() => navigate("/CreateCert")}>Add Certificate</button>}
@@ -56,7 +56,7 @@ function Dashboard() {
                 {roles.includes("Admin") && <button onClick={() => navigate("/assignMarker")}>Assign Marker</button>}
                 {roles.includes("Marker") && (
                     <button onClick={() => navigate(`/marker/assignments/${userData?.id}`)}>Your Assignments</button>
-                )}
+                )} */}
             </div>
         </div>
     );

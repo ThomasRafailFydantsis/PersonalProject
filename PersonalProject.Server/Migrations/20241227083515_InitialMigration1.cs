@@ -5,7 +5,7 @@
 namespace PersonalProject.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class Uploads1 : Migration
+    public partial class InitialMigration1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

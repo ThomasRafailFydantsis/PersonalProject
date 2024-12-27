@@ -124,7 +124,7 @@ const ExamPage = () => {
     };
 
     if (!userId) return <p className="text-danger">Error: User ID not found.</p>;
-    if (loading) return <div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div>;
+    if (loading) return <div className="spinner-border" style={{margin: "0 auto", display: "block"}} role="status"><span className="visually-hidden">Loading...</span></div>;
     if (error) return <p className="text-danger">Error: {error}</p>;
 
     if (AuthError) {

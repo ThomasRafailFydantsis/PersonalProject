@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.IdentityModel.Tokens;
 using PersonalProject.Server.Models;
 using System.ComponentModel.DataAnnotations;
@@ -134,6 +135,8 @@ namespace PersonalProject.Server.Controllers
                 user.Email,
                 user.FirstName,
                 user.LastName,
+                user.Address1,
+                user.PasswordHash,
                 Roles = roles
             };
 
@@ -219,25 +222,7 @@ namespace PersonalProject.Server.Controllers
 
             return Ok("User registered successfully.");
         }
-        //public async Task<IActionResult> Register([FromBody] RegisterDto model)
-        //{
-        //    if (!ModelState.IsValid)
-        //        return BadRequest(ModelState);
-
-        //    var user = new ApplicationUser
-        //    {
-        //        UserName = model.Username,
-        //        Email = model.Email
-        //    };
-
-        //    var result = await _userManager.CreateAsync(user, model.Password);
-
-        //    if (!result.Succeeded)
-        //        return BadRequest(result.Errors);
-
-        //    return Ok(new { message = "User registered successfully." });
-        //}
-
+      
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
@@ -333,6 +318,9 @@ namespace PersonalProject.Server.Controllers
             user.LastName = model.LastName;
             user.Email = model.Email;
             user.UserName = model.Username;
+            user.Address1 = model.Address;
+           
+            
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
@@ -396,6 +384,8 @@ namespace PersonalProject.Server.Controllers
         public string Email { get; set; }
 
         [Required]
-        public string Username { get; set; }
+        public string Username { get; set; }  
+        public string? Address { get; set; }
+
     }
 }

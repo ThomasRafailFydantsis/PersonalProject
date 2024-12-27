@@ -21,8 +21,13 @@ const HomePage = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+ 
+
+
   const navigate = useNavigate();
   const { revalidateAuth } = useAuth();
+
+ 
 
   const handleRegister = async (e) => {
       e.preventDefault();
@@ -64,9 +69,9 @@ const HomePage = () => {
   };
 
   return (
-    < >
+    <>
 
-    <OflineHeader />
+    <OflineHeader  />
 
   
     <div  className="text-center my-5" style={{margin:'0px 0px 0px 0px', color: '#607d8b ', boxShadow: '0 0px 0px rgba(0, 0, 0, 0.4)'}}>
@@ -77,28 +82,28 @@ const HomePage = () => {
     </div>
    
 
-    <div className="d-flex justify-content-center my-5">
-                <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b' }}>
+    <div className="d-flex justify-content-center my-5" style={{display: 'flex', flexWrap: 'wrap'}}>
+                <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b',boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)' }}>
                     <div className="card-body">
                         <h5 className="card-title">New to <span style={{ color: '#FF8C00' }}>Certflix?</span></h5>
                         <p className="card-text">Sign up today and start your journey!</p>
                     </div>
                     <Button
-                        style={{ backgroundColor: '#FF8C00', color: '#607d8b' }}
                         onClick={() => { setShowModal(true); setActiveTab('signup'); }}
+                        className='green-button'
                     >
                         Register
                     </Button>
                 </div>
 
-                <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b' }}>
+                <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b',boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', marginLeft: '100px' }}>
                     <div className="card-body">
                         <h5 className="card-title">Already have an account?</h5>
                         <p className="card-text">Log in to access your certificates!</p>
                     </div>
                     <Button
-                        style={{ backgroundColor: '#FF8C00', color: '#607d8b' }}
                         onClick={() => { setShowModal(true); setActiveTab('signin'); }}
+                        className='green-button'
                     >
                         Login
                     </Button>
@@ -108,7 +113,7 @@ const HomePage = () => {
     <div style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '60px', maxWidth:'1200px',paddingTop: '30px', marginBottom: '110px'}}></div>
     
     <Carousel style={{margin:'0px auto', boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', backgroundColor: '#819b8c',maxWidth:'900px'}}>
-        <Carousel.Item interval={500}>
+        <Carousel.Item interval={10000}>
         <img
                 className="d-block w-100"
                 src={img1}
@@ -121,7 +126,7 @@ const HomePage = () => {
                 <p>In the age of information, knowledge is power, and Certflix is here to empower you</p>
             </Carousel.Caption>
         </Carousel.Item>
-        <Carousel.Item interval={500}>
+        <Carousel.Item interval={1000}>
         <img
                 className="d-block w-100"
                 src={img2}
@@ -133,7 +138,7 @@ const HomePage = () => {
                 <p>Our oroducts are specifically designed to help you succeed in your career</p>
             </Carousel.Caption>
         </Carousel.Item>
-        <Carousel.Item>
+        <Carousel.Item interval={10000}>
         <img
                 className="d-block w-100"
                 src={img3}
@@ -151,7 +156,7 @@ const HomePage = () => {
 
     <div className="d-flex justify-content-between align-items-center my-5" style={{maxWidth:'1200px'}}>
         <div className="col-md-6">
-            <h3>Learning with Certflix</h3>
+            <h3>Learning with <span style={{color: '#FF8C00'}}>Certflix</span></h3>
             <p>We provide high-quality courses designed to help you master new programming languages and enhance your career opportunities.</p>
         </div>
         <div className="col-md-6">
@@ -163,7 +168,7 @@ const HomePage = () => {
         </div>
     </div>
 
-    <div style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '-20px', maxWidth:'1200px',paddingTop: '30px'}}></div>
+    <div style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '-31px', maxWidth:'1200px'}}></div>
 
     <div className="d-flex justify-content-between align-items-center my-5" style={{maxWidth:'1200px'}}>
         <div className="col-md-6">
@@ -175,14 +180,14 @@ const HomePage = () => {
         </div>
         <div className="col-md-6">
             <h3>Interactive Learning</h3>
-            <p>Certflix offers interactive quizzes, coding challenges, and more to ensure you understand the concepts you learn.</p>
+            <p>We offer interactive quizzes, coding challenges, and more to ensure you understand the concepts you learn.</p>
         </div>
     </div>
 
     <div style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '-20px',paddingTop: '30px', marginBottom: '100px', maxWidth:'1200px'}}></div>
 
     <div className="my-5 text-center" style={{maxWidth:'1200px'}}>
-        <h3>Things You Can Do with Certflix</h3>
+        <h3>Things You Can Do with <span style={{color: '#FF8C00'}}>Certflix</span></h3>
         <ul className="list-unstyled">
             <li><i className="fas fa-check-circle"></i> Access a wide variety of programming courses.</li>
             <li><i className="fas fa-check-circle"></i> Earn certificates for completing courses.</li>
@@ -191,7 +196,7 @@ const HomePage = () => {
     </div>
     <div style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '-20px', maxWidth:'1200px',paddingTop: '30px'}}></div>
  
-    <div className="my-5 text-center">
+    <div className="my-5 text-center" >
         <h3>User Reviews</h3>
         <div className="d-flex justify-content-around" style={{maxWidth:'1200px'}}>
      
@@ -220,7 +225,7 @@ const HomePage = () => {
     </div>
           
 
-          {/* Modal for Auth */}
+         
           <Modal show={showModal} onHide={() => setShowModal(false)} centered  dialogClassName="custom-modal">
                 {/* <Modal.Header closeButton  style={{border:'none',marginTop: '-50px' ,marginBottom: '-50px'}}>
                     <Modal.Title >{activeTab === 'signin' ? 'Sign In' : 'Sign Up'}</Modal.Title>
@@ -237,12 +242,13 @@ const HomePage = () => {
                         <Button
                             variant={activeTab === 'signup' ? 'success' : 'outline-success'}
                             onClick={() => setActiveTab('signup')}
+                            
                         >
                             Sign Up
                         </Button>
                     </div>
 
-                    {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                    {errorMessage && <p style={{ color: 'red' }} >{errorMessage}</p>}
 
                     {activeTab === 'signin' ? (
                         <form onSubmit={handleLogin} style={{border:'none', width:'100%'}}>
@@ -265,7 +271,7 @@ const HomePage = () => {
                                     
                                 />
                             </div>
-                            <button style={{marginBottom: '-160px',marginTop: '-130px'}} className="btn btn-outline-success" type="submit">Sign In</button>
+                            <button style={{marginBottom: '-160px',marginTop: '-130px', marginLeft:'20px'}} className="btn btn-outline-success" type="submit">Sign In</button>
                         </form>
                     ) : (
                         <form onSubmit={handleRegister}>
@@ -314,7 +320,7 @@ const HomePage = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
-                            <button style={{ marginTop: '40px', marginBottom: '-70px' }}  className="btn btn-outline-success " type="submit">Sign Up</button>
+                            <button style={{ marginTop: '3rem', marginBottom: '-3.2rem' , marginLeft:'20px'}}  className="btn btn-outline-success " type="submit">Sign Up</button>
                         </form>
                     )}
                 </Modal.Body>

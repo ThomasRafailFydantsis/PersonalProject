@@ -10,7 +10,7 @@ const MarkerAssignmentsPage = () => {
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const { isAuthenticated, roles, AuthError, revalidateAuth } = useAuth();
+    const { isAuthenticated, roles, AuthError, revalidateAuth, userData } = useAuth();
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -51,12 +51,11 @@ const MarkerAssignmentsPage = () => {
     if (!isAuthenticated) {
         return <div>You are not logged in. Please log in.</div>;
     }
-
+console.log("assignments",assignments);
     return (
         <div>
             <Header />
-            <button onClick={() => navigate("/dashboard")}>Back</button>
-            <h1>Marker Assignments</h1>
+            <h1>{userData.userName}'s Assignments</h1>
             <table border="1" style={{ width: "100%", textAlign: "center" }}>
                 <thead>
                     <tr>

@@ -81,7 +81,7 @@ const UserProfile = () => {
     return (
         <div>
             <Header />
-            <button className="green-button" onClick={() => navigate('/dashboard')}>Back</button>
+           
             <button className="green-button" onClick={() => navigate('/MyCertificate')}>My Certificates</button>
             <h1>User Profile</h1>
             <UserProfileImageUpload userId={userData.id} />
@@ -113,6 +113,28 @@ const UserProfile = () => {
                             value={updatedData.email || ""}
                             onChange={handleInputChange}
                         />
+                        
+                    </label>
+                    <label>
+                        Address:
+                        <input
+                            type="address1"
+                            name="address1"
+                            value={updatedData.address1 || ""}
+                            onChange={handleInputChange}
+                        />
+                        
+                    </label>
+                    <label>
+                        Password:
+                        <input
+                            type="password"
+                            name="password"
+                            value={updatedData.password || ""}
+                            onChange={handleInputChange}
+                            disabled
+                        />
+                        
                     </label>
                     <button type="button" onClick={handleSaveChanges}>
                         Save Changes
@@ -135,6 +157,8 @@ const UserProfile = () => {
                     <p>First Name: {userData.firstName || "N/A"}</p>
                     <p>Last Name: {userData.lastName || "N/A"}</p>
                     <p>Email: {userData.email || "N/A"}</p>
+                    <p>Address: {userData.address1 || "N/A"}</p>
+
                     <button onClick={() => setIsEditing(true)}>Edit</button>
                 </div>
             )}

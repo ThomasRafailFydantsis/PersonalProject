@@ -13,7 +13,7 @@ namespace PersonalProject.Server.Models
      [NotMapped]
      public ClaimsIdentity? Username { get; internal set; }
      public ICollection<UserCertificate>? UserCertificates { get; set; }
-    
+     public string? Address1 { get; set; }
     
  }
 }

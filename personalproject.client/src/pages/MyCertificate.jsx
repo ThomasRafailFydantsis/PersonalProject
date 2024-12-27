@@ -33,16 +33,13 @@ const MyCertificate = () => {
         fetchCertificates();
     }, [userData]);
 
-    // Define hasNoPermission based on roles or conditions
-    
-
-    // Handle certificate download
+  
     const handleDownload = async (certificateId) => {
         try {
             const response = await axios.get(`https://localhost:7295/api/Exam/certificate/${certificateId}`, {
                 responseType: "blob",
             });
-
+console.log(certificateId);
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement("a");
             link.href = url;
@@ -86,12 +83,12 @@ const MyCertificate = () => {
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {certificates.map((cert) => (
+                        <tbody>
+                            {certificates.map((cert) => (cert.score != null &&
                             <tr key={cert.id}>
                                 <td>{cert.certificateName}</td>
-                                <td>{cert.dateTaken}</td>
-                                <td>{cert.score}</td>
+                                <td>{cert.dateTaken || "-"}</td>
+                                <td>{cert.score || "-"}</td>
                                 <td>{cert.isPassed && cert.isMarked ? "Passed & Marked" : "Pending"}</td>
                                 <td>
                                     {cert.certificateDownloadable ? (

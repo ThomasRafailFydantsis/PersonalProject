@@ -109,15 +109,15 @@ const CreateCert = () => {
     }
 
     return (
-        <div>
+        <div style={{justifyContent: "center"  }}>
             <Header />
-            <form onSubmit={handleSubmit}>
-                <div>
+            <form onSubmit={handleSubmit} className="exam-form" style={{alignContent: "center"  }}>
+                <div style={{textAlign: "center"  }}>
                     <label>Exam Title:</label>
-                    <input type="text" value={certName} onChange={handleCertNameChange} required />
+                    <input type="text" value={certName} onChange={handleCertNameChange} required  style={{ width: "100%" }} />
                     <ExamImageUpload certId={certId}/>
                     <label>Passing Score:</label>
-                    <input type="number" value={passingScore} onChange={handlePassingScoreChange} required />
+                    <input type="number" value={passingScore} onChange={handlePassingScoreChange} required  style={{ width: "100%" }} />
                 </div>
 
                 {questions.map((question, questionIndex) => (
@@ -129,6 +129,7 @@ const CreateCert = () => {
                             value={question.text}
                             onChange={(e) => handleQuestionChange(questionIndex, "text", e.target.value)}
                             required
+                            style={{ width: "100%" }}
                         />
                         <label>Correct Answer:</label>
                         <input
@@ -136,6 +137,7 @@ const CreateCert = () => {
                             value={question.correctAnswer}
                             onChange={(e) => handleQuestionChange(questionIndex, "correctAnswer", e.target.value)}
                             required
+                            style={{ width: "100%" }}
                         />
                         <h5>Answer Options</h5>
                         {question.answerOptions.map((option, optionIndex) => (
@@ -144,6 +146,7 @@ const CreateCert = () => {
                                 <input
                                     type="text"
                                     value={option.text}
+                                    style={{ width: "100%" }}
                                     onChange={(e) =>
                                         handleAnswerChange(questionIndex, optionIndex, "text", e.target.value)
                                     }

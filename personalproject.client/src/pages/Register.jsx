@@ -45,7 +45,7 @@ const RegisterPage = () => {
             <OflineHeader />
             <h2 style={{ textAlign: 'center' }}>Register</h2>
             {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} style={{width: '380px', margin: '0 auto'}}>
                 <div>
                     <label htmlFor="firstName">First Name:</label>
                     <input
