@@ -365,19 +365,19 @@ namespace PersonalProject.Server.Controllers
                 return BadRequest("Certificate not available for this user.");
             }
 
-            // Check if passed and marked
+            //if passed and marked 
             var submission = await _context.ExamSubmissions
                 .FirstOrDefaultAsync(es => es.UserId == userCertificate.UserId && es.CertId == userCertificate.CertId);
 
             var markerAssignment = await _context.MarkerAssignments
                 .FirstOrDefaultAsync(ma => ma.ExamSubmissionId == submission.Id);
-
+            //if not
             if (!userCertificate.IsPassed || markerAssignment == null || !markerAssignment.IsMarked)
             {
                 return BadRequest("The exam is either not marked, or the candidate did not pass.");
             }
 
-            // Generate the PDF certificate
+            // Generate 
             var pdfBytes = GenerateCertificatePdf(userCertificate);
 
             userCertificate.IsCertificateGenerated = true;
@@ -397,65 +397,65 @@ namespace PersonalProject.Server.Controllers
                 PdfPage page = document.AddPage();
                 XGraphics gfx = XGraphics.FromPdfPage(page);
 
-                // Set up fonts and colors
-                XFont titleFont = new XFont("Arial", 36, XFontStyle.Bold);  // Elegant font for title
-                XFont subtitleFont = new XFont("Arial", 24, XFontStyle.Bold);  // Elegant font for CertFlix
-                XFont textFont = new XFont("Arial", 14);  // Elegant font for body text
+               
+                XFont titleFont = new XFont("Arial", 36, XFontStyle.Bold);  // font
+                XFont subtitleFont = new XFont("Arial", 24, XFontStyle.Bold);  // font
+                XFont textFont = new XFont("Arial", 14);  // font
 
-                XBrush blackBrush = new XSolidBrush(XColor.FromArgb(0, 0, 0));  // Black for text
-                XBrush certFlixBrush = new XSolidBrush(XColor.FromArgb(96, 125, 139));  // Color for CertFlix text
+                XBrush blackBrush = new XSolidBrush(XColor.FromArgb(0, 0, 0));  // text
+                XBrush certFlixBrush = new XSolidBrush(XColor.FromArgb(96, 125, 139));  // Color 
 
-                // Define the border colors
-                XColor outerBorderColor = XColor.FromArgb(255, 140, 0);  // Outer border: #FF8C00 (Bright Orange)
-                XColor innerBorderColor = XColor.FromArgb(96, 125, 139);  // Inner border: #607d8b (Bluish-gray)
+                
+                XColor outerBorderColor = XColor.FromArgb(255, 140, 0);  // Outer border
+                XColor innerBorderColor = XColor.FromArgb(96, 125, 139);  // Inner border
 
-                XPen outerBorderPen = new XPen(outerBorderColor, 6);  // Outer border with thicker pen
-                XPen innerBorderPen = new XPen(innerBorderColor, 3);  // Inner border with thinner pen
+                XPen outerBorderPen = new XPen(outerBorderColor, 6);  // Outer border
+                XPen innerBorderPen = new XPen(innerBorderColor, 3);  // Inner border 
 
                 // Set page size and margins
                 page.Width = 700;
                 page.Height = 500;
                 double margin = 0;
-                double verticalSpacing = 20;  // Space between different sections
-                double textHeight = 50;  // Approximate height for text lines
+                double verticalSpacing = 20;  
+                double textHeight = 50;  
                 double w = 14;
                 double e = 91;
 
-                // Draw the outer border using XPen (Bright Orange) - this is the page border
+                // Draw the outer border 
                 gfx.DrawRectangle(outerBorderPen, margin, margin, page.Width - 2 * margin, page.Height - 2 * margin);
 
-                // Draw the inner border using XPen (Bluish-gray) - the second border inside the page
+                // Draw the inner border 
                 gfx.DrawRectangle(innerBorderPen, margin + 10, margin + 10, page.Width - 2 * margin - 20, page.Height - 2 * margin - 20);
 
-                // Title of the certificate ("Certificate of Achievement") - bold font
+                // Title of the certificate 
                 gfx.DrawString("Certificate of Achievement", titleFont, blackBrush,
                     new XRect(margin -5, margin + 90, page.Width - 2 * margin, textHeight), XStringFormats.TopCenter);
 
-                // Company name ("CertFlix") - larger font, color #607d8b (Bluish-gray)
+                // Company name ("CertFlix") 
                 gfx.DrawString("CertFlix", subtitleFont, certFlixBrush,
                     new XRect(margin -5, margin + 150, page.Width - 2 * margin, textHeight), XStringFormats.TopCenter);
 
-                // Congratulatory message (text in black)
+                // Congratulatory message
                 gfx.DrawString($"This certifies that", subtitleFont, blackBrush,
                     new XRect(margin - 5, margin + 210, page.Width - 2 * margin, textHeight), XStringFormats.TopCenter);
 
-                // Recipient's name (centered, large font size)
+                // Recipient's name 
                 gfx.DrawString($"{userCertificate.User.FirstName} {userCertificate.User.LastName}", titleFont, blackBrush,
                     new XRect(margin - 5, margin + 260, page.Width - 2 * margin, textHeight), XStringFormats.TopCenter);
 
-                // Certificate description (body text in black)
+                // Certificate description 
                 gfx.DrawString($"Has successfully completed the {userCertificate.Certificate.CertName} exam", textFont, blackBrush,
                     new XRect(margin - 5, margin + 315, page.Width - 2 * margin, textHeight), XStringFormats.TopCenter);
 
-                // Date of issue (text in black)
+                // Date of issue 
                 gfx.DrawString($"Date of Issue: {DateTime.Now:MMMM dd, yyyy}", textFont, blackBrush,
                     new XRect(w, e + 300 + verticalSpacing, page.Width - 2 * margin, textHeight), XStringFormats.TopLeft);
 
-                // Signature line (text in black)
+                // Signature line 
                 gfx.DrawString("Signature: ______________________", textFont, blackBrush,
                     new XRect(w, e + 330 + verticalSpacing, page.Width - 2 * margin, textHeight), XStringFormats.TopLeft);
 
-                // Owner of the certificate (text in black)
+                // Owner of the certificate 
                 gfx.DrawString("Owner : Antwnhs Remos", textFont, blackBrush,
                     new XRect(w, e + 360 + verticalSpacing, page.Width - 2 * margin, textHeight), XStringFormats.TopLeft);
 

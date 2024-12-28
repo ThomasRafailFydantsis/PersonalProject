@@ -1,29 +1,34 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthProvider";
 import Header from "../components/Header";
-import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/SideBar";
 
 const MarkerAssignmentsPage = () => {
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const { isAuthenticated, roles, AuthError, revalidateAuth, userData } = useAuth();
-    const { id } = useParams();
-    const navigate = useNavigate();
+   
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
+    // Revalidate authentication on mount
     useEffect(() => {
         revalidateAuth();
-    }, [location]);
+    }, []); // Only run once on component mount
 
+    // Fetch assignments when `id` changes
     useEffect(() => {
         const fetchAssignments = async () => {
             try {
                 setLoading(true);
                 const response = await axios.get(
-                    `https://localhost:7295/api/Exam/marker-assignments/${id}`
+                    `https://localhost:7295/api/Exam/marker-assignments/${userData.id}`
                 );
                 setAssignments(response.data);
             } catch (err) {
@@ -34,9 +39,10 @@ const MarkerAssignmentsPage = () => {
             }
         };
 
-        fetchAssignments();
-    }, [id]);
+        if (userData) fetchAssignments(); // Ensure `id` is defined before making the request
+    }, [userData]);
 
+    // Conditional rendering
     if (loading) return <p>Loading...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
@@ -51,12 +57,13 @@ const MarkerAssignmentsPage = () => {
     if (!isAuthenticated) {
         return <div>You are not logged in. Please log in.</div>;
     }
-console.log("assignments",assignments);
+
     return (
         <div>
-            <Header />
-            <h1>{userData.userName}'s Assignments</h1>
-            <table border="1" style={{ width: "100%", textAlign: "center" }}>
+             <Header toggleSidebar={toggleSidebar} />
+             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            <h2 style={{ textAlign: "center" }}>{userData.userName}'s Assignments</h2>
+            <table border="1" style={{ width: "1170px", textAlign: "center" }}>
                 <thead>
                     <tr>
                         <th>Submission ID</th>

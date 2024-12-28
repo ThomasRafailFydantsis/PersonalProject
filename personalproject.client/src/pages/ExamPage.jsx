@@ -195,9 +195,9 @@ const ExamPage = () => {
                 <div className="alert alert-success mt-4">
                     <h2>Result</h2>
                     <p><strong>Certificate:</strong> {result.certName || "Certificate not found"}</p>
-                    <p><strong>Score:</strong> {result.score }</p>
+                    <p><strong>Score:</strong>  {result.score }</p>
                     <p><strong>Passed:</strong> {result.passed ? "Yes" : "No"}</p>
-                    <p><strong>Date Taken:</strong> {result.dateTaken || "Date not available"}</p>
+                    <p><strong>Date Taken:</strong>{result.dateTaken ? new Date(cert.dateTaken).toLocaleDateString() : "-"}</p>
                     <button className="btn btn-primary" onClick={()=> navigate(-1)}>Go Back</button>
                 </div>
             )}

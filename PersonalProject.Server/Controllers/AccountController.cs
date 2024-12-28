@@ -29,7 +29,6 @@ namespace PersonalProject.Server.Controllers
             this.roleManager = roleManager;
         }
         [HttpGet("roles")]
-        //[Authorize]
         public async Task<IActionResult> GetUserRoles()
         {
 
@@ -136,7 +135,7 @@ namespace PersonalProject.Server.Controllers
                 user.FirstName,
                 user.LastName,
                 user.Address1,
-                user.PasswordHash,
+                user.PhoneNumber,
                 Roles = roles
             };
 
@@ -318,9 +317,8 @@ namespace PersonalProject.Server.Controllers
             user.LastName = model.LastName;
             user.Email = model.Email;
             user.UserName = model.Username;
-            user.Address1 = model.Address;
-           
-            
+            user.Address1 = model.Address1; 
+            user.PhoneNumber = model.PhoneNumber; 
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
@@ -328,8 +326,6 @@ namespace PersonalProject.Server.Controllers
 
             return Ok("User updated successfully.");
         }
-
-
     }
 
     public class LoginDto
@@ -384,8 +380,10 @@ namespace PersonalProject.Server.Controllers
         public string Email { get; set; }
 
         [Required]
-        public string Username { get; set; }  
-        public string? Address { get; set; }
+        public string Username { get; set; }
 
+        public string? Address1 { get; set; }
+        public string? PhoneNumber { get; set; }
     }
-}
+
+  }

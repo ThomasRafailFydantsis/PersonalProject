@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { useAuth } from "../components/AuthProvider";
 import UserProfileImageUpload from "../components/UserProfileImageUpload";
+import Sidebar from "../components/SideBar";
 
 const UserProfile = () => {
     const { isAuthenticated, userData, AuthError } = useAuth();
@@ -12,6 +13,11 @@ const UserProfile = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [image, setImage] = useState(null);
     const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -57,11 +63,12 @@ const UserProfile = () => {
 
     useEffect(() => {
         const fetchImagePath = async () => {
-            if (!userData || !userData.id) return; // Null-check userData and userData.id
+            if (!userData || !userData.id) return;
             try {
-                const response = await axios.get(`https://localhost:7295/api/ImageUpload/get-user-profile-image/${userData.id}`);
+                const response = await axios.get(
+                    `https://localhost:7295/api/ImageUpload/get-user-profile-image/${userData.id}`
+                );
                 setImage(response.data);
-                console.log("Image Path:", response.data);
             } catch (err) {
                 console.error("Error fetching image path:", err);
             }
@@ -79,89 +86,182 @@ const UserProfile = () => {
     }
 
     return (
-        <div>
-            <Header />
-           
-            <button className="green-button" onClick={() => navigate('/MyCertificate')}>My Certificates</button>
-            <h1>User Profile</h1>
-            <UserProfileImageUpload userId={userData.id} />
-            {isEditing ? (
-                <form>
-                    <label>
-                        First Name:
-                        <input
-                            type="text"
-                            name="firstName"
-                            value={updatedData.firstName || ""}
-                            onChange={handleInputChange}
-                        />
-                    </label>
-                    <label>
-                        Last Name:
-                        <input
-                            type="text"
-                            name="lastName"
-                            value={updatedData.lastName || ""}
-                            onChange={handleInputChange}
-                        />
-                    </label>
-                    <label>
-                        Email:
-                        <input
-                            type="email"
-                            name="email"
-                            value={updatedData.email || ""}
-                            onChange={handleInputChange}
-                        />
-                        
-                    </label>
-                    <label>
-                        Address:
-                        <input
-                            type="address1"
-                            name="address1"
-                            value={updatedData.address1 || ""}
-                            onChange={handleInputChange}
-                        />
-                        
-                    </label>
-                    <label>
-                        Password:
-                        <input
-                            type="password"
-                            name="password"
-                            value={updatedData.password || ""}
-                            onChange={handleInputChange}
-                            disabled
-                        />
-                        
-                    </label>
-                    <button type="button" onClick={handleSaveChanges}>
-                        Save Changes
-                    </button>
-                    <button type="button" onClick={() => setIsEditing(false)}>
-                        Cancel
-                    </button>
-                </form>
-            ) : (
-                <div>
+        
+        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex" }}>
+            <Header toggleSidebar={toggleSidebar} />
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            <div style={{ flex: 1, padding: "20px" }}>
+                <div
+                    style={{
+                        padding: "20px",
+                        backgroundColor: " rgba(160, 158, 157, 0.1)",
+                        borderRadius: "8px",
+                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+                        display: "flex",
+                        alignItems: "center",
+                    
+                    }}
+                >
                     {image ? (
                         <img
                             src={`https://localhost:7295${image}`}
                             alt="User Profile"
-                            style={{ width: "100px", height: "100px" }}
+                            style={{
+                                width: "100px",
+                                height: "100px",
+                                borderRadius: "50%",
+                                marginRight: "20px",
+                            }}
                         />
+                        
                     ) : (
-                        <p>Profile image not available</p>
+                        <p style={{ marginRight: "20px" }}>Profile image not available</p>
                     )}
-                    <p>First Name: {userData.firstName || "N/A"}</p>
-                    <p>Last Name: {userData.lastName || "N/A"}</p>
-                    <p>Email: {userData.email || "N/A"}</p>
-                    <p>Address: {userData.address1 || "N/A"}</p>
-
-                    <button onClick={() => setIsEditing(true)}>Edit</button>
+                    <h2 style={{marginLeft: "30px"}}>Hello, {userData.userName}!</h2>
+                  {!isEditing ? null :  <UserProfileImageUpload userId={userData.id} />}
                 </div>
-            )}
+                {isEditing ? (
+                   <form style={{ display: "grid", gap: "20px", marginBottom: "20px", backgroundColor:' rgba(201, 240, 214, 0.8)', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' }}>
+                   <label>
+                       First Name:
+                       <input
+                           type="text"
+                           name="firstName"
+                           value={updatedData.firstName || ""}
+                           onChange={handleInputChange}
+                           style={{
+                               width: "100%",
+                               padding: "8px",
+                               borderRadius: "4px",
+                               border: "1px solid #ccc",
+                           }}
+                       />
+                   </label>
+                   <label>
+                       Last Name:
+                       <input
+                           type="text"
+                           name="lastName"
+                           value={updatedData.lastName || ""}
+                           onChange={handleInputChange}
+                           style={{
+                               width: "100%",
+                               padding: "8px",
+                               borderRadius: "4px",
+                               border: "1px solid #ccc",
+                           }}
+                       />
+                   </label>
+                   <label>
+                       Email:
+                       <input
+                           type="email"
+                           name="email"
+                           value={updatedData.email || ""}
+                           onChange={handleInputChange}
+                           style={{
+                               width: "100%",
+                               padding: "8px",
+                               borderRadius: "4px",
+                               border: "1px solid #ccc",
+                           }}
+                       />
+                   </label>
+                   <label>
+                       Address:
+                       <input
+                           type="text"
+                           name="address1"
+                           value={updatedData.address1 || ""}
+                           onChange={handleInputChange}
+                           style={{
+                               width: "100%",
+                               padding: "8px",
+                               borderRadius: "4px",
+                               border: "1px solid #ccc",
+                           }}
+                       />
+                   </label>
+                   <label>
+                       Phone Number:
+                       <input
+                           type="text"
+                           name="phoneNumber"
+                           value={updatedData.phoneNumber || ""}
+                           onChange={handleInputChange}
+                           style={{
+                               width: "100%",
+                               padding: "8px",
+                               borderRadius: "4px",
+                               border: "1px solid #ccc",
+                           }}
+                       />
+                   </label>
+                   <div style={{ display: "flex", justifyContent: "space-between"}}>
+                       <button
+                           type="button"
+                           onClick={handleSaveChanges}
+                           style={{
+                               padding: "10px 20px",
+                               backgroundColor: "#4CAF50",
+                               color: "white",
+                               border: "none",
+                               borderRadius: "4px",
+                               cursor: "pointer",
+                               marginTop: "-40px",
+                           }}
+                       >
+                           Save Changes
+                       </button>
+                       <button
+                           type="button"
+                           onClick={() => setIsEditing(false)}
+                           style={{
+                               padding: "10px 20px",
+                               backgroundColor: "#f44336",
+                               color: "white",
+                               border: "none",
+                               borderRadius: "4px",
+                               cursor: "pointer",
+                               marginBottom: "-40px",
+                           }}
+                       >
+                           Cancel
+                       </button>
+                   </div>
+               </form>
+               
+                ) : (
+                    <div
+                        style={{
+                            padding: "20px",
+                            backgroundColor: " rgba(160, 158, 157, 0.1)",
+                            borderRadius: "8px",
+                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+                        }}
+                    >
+                        <p>First Name: {userData.firstName || "N/A"}</p>
+                        <p>Last Name: {userData.lastName || "N/A"}</p>
+                        <p>Email: {userData.email || "N/A"}</p>
+                        <p>Address: {userData.address1 || "N/A"}</p>
+                        <p>Phone Number: {userData.phoneNumber || "N/A"}</p>
+                        <button
+                            onClick={() => setIsEditing(true)}
+                            style={{
+                                marginTop: "20px",
+                                padding: "10px 20px",
+                                backgroundColor: "#086d6d",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                            }}
+                        >
+                            Edit Profile
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

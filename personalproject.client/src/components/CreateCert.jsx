@@ -1,10 +1,10 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Header from "./Header";
 import { useAuth } from "./AuthProvider";
-import ExamImageUpload from "./ExamImageUpload";
+//import ExamImageUpload from "./ExamImageUpload";
 
 
 const CreateCert = () => {
@@ -115,7 +115,7 @@ const CreateCert = () => {
                 <div style={{textAlign: "center"  }}>
                     <label>Exam Title:</label>
                     <input type="text" value={certName} onChange={handleCertNameChange} required  style={{ width: "100%" }} />
-                    <ExamImageUpload certId={certId}/>
+                    {/*<ExamImageUpload certId={certId}/>*/}
                     <label>Passing Score:</label>
                     <input type="number" value={passingScore} onChange={handlePassingScoreChange} required  style={{ width: "100%" }} />
                 </div>

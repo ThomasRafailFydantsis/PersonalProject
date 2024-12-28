@@ -2,11 +2,19 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import CertsList from "./CertsList";
+import { useState } from "react";
 import { useAuth } from "./AuthProvider";
+import Sidebar from "c:/Users/Thoma/OneDrive/Υπολογιστής/class/142/PersonalProject/personalproject.client/src/components/SideBar";
 
 
 function Dashboard() {
     const { isAuthenticated, userData, roles, AuthError, loading, revalidateAuth } = useAuth();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -41,8 +49,8 @@ function Dashboard() {
 
     return (
         <div>
-            <Header />
-           
+            <Header toggleSidebar={toggleSidebar} />
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
             <div className="wrapper">
                 {/* <h2 className="welcome">Welcome Back, {userData?.userName || "User"}!</h2> */}
                 <div className="dashboard-certificates" style={{marginTop: "-100px"}}>

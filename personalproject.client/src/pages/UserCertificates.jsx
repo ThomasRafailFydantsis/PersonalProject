@@ -3,12 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
 import { useAuth } from '../components/AuthProvider';
+import { FaCheck } from 'react-icons/fa';
+import Sidebar from '../components/SideBar';
 
 function UserCertificates() {
     const [certificates, setCertificates] = useState([]);
     const [error, setError] = useState(null);
-    const { isAuthenticated, userData, AuthError, revalidateAuth,roles } = useAuth();
+    const { isAuthenticated, userData, AuthError, revalidateAuth, roles } = useAuth();
     const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
 
     useEffect(() => {
         revalidateAuth(); // Validate authentication state
@@ -86,31 +93,59 @@ function UserCertificates() {
         return <div>{AuthError}</div>;
     }
 
-    // Add permission check based on roles
-   
-
     return (
         <div>
-            <Header />
-            <h2>User Certificates</h2>
+            <Header toggleSidebar={toggleSidebar} />
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            <h3 style={{ textAlign: 'center', color:'darkgreen' }}>Here you can find your added Certificates</h3>
             {certificates.length === 0 ? (
                 <div>No certificates found for the user.</div>
             ) : (
                 <div className="dashboard-certificates" style={{ maxWidth: '600px', margin: '0 auto' }}>
                     <ul>
                         {certificates.map((certificate) => (
-                            <li key={certificate.certId} className="certList" style={{ maxWidth: '600px', marginTop: '20px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', maxHeight: '200px', fontSize: '25px' }}>
+                            <li
+                                key={certificate.certId}
+                                className="certList"
+                                style={{
+                                    maxWidth: '600px',
+                                    marginTop: '20px',
+                                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                                    maxHeight: '200px',
+                                    fontSize: '25px',
+                                }}
+                            >
                                 <div>
                                     <div style={{ fontSize: '25px' }}>{certificate.certName}</div>
-                                    <button className="green-button" onClick={() => handleTakeExam(certificate.certId)}>Take Exam</button>
-                                  {roles.includes("Admin") && <button className="red-button" onClick={() => handleDelete(certificate.certId)}>Remove Certificate</button>}
+                                    {!certificate.isPassed ? (
+                                        <button
+                                            className="green-button"
+                                            onClick={() => handleTakeExam(certificate.certId)}
+                                        >
+                                            Take Exam
+                                        </button>
+                                    ) : (
+                                        <button
+                                                className="btn btn-success"
+                                            onClick={() => navigate('/myCertificate')}
+                                        >
+                                            Owned <FaCheck />
+                                        </button>
+                                    )}
+                                    {roles.includes("Admin") && (
+                                        <button
+                                            className="red-button"
+                                            onClick={() => handleDelete(certificate.certId)}
+                                        >
+                                            Remove Certificate
+                                        </button>
+                                    )}
                                 </div>
                             </li>
                         ))}
                     </ul>
                 </div>
             )}
-           
         </div>
     );
 }

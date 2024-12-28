@@ -13,22 +13,24 @@ const GradeExamPage = () => {
     const { isAuthenticated, roles, AuthError, revalidateAuth } = useAuth();
     const navigate = useNavigate();
 
-    // Revalidate authentication
+
     useEffect(() => {
         revalidateAuth();
-    }, [revalidateAuth]);
+    }, []); 
 
     // Fetch submission details
     useEffect(() => {
         const fetchSubmissionDetails = async () => {
             try {
+                setLoading(true);
                 const response = await axios.get(
                     `https://localhost:7295/api/Exam/submission/${examSubmissionId}`
                 );
                 setSubmissionDetails(response.data);
 
+                // Initialize grading data based on the answers
                 const initialGradingData = response.data.answers.reduce((acc, answer) => {
-                    acc[answer.questionId] = answer.isCorrect ? answer.selectedAnswerId : null;
+                    acc[answer.questionId] = answer.selectedAnswerId || null;
                     return acc;
                 }, {});
                 setGradingData(initialGradingData);
@@ -40,40 +42,27 @@ const GradeExamPage = () => {
             }
         };
 
-        fetchSubmissionDetails();
+        if (examSubmissionId) fetchSubmissionDetails(); // Ensure `examSubmissionId` exists
     }, [examSubmissionId]);
 
+    // Handle checkbox changes for grading
     const handleCheckboxChange = (questionId, selectedAnswerId) => {
-        setGradingData((prev) => {
-            const updatedGradingData = { ...prev };
-
-            if (selectedAnswerId === null || selectedAnswerId === undefined) {
-                delete updatedGradingData[questionId];
-            } else {
-                updatedGradingData[questionId] = selectedAnswerId;
-            }
-
-            return updatedGradingData;
-        });
+        setGradingData((prev) => ({
+            ...prev,
+            [questionId]: selectedAnswerId,
+        }));
     };
 
+    // Submit grades
     const handleSubmitGrades = async () => {
         try {
             const payload = {
-                examSubmissionId: parseInt(examSubmissionId),
-                gradingData: {},
+                examSubmissionId: parseInt(examSubmissionId, 10),
+                gradingData: gradingData,
             };
 
-            submissionDetails.answers.forEach((answer) => {
-                const selectedAnswerId = gradingData[answer.questionId];
-                if (selectedAnswerId !== undefined && selectedAnswerId !== null) {
-                    payload.gradingData[answer.questionId] = selectedAnswerId;
-                } else {
-                    console.warn(`No selected answer for question ${answer.questionId}`);
-                }
-            });
-
-            if (Object.keys(payload.gradingData).length === 0) {
+            // Validate grading data
+            if (!Object.keys(payload.gradingData).length) {
                 setError("No grading data to submit.");
                 return;
             }
@@ -85,24 +74,21 @@ const GradeExamPage = () => {
 
             const responseData = response.data;
 
-            setSubmissionDetails({
-                ...submissionDetails,
-                gradingData: responseData.gradingData,
+            // Update the state with the server response
+            setSubmissionDetails((prev) => ({
+                ...prev,
                 score: responseData.score,
                 isPassed: responseData.isPassed,
-            });
+            }));
 
             alert("Grading submitted successfully!");
         } catch (err) {
-            if (err.response) {
-                console.error("Error response from server:", err.response.data);
-            } else {
-                console.error("Error message:", err.message);
-            }
+            console.error(err);
             setError("Failed to submit grades.");
         }
     };
 
+    // Conditional rendering
     if (loading) return <p>Loading...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
@@ -145,7 +131,7 @@ const GradeExamPage = () => {
                 <thead>
                     <tr>
                         <th>Question</th>
-                        <th>Candidates Answer</th>
+                        <th>Candidate's Answer</th>
                         <th>Correct Answer</th>
                         <th>Mark Correct?</th>
                     </tr>
@@ -159,7 +145,7 @@ const GradeExamPage = () => {
                             <td>
                                 <input
                                     type="checkbox"
-                                    checked={gradingData[answer.questionId] || false}
+                                    checked={gradingData[answer.questionId] === answer.correctAnswerId}
                                     onChange={(e) =>
                                         handleCheckboxChange(
                                             answer.questionId,

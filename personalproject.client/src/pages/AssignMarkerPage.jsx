@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { useAuth } from "../components/AuthProvider";
 import { RxCheck } from "react-icons/rx";
+import Sidebar from "../components/SideBar";
 
 const AssignMarkerPage = () => {
     const [submissions, setSubmissions] = useState([]);
@@ -14,6 +15,11 @@ const AssignMarkerPage = () => {
     const [successMessage, setSuccessMessage] = useState("");
     const { isAuthenticated, roles, AuthError, revalidateAuth } = useAuth();
     const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
 
     useEffect(() => {
             revalidateAuth();
@@ -114,16 +120,17 @@ const AssignMarkerPage = () => {
 
     return (
         <div>
-            <Header />
-            <h1>Assign Marker</h1>
+             <Header toggleSidebar={toggleSidebar} />
+             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            <h2 style={{ textAlign: "center" }}>Assign Marker</h2>
             {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
 
-            <table border="1" style={{ width: "100%", marginBottom: "20px", textAlign: "center" }}>
+            <table border="1" style={{ width: "1150px", marginBottom: "20px", textAlign: "center" }}>
                 <thead>
                     <tr>
                         <th>Submission</th>
                         <th>Marker</th>
-                        <th>Action</th>
+                        <th >Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -132,9 +139,9 @@ const AssignMarkerPage = () => {
                         return (
                             <tr key={submission.id}>
                                 <td>
-                                    {`Submission #${submission.id} - ${submission.certName} by User ${submission.userId}`}
+                                    {`Submission #${submission.id} - ${submission.certName}`}
                                 </td>
-                                <td>
+                                <td style={{maxWidth:'80px'}}>
                                     <select
                                         value={selectedMarkers[submission.id] || ""}
                                         onChange={(e) => handleMarkerChange(submission.id, e.target.value)}
@@ -150,7 +157,7 @@ const AssignMarkerPage = () => {
                                         ))}
                                     </select>
                                 </td>
-                                <td>
+                                <td style={{maxWidth:'80px'}}>
                                     {isAssigned ? (
                                         <h6>Assigned <RxCheck /></h6> // Display 'Assigned' if marked
                                     ) : (

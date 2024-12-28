@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { useAuth } from "../components/AuthProvider";
+import Sidebar from "../components/SideBar";
+
 
 
 const UserTable = () => {
@@ -14,8 +16,11 @@ const UserTable = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const isAdmin = roles.includes("Admin");
-    console.log("is admin:" + isAdmin);
-    console.log("is auth:" + isAuthenticated);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
    
 
     useEffect(() => {
@@ -87,7 +92,8 @@ const UserTable = () => {
 
     return (
         <div>
-            <Header />
+            <Header toggleSidebar={toggleSidebar} />
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
             <h1 style={{ textAlign: "center" }}>User List</h1>
             <div style={{justifyContent:"center", display:"flex"}}>
                 <label style={{marginTop:"15px", fontSize:"20px"}} htmlFor="roleFilter">Filter by Role:</label>
@@ -137,7 +143,7 @@ const UserTable = () => {
                                     <option value="Marker">Marker</option>
                                 </select></td>
                             <td>
-                                <button class="btn btn-outline-danger" onClick={() => handleDelete(user.id)}>Delete</button>
+                                <button className="btn btn-outline-danger" onClick={() => handleDelete(user.id)}>Delete</button>
                                
                             </td>
                         </tr>

@@ -38,7 +38,7 @@ const UserProfileImageUpload = ({ userId }) => {
             <h3>Upload Profile Image</h3>
             <input type="file" onChange={handleFileChange} />
             {preview && <img src={preview} alt="Preview" style={{ width: "100px", height: "100px" }} />}
-            <button onClick={handleUpload}>Upload</button>
+            <button className="btn btn-primary" onClick={handleUpload}>Upload</button>
         </div>
     );
 };

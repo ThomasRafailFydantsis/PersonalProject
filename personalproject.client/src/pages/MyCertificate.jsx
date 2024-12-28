@@ -3,12 +3,18 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthProvider";
 import Header from "../components/Header";
+import Sidebar from "../components/SideBar";
 const MyCertificate = () => {
     const [certificates, setCertificates] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const { isAuthenticated, userData, AuthError, revalidateAuth } = useAuth();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
 
     useEffect(() => {
         revalidateAuth();
@@ -65,11 +71,12 @@ console.log(certificateId);
     }
 
     
-
+console.log(certificates);
     return (
         <div>
-            <Header />
-            <h1>User Certificates</h1>
+             <Header toggleSidebar={toggleSidebar} />
+             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            <h2 style={{ textAlign: "center" }}>User Certificates</h2>
             {certificates.length === 0 ? (
                 <p>No certificates available.</p>
             ) : (
@@ -87,8 +94,8 @@ console.log(certificateId);
                             {certificates.map((cert) => (cert.score != null &&
                             <tr key={cert.id}>
                                 <td>{cert.certificateName}</td>
-                                <td>{cert.dateTaken || "-"}</td>
-                                <td>{cert.score || "-"}</td>
+                                <td>{cert.dateTaken ? new Date(cert.dateTaken).toLocaleDateString() : "-"}</td>
+                                <td>{cert.score}</td>
                                 <td>{cert.isPassed && cert.isMarked ? "Passed & Marked" : "Pending"}</td>
                                 <td>
                                     {cert.certificateDownloadable ? (
@@ -102,7 +109,7 @@ console.log(certificateId);
                     </tbody>
                 </table>
             )}
-            <button className="green-button" onClick={() => navigate(-1)}>Back</button>
+          
         </div>
     );
 };

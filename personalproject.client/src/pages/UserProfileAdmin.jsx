@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Header from "../components/Header";
+import Sidebar from "../components/SideBar";
+
 
 const UserProfileAdmin = () => {
     const { userId } = useParams();
@@ -10,6 +12,11 @@ const UserProfileAdmin = () => {
     const [loading, setLoading] = useState(true);
     const [certificates, setCertificates] = useState([]);
     const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -54,7 +61,8 @@ const UserProfileAdmin = () => {
 
     return (
         <div>
-            <Header />
+             <Header toggleSidebar={toggleSidebar} />
+             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
             <h1>User Profile</h1>
             {user && user.profileImagePath ? (
                 <img

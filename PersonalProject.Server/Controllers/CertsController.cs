@@ -56,6 +56,7 @@ namespace PersonalProject.Server.Controllers
             {
                 uc.Certificate.CertId,
                 uc.Certificate.CertName,
+                uc.IsPassed,
                 uc.DateAdded
             }));
         }
@@ -77,6 +78,7 @@ namespace PersonalProject.Server.Controllers
             {
                 uc.Certificate.CertId,
                 uc.Certificate.CertName,
+                uc.IsPassed,
                 uc.DateAdded
             }));
         }

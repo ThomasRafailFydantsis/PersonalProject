@@ -15,5 +15,6 @@ namespace PersonalProject.Server.Models
      public ICollection<UserCertificate>? UserCertificates { get; set; }
      public string? Address1 { get; set; }
     
+    
  }
 }

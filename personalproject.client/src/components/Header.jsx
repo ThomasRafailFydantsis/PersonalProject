@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
 import { FaShoppingBag } from "react-icons/fa";
 import { useState, useEffect } from "react";
-function Header() {
+function Header({toggleSidebar}) {
     const { userData, roles } = useAuth();
     const [transparent, setTransparent] = useState(false); 
     const navigate = useNavigate();
@@ -29,10 +29,16 @@ function Header() {
     return (
         <>
         {transparent === false ? (
+
             <header className="header header-isNotTransparent">
-            <a className="header-logo" href="/dashboard">
+                <div className="header-logo" style={{display: 'flex', alignItems: 'center', marginLeft: '-31px'}}>
+                 <button onClick={toggleSidebar} style={{ background: "none", border: "none", color: "white", fontSize: "20px", cursor: "pointer" }}>
+                ☰
+            </button>
+            <a  href="/dashboard" >
                 <h1>Certflix</h1>
             </a>
+            </div>
             <nav className="header-nav">
                 {roles.includes("Admin") && <button onClick={() => navigate("/CreateCert")}>Create Certificate</button>}
                 {roles.includes("Marker") && <button onClick={() => navigate("/CreateCert")}>Create Certificate</button>}
@@ -48,9 +54,15 @@ function Header() {
         </header>
         ):(
             <header className="header header-transparent">
+                   <div className="header-logo" style={{display: 'flex', alignItems: 'center', marginLeft: '-31px'}}>
+                 <button onClick={toggleSidebar} style={{ background: "none", border: "none", color: "white", fontSize: "20px", cursor: "pointer" }}>
+                ☰
+            </button>
             <a className="header-logo" href="/dashboard">
+           
                 <h1>Certflix</h1>
             </a>
+            </div>
             <nav className="header-nav">
                 {roles.includes("Admin") && <button onClick={() => navigate("/CreateCert")}>Create Certificate</button>}
                 {roles.includes("Marker") && <button onClick={() => navigate("/CreateCert")}>Create  Certificate</button>}

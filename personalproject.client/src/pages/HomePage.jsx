@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '/MVC/PersonalProject/personalproject.client/AuthService';
-import OflineHeader from '../components/OflineHeader';
+// import OflineHeader from '../components/OflineHeader';
+import { useEffect } from 'react';
 import { useAuth } from '../components/AuthProvider';
 import { Modal, Button, Carousel, Container } from 'react-bootstrap';
+import {FaRegUserCircle } from 'react-icons/fa';
 import img1 from '../imgs/2bros.jpg';
 import img2 from '../imgs/coding.jpg';
 import img3 from '../imgs/kineza.jpg';
@@ -12,9 +14,10 @@ import img5 from '../imgs/tetragwnh-programming.jpg';
 
 
 
+
 const HomePage = () => {
   const [showModal, setShowModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('signup'); // 'signup' or 'signin'
+  const [activeTab, setActiveTab] = useState('signup');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,8 +26,23 @@ const HomePage = () => {
   const [errorMessage, setErrorMessage] = useState('');
  
 
+  const [transparent, setTransparent] = useState(false);
+    const navigate = useNavigate();
 
-  const navigate = useNavigate();
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 0) {
+                setTransparent(true);
+            } else {
+                setTransparent(false);
+            }
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+  
   const { revalidateAuth } = useAuth();
 
  
@@ -71,7 +89,33 @@ const HomePage = () => {
   return (
     <>
 
-    <OflineHeader  />
+<>
+      {transparent === false ? (
+        <header className="header">
+            <>
+                <a className="header-notTransparent" href="/"><h1>Certflix</h1></a>
+                 <Button
+                        onClick={() => { setShowModal(true); setActiveTab('signup'); }}
+                        className='green-button'
+                    >
+                        <FaRegUserCircle />
+                    </Button>
+            </>
+        </header>
+      ):( 
+      <header  className="header header-transparent">
+        
+            <a   href="/"><h1>Certflix</h1></a>
+            
+            <Button
+                        onClick={() => { setShowModal(true); setActiveTab('signup'); }}
+                        className='green-button'
+                    >
+                        <FaRegUserCircle />
+                    </Button>
+    </header>
+        )}
+       </>
 
   
     <div  className="text-center my-5" style={{margin:'0px 0px 0px 0px', color: '#607d8b ', boxShadow: '0 0px 0px rgba(0, 0, 0, 0.4)'}}>
@@ -81,39 +125,12 @@ const HomePage = () => {
         </h3>
     </div>
    
-
-    <div className="d-flex justify-content-center my-5" style={{display: 'flex', flexWrap: 'wrap'}}>
-                <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b',boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)' }}>
-                    <div className="card-body">
-                        <h5 className="card-title">New to <span style={{ color: '#FF8C00' }}>Certflix?</span></h5>
-                        <p className="card-text">Sign up today and start your journey!</p>
-                    </div>
-                    <Button
-                        onClick={() => { setShowModal(true); setActiveTab('signup'); }}
-                        className='green-button'
-                    >
-                        Register
-                    </Button>
-                </div>
-
-                <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b',boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', marginLeft: '100px' }}>
-                    <div className="card-body">
-                        <h5 className="card-title">Already have an account?</h5>
-                        <p className="card-text">Log in to access your certificates!</p>
-                    </div>
-                    <Button
-                        onClick={() => { setShowModal(true); setActiveTab('signin'); }}
-                        className='green-button'
-                    >
-                        Login
-                    </Button>
-                </div>
-            </div>
-
-    <div style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '60px', maxWidth:'1200px',paddingTop: '30px', marginBottom: '110px'}}></div>
     
-    <Carousel style={{margin:'0px auto', boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', backgroundColor: '#819b8c',maxWidth:'900px'}}>
-        <Carousel.Item interval={10000}>
+
+   
+    
+    <Carousel style={{margin:'0px auto', boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', backgroundColor: '#819b8c',maxWidth:'900px', maxHeight:'600px'}}>
+        <Carousel.Item interval={10000} style={{marginTop: '-30px'}}>
         <img
                 className="d-block w-100"
                 src={img1}
@@ -126,7 +143,7 @@ const HomePage = () => {
                 <p>In the age of information, knowledge is power, and Certflix is here to empower you</p>
             </Carousel.Caption>
         </Carousel.Item>
-        <Carousel.Item interval={1000}>
+        <Carousel.Item interval={1000} style={{marginTop: '-30px'}}> 
         <img
                 className="d-block w-100"
                 src={img2}
@@ -135,10 +152,10 @@ const HomePage = () => {
             />
             <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
                 <h3>Succeed in your career</h3>
-                <p>Our oroducts are specifically designed to help you succeed in your career</p>
+                <p>Our oroducts are specifically designed to help you succeed in your career, land your dreamjob</p>
             </Carousel.Caption>
         </Carousel.Item>
-        <Carousel.Item interval={10000}>
+        <Carousel.Item interval={10000} style={{marginTop: '-30px'}}>
         <img
                 className="d-block w-100"
                 src={img3}
@@ -223,10 +240,38 @@ const HomePage = () => {
             </div>
         </div>
     </div>
-          
 
+    <div style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '60px', maxWidth:'1200px',paddingTop: '30px', marginBottom: '110px'}}></div>
+          
+    <div className="d-flex justify-content-center my-5" style={{display: 'flex', flexWrap: 'wrap'}}>
+                <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b',boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)' }}>
+                    <div className="card-body">
+                        <h5 className="card-title">New to <span style={{ color: '#FF8C00' }}>Certflix?</span></h5>
+                        <p className="card-text">Sign up today and start your journey!</p>
+                    </div>
+                    <Button
+                        onClick={() => { setShowModal(true); setActiveTab('signup'); }}
+                        className='green-button'
+                    >
+                        Register
+                    </Button>
+                </div>
+
+                <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b',boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', marginLeft: '100px' }}>
+                    <div className="card-body">
+                        <h5 className="card-title">Already have an account?</h5>
+                        <p className="card-text">Log in to access your certificates!</p>
+                    </div>
+                    <Button
+                        onClick={() => { setShowModal(true); setActiveTab('signin'); }}
+                        className='green-button'
+                    >
+                        Login
+                    </Button>
+                </div>
+            </div>
          
-          <Modal show={showModal} onHide={() => setShowModal(false)} centered  dialogClassName="custom-modal">
+          <Modal show={showModal} onHide={() => setShowModal(false)} centered  dialogClassName="custom-modal" style={{margin: '0 auto'}}>
                 {/* <Modal.Header closeButton  style={{border:'none',marginTop: '-50px' ,marginBottom: '-50px'}}>
                     <Modal.Title >{activeTab === 'signin' ? 'Sign In' : 'Sign Up'}</Modal.Title>
                 </Modal.Header> */}

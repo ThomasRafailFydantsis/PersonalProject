@@ -34,7 +34,7 @@ const App = () => {
         <Route path="/certForm/:certId" caseSensitive={false} element={<CertForm />} />
         <Route path="/CreateCert" caseSensitive={false} element={<CreateCert />} />
         <Route path="/assignMarker" caseSensitive={false} element={<AssignMarkerPage />} />
-        <Route path="/marker/assignments/:id" element={<MarkerAssignmentsPage />} />
+        <Route path="/marker/assignments" element={<MarkerAssignmentsPage />} />
         <Route path="/exam/submission/:examSubmissionId" element={<GradeExamPage />} />
         <Route path="/MyCertificate" caseSensitive={false} element={<MyCertificate />} />
         <Route path="/profile/:userId" element={<UserProfileAdmin />} />
