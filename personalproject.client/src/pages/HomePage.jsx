@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AuthService from '/MVC/PersonalProject/personalproject.client/AuthService';
+import AuthService from '../servicesE/AuthService';
 // import OflineHeader from '../components/OflineHeader';
 import { useEffect } from 'react';
 import { useAuth } from '../components/AuthProvider';
@@ -11,7 +11,7 @@ import img2 from '../imgs/coding.jpg';
 import img3 from '../imgs/kineza.jpg';
 import img4 from '../imgs/tetragwnh-laptop.jpg';
 import img5 from '../imgs/tetragwnh-programming.jpg';
-
+import HomeCerts from '../components/HomeCerts';
 
 
 
@@ -24,10 +24,26 @@ const HomePage = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [redirectAfterAuth, setRedirectAfterAuth] = useState(null);
+  const { isAuthenticated } = useAuth();
  
 
   const [transparent, setTransparent] = useState(false);
     const navigate = useNavigate();
+    const [activeItem, setActiveItem] = useState(null);
+
+    const handleItemClick = (index) => {
+        setActiveItem(index); // Set the clicked item as active
+    };
+
+    const handleAuthRedirect = (targetRoute) => {
+        if (!isAuthenticated) {
+            setRedirectAfterAuth(targetRoute);
+            setShowModal(true);
+        } else {
+            navigate(targetRoute);
+        }
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -81,61 +97,126 @@ const HomePage = () => {
           const token = await AuthService.login(username, password);
           await revalidateAuth();
           navigate('/dashboard');
+          if (redirectAfterAuth) {
+            navigate(redirectAfterAuth);
+        }
       } catch (error) {
           setErrorMessage(error.message);
       }
   };
+  const styles = {
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    color: 'orange',
+  };
 
   return (
-    <>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: "inherit" }}>
 
-<>
+       <>
       {transparent === false ? (
         <header className="header">
             <>
-                <a className="header-notTransparent" href="/"><h1>Certflix</h1></a>
+                 <a className="header-notTransparent" href="/"><h1>Certflix</h1></a>
+                 <ul className="header-nav " style={{ marginTop: "10px", marginLeft: "-32px" }}>
+            {[
+                { text: "Start", href: "#scrollspyHeading1" },
+                { text: "Products", href: "#scrollspyHeading2" },
+                { text: "Programming", href: "#scrollspyHeading3" },
+                { text: "Goal", href: "#scrollspyHeading4" },
+                { text: "Reviews", href: "#scrollspyHeading5" },
+                { text: "Join us", href: "#scrollspyHeading6" },
+            ].map((item, index) => (
+                <li
+                    key={index}
+                    className={`nav-item ${activeItem === index ? "active" : ""}`}
+                    onClick={() => handleItemClick(index)}
+                    style={{
+                        margin: "4px",
+                        padding: "5px 10px",
+                        borderRadius: "5px",
+                        backgroundColor: activeItem === index ? "rgba(255, 140, 0, 0.1)" : "transparent",
+                        color: activeItem === index ? "#FF8C00" : "inherit",
+                        transition: "background-color 0.3s ease, color 0.3s ease",
+                    }}
+                >
+                    <a  href={item.href} style={{ textDecoration: "none", color: "inherit" }}>
+                        {item.text}
+                    </a>
+                </li>
+            ))}
+        </ul>
                  <Button
                         onClick={() => { setShowModal(true); setActiveTab('signup'); }}
                         className='green-button'
-                    >
+                 >
                         <FaRegUserCircle />
-                    </Button>
+                 </Button>
             </>
         </header>
       ):( 
-      <header  className="header header-transparent">
-        
-            <a   href="/"><h1>Certflix</h1></a>
-            
-            <Button
-                        onClick={() => { setShowModal(true); setActiveTab('signup'); }}
-                        className='green-button'
-                    >
-                        <FaRegUserCircle />
+      <header  className="header header-transparent">      
+      <a   href="/"><h1>Certflix</h1></a>
+      <ul className="header-nav" style={{ marginTop: "10px", marginLeft: "-32px" }}>
+            {[
+                 { text: "Start", href: "#scrollspyHeading1" },
+                 { text: "Products", href: "#scrollspyHeading2" },
+                 { text: "Programming", href: "#scrollspyHeading3" },
+                 { text: "Goal", href: "#scrollspyHeading4" },
+                 { text: "Reviews", href: "#scrollspyHeading5" },
+                 { text: "Join us", href: "#scrollspyHeading6" },
+            ].map((item, index) => (
+                <li
+                    key={index}
+                    className={`nav-item ${activeItem === index ? "active" : ""}`}
+                    onClick={() => handleItemClick(index)}
+                    style={{
+                        margin: "4px",
+                        padding: "5px 10px",
+                        borderRadius: "5px",
+                        backgroundColor: activeItem === index ? "rgba(255, 140, 0, 0.1)" : "transparent",
+                        color: activeItem === index ? "#FF8C00" : "inherit",
+                        transition: "background-color 0.4s ease, color 0.3s ease",
+                    }}
+                >
+                    <a href={item.href} style={{ textDecoration: "none", color: "inherit" }}>
+                        {item.text}
+                    </a>
+                </li>
+            ))}
+        </ul>
+      <Button onClick={() => { setShowModal(true); setActiveTab('signup'); }} className='green-button' >
+ <FaRegUserCircle />
                     </Button>
     </header>
         )}
        </>
 
-  
-    <div  className="text-center my-5" style={{margin:'0px 0px 0px 0px', color: '#607d8b ', boxShadow: '0 0px 0px rgba(0, 0, 0, 0.4)'}}>
-        <h1>Welcome to < span style={{color: '#FF8C00'}}>Certflix</span></h1>
+       <div
+        data-bs-spy="scroll"
+        data-bs-target="#navbar-example2"
+        data-bs-root-margin="0px 0px -40%"
+        data-bs-smooth-scroll="true"
+        className="scrollspy-example p-3 rounded-2"
+        tabIndex="0"
+        style={{ backgroundColor: 'aliceblue',marginTop: '-60px' }}
+         id="scrollspyHeading1"
+      > 
+       
+    <div className="text-center my-5" style={{margin:'0px 0px 0px 0px', color: '#607d8b ', boxShadow: '0 0px 0px rgba(0, 0, 0, 0.4)'}}>
+        <h1 >Welcome to < span style={{color: '#FF8C00'}}>Certflix</span></h1>
         <h3 className="my-3">
             Learning to code is like learning a new language. The more you practice, the easier it becomes.
         </h3>
     </div>
    
-    
-
    
-    
-    <Carousel style={{margin:'0px auto', boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', backgroundColor: '#819b8c',maxWidth:'900px', maxHeight:'600px'}}>
+    <Carousel  style={{margin:'0px auto', boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', backgroundColor: '#819b8c',opacity: '0.9',maxWidth:'900px', maxHeight:'600px',marginTop: '-30px'}}>
         <Carousel.Item interval={10000} style={{marginTop: '-30px'}}>
         <img
                 className="d-block w-100"
                 src={img1}
                 alt="Third slide"
-                
+                style={{paddingTop: '14px'}}
                 height={480}
             />
             <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
@@ -149,6 +230,7 @@ const HomePage = () => {
                 src={img2}
                 alt="Third slide"
                 height={480}
+                style={{paddingTop: '14px'}}
             />
             <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
                 <h3>Succeed in your career</h3>
@@ -160,6 +242,7 @@ const HomePage = () => {
                 className="d-block w-100"
                 src={img3}
                 alt="Third slide"
+                style={{paddingTop: '14px'}}
                 height={480}
             />
             <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
@@ -169,9 +252,10 @@ const HomePage = () => {
         </Carousel.Item>
     </Carousel>
     
-         <div style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '60px', maxWidth:'1200px',paddingTop: '30px'}}></div>
-
-    <div className="d-flex justify-content-between align-items-center my-5" style={{maxWidth:'1200px'}}>
+         <div id="scrollspyHeading2" style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '60px', maxWidth:'1200px',paddingTop: '30px',marginBottom: '120px'}}></div>
+         <HomeCerts onAuthRedirect={handleAuthRedirect} />
+    <div id="scrollspyHeading3" style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '120px', maxWidth:'1200px'}}></div>
+    <div  className="d-flex justify-content-between align-items-center my-5" style={{maxWidth:'1200px'}}>
         <div className="col-md-6">
             <h3>Learning with <span style={{color: '#FF8C00'}}>Certflix</span></h3>
             <p>We provide high-quality courses designed to help you master new programming languages and enhance your career opportunities.</p>
@@ -185,9 +269,9 @@ const HomePage = () => {
         </div>
     </div>
 
-    <div style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '-31px', maxWidth:'1200px'}}></div>
+    <div id="scrollspyHeading4" style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '120px', maxWidth:'1200px'}}></div>
 
-    <div className="d-flex justify-content-between align-items-center my-5" style={{maxWidth:'1200px'}}>
+    <div  className="d-flex justify-content-between align-items-center my-5" style={{maxWidth:'1200px'}}>
         <div className="col-md-6">
             <img
                 src={img4}
@@ -201,9 +285,9 @@ const HomePage = () => {
         </div>
     </div>
 
-    <div style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '-20px',paddingTop: '30px', marginBottom: '100px', maxWidth:'1200px'}}></div>
+    <div id="scrollspyHeading5" style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '120px',paddingTop: '30px', marginBottom: '100px', maxWidth:'1200px'}}></div>
 
-    <div className="my-5 text-center" style={{maxWidth:'1200px'}}>
+    <div  className="my-5 text-center" style={{maxWidth:'1200px'}}>
         <h3>Things You Can Do with <span style={{color: '#FF8C00'}}>Certflix</span></h3>
         <ul className="list-unstyled">
             <li><i className="fas fa-check-circle"></i> Access a wide variety of programming courses.</li>
@@ -241,9 +325,10 @@ const HomePage = () => {
         </div>
     </div>
 
-    <div style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '60px', maxWidth:'1200px',paddingTop: '30px', marginBottom: '110px'}}></div>
-          
-    <div className="d-flex justify-content-center my-5" style={{display: 'flex', flexWrap: 'wrap'}}>
+    <div style={{borderBottom: '2px solid #607d8b', borderRadius: '0px', marginTop: '60px', maxWidth:'1200px',paddingTop: '30px', marginBottom: '210px'}}></div>
+          <h1  style={{textAlign: 'center',color: '#607d8b',marginBottom: '50px'}}>Join the <span style={{color: '#FF8C00'}}>Certflix</span> Community</h1>
+          <h3 style={{textAlign: 'center',color: '#607d8b',marginBottom: '130px'}}>Sign up today and start your journey!</h3>
+    <div id="scrollspyHeading6" className="d-flex justify-content-center my-5" style={{display: 'flex', flexWrap: 'wrap' }}>
                 <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b',boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)' }}>
                     <div className="card-body">
                         <h5 className="card-title">New to <span style={{ color: '#FF8C00' }}>Certflix?</span></h5>
@@ -270,8 +355,9 @@ const HomePage = () => {
                     </Button>
                 </div>
             </div>
-         
-          <Modal show={showModal} onHide={() => setShowModal(false)} centered  dialogClassName="custom-modal" style={{margin: '0 auto'}}>
+         </div>
+         <div className="modal-container">
+          <Modal show={showModal} onHide={() => setShowModal(false)} centered  dialogClassName="custom-modal" style={{marginTop: '-50px'}}>
                 {/* <Modal.Header closeButton  style={{border:'none',marginTop: '-50px' ,marginBottom: '-50px'}}>
                     <Modal.Title >{activeTab === 'signin' ? 'Sign In' : 'Sign Up'}</Modal.Title>
                 </Modal.Header> */}
@@ -370,8 +456,8 @@ const HomePage = () => {
                     )}
                 </Modal.Body>
             </Modal>
-           
-      </>
+            </div>
+      </div>
   );
 };
 

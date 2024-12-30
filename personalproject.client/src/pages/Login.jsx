@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import AuthService from '/MVC/PersonalProject/personalproject.client/AuthService';
+import AuthService from '../servicesE/AuthService';
 import { useNavigate } from 'react-router-dom';
 import OflineHeader from '../components/OflineHeader';
 import { useAuth } from "../components/AuthProvider";
@@ -32,11 +32,11 @@ const LoginPage = () => {
     return (
         <div>
             <OflineHeader />
-            <h2 style={{ textAlign: 'center' }}>Login</h2>
+            <h2 style={{ textAlign: 'center', color: '#607d8b' }}>Login</h2>
             {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
-            <form onSubmit={handleSubmit} style={{width: '380px', margin: '0 auto'}}>
+            <form onSubmit={handleSubmit} style={{width: '380px', margin: '0 auto', borderRadius: '8px', padding: '20px', background: 'linear-gradient(32deg, rgba(54,95,114,1) 45%, rgba(183,121,37,1) 100%)', boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)'}}>
                 <div >
-                    <label htmlFor="username">Username:</label>
+                    <label style={{color: 'aliceblue'}} htmlFor="username">Username:</label>
                     <input
                         type="text"
                         id="username"
@@ -46,7 +46,7 @@ const LoginPage = () => {
                     />
                 </div>
                 <div>
-                    <label htmlFor="password">Password:</label>
+                    <label style={{color: 'aliceblue'}} htmlFor="password">Password:</label>
                     <input
                         type="password"
                         id="password"

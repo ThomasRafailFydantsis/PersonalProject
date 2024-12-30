@@ -22,13 +22,13 @@ function OflineHeader( ) {
     return (
         <>
       {transparent === false ? (
-        <header className="header">
-            <>
-                <a className="header-notTransparent" href="/"><h1>Certflix</h1></a>
-            </>
+        <header className="header" >
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <a className="header-notTransparent"  href="/"><h1>Certflix</h1></a>
+            </div>
         </header>
       ):( 
-      <header  className="header header-transparent">
+      <header  className="header header-transparent" style={{textAlign:"center"}}>
         
             <a   href="/"><h1>Certflix</h1></a>
         

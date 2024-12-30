@@ -343,7 +343,7 @@ namespace PersonalProject.Server.Controllers
                 ExamSubmissionId = assignmentDto.ExamSubmissionId,
                 MarkerId = assignmentDto.MarkerId,
                 AssignedDate = DateTime.UtcNow,
-                IsMarked = false // Set IsMarked to true
+                IsMarked = false 
             };
 
             _context.MarkerAssignments.Add(markerAssignment);
@@ -488,9 +488,9 @@ namespace PersonalProject.Server.Controllers
         public async Task<IActionResult> GetExamSubmission(int examSubmissionId)
         {
             var submission = await _context.ExamSubmissions
-                .Include(es => es.User) 
+                .Include(es => es.User)
                 .Include(es => es.Certificate)
-                .Include(es => es.Answers) 
+                .Include(es => es.Answers)
                     .ThenInclude(a => a.Question)
                     .ThenInclude(q => q.AnswerOptions)
                 .FirstOrDefaultAsync(es => es.Id == examSubmissionId);
@@ -503,9 +503,9 @@ namespace PersonalProject.Server.Controllers
             var submissionDetails = new
             {
                 examSubmissionId = submission.Id,
-                candidateName = submission.User?.UserName, 
-                candidateId = submission.User?.Id, 
-                certificateName = submission.Certificate?.CertName, 
+                candidateName = submission.User?.UserName,
+                candidateId = submission.User?.Id,
+                certificateName = submission.Certificate?.CertName,
                 submissionDate = submission.SubmissionDate,
                 score = submission.Score,
                 isPassed = submission.IsPassed,
@@ -514,9 +514,15 @@ namespace PersonalProject.Server.Controllers
                     questionId = a.QuestionId,
                     questionText = a.Question?.Text,
                     selectedAnswerId = a.SelectedAnswerId,
-                    answerText = a.Question?.AnswerOptions?.FirstOrDefault(ans => ans.Id == a.SelectedAnswerId)?.Text, 
+                    answerText = a.Question?.AnswerOptions?.FirstOrDefault(ans => ans.Id == a.SelectedAnswerId)?.Text,
                     isCorrect = a.IsCorrect,
-                    correctAnswer = a.Question?.AnswerOptions?.FirstOrDefault(ans => ans.IsCorrect)?.Text, 
+                    correctAnswer = a.Question?.AnswerOptions?.FirstOrDefault(ans => ans.IsCorrect)?.Text,
+                    answerOptions = a.Question?.AnswerOptions.Select(opt => new
+                    {
+                        opt.Id,
+                        opt.Text,
+                        opt.IsCorrect
+                    }).ToList()
                 })
             };
 
@@ -556,17 +562,18 @@ namespace PersonalProject.Server.Controllers
         [HttpPost("grade-submission")]
         public async Task<IActionResult> GradeSubmission([FromBody] GradeSubmissionDto dto)
         {
-            if (dto == null || !dto.GradingData.Any())
+            if (dto == null || dto.GradingData == null || !dto.GradingData.Any())
             {
                 return BadRequest("Invalid grading data.");
             }
 
+            // Fetch the exam submission along with related entities
             var submission = await _context.ExamSubmissions
                 .Include(es => es.Answers)
                 .ThenInclude(a => a.Question)
                 .ThenInclude(q => q.AnswerOptions)
                 .Include(es => es.Certificate)
-                .Include(es => es.MarkerAssignments)  // Ensure we load marker assignments
+                .Include(es => es.MarkerAssignments)
                 .FirstOrDefaultAsync(es => es.Id == dto.ExamSubmissionId);
 
             if (submission == null)
@@ -576,13 +583,17 @@ namespace PersonalProject.Server.Controllers
 
             foreach (var answer in submission.Answers)
             {
+                // Check if the marker provided a new selected answer ID for the question
                 if (dto.GradingData.TryGetValue(answer.QuestionId, out var selectedAnswerId))
                 {
                     answer.SelectedAnswerId = selectedAnswerId;
+
+                    // Determine if the selected answer is correct based on the updated selection
                     answer.IsCorrect = answer.Question?.AnswerOptions?.Any(a => a.Id == selectedAnswerId && a.IsCorrect) ?? false;
                 }
             }
 
+            // Recalculate the score based on updated answers
             submission.Score = submission.Answers.Count(a => a.IsCorrect);
             submission.IsPassed = submission.Score >= submission.Certificate.PassingScore;
 

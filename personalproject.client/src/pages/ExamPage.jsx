@@ -197,7 +197,7 @@ const ExamPage = () => {
                     <p><strong>Certificate:</strong> {result.certName || "Certificate not found"}</p>
                     <p><strong>Score:</strong>  {result.score }</p>
                     <p><strong>Passed:</strong> {result.passed ? "Yes" : "No"}</p>
-                    <p><strong>Date Taken:</strong>{result.dateTaken ? new Date(cert.dateTaken).toLocaleDateString() : "-"}</p>
+                    <p><strong>Date Taken:</strong>{result.dateTaken ? new Date(result.dateTaken).toLocaleDateString() : "-"}</p>
                     <button className="btn btn-primary" onClick={()=> navigate(-1)}>Go Back</button>
                 </div>
             )}

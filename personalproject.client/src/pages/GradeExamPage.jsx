@@ -13,12 +13,12 @@ const GradeExamPage = () => {
     const { isAuthenticated, roles, AuthError, revalidateAuth } = useAuth();
     const navigate = useNavigate();
 
-
+    // Revalidate authentication on page load
     useEffect(() => {
         revalidateAuth();
-    }, []); 
+    }, []);
 
-    // Fetch submission details
+    // Fetch submission details and initialize grading data
     useEffect(() => {
         const fetchSubmissionDetails = async () => {
             try {
@@ -26,11 +26,14 @@ const GradeExamPage = () => {
                 const response = await axios.get(
                     `https://localhost:7295/api/Exam/submission/${examSubmissionId}`
                 );
-                setSubmissionDetails(response.data);
 
-                // Initialize grading data based on the answers
-                const initialGradingData = response.data.answers.reduce((acc, answer) => {
-                    acc[answer.questionId] = answer.selectedAnswerId || null;
+                const submission = response.data;
+
+                setSubmissionDetails(submission);
+
+                // Initialize grading data with current selectedAnswerId values
+                const initialGradingData = submission.answers.reduce((acc, answer) => {
+                    acc[answer.questionId] = answer.selectedAnswerId || null; // Pre-fill with existing data
                     return acc;
                 }, {});
                 setGradingData(initialGradingData);
@@ -42,30 +45,24 @@ const GradeExamPage = () => {
             }
         };
 
-        if (examSubmissionId) fetchSubmissionDetails(); // Ensure `examSubmissionId` exists
+        if (examSubmissionId) fetchSubmissionDetails();
     }, [examSubmissionId]);
 
-    // Handle checkbox changes for grading
-    const handleCheckboxChange = (questionId, selectedAnswerId) => {
+    // Handle radio button state changes
+    const handleRadioChange = (questionId, selectedAnswerId) => {
         setGradingData((prev) => ({
             ...prev,
-            [questionId]: selectedAnswerId,
+            [questionId]: selectedAnswerId, // Update selectedAnswerId for the question
         }));
     };
 
-    // Submit grades
+    // Submit the finalized grading data
     const handleSubmitGrades = async () => {
         try {
             const payload = {
                 examSubmissionId: parseInt(examSubmissionId, 10),
-                gradingData: gradingData,
+                gradingData, // Send gradingData in expected format
             };
-
-            // Validate grading data
-            if (!Object.keys(payload.gradingData).length) {
-                setError("No grading data to submit.");
-                return;
-            }
 
             const response = await axios.post(
                 "https://localhost:7295/api/Exam/grade-submission",
@@ -74,21 +71,19 @@ const GradeExamPage = () => {
 
             const responseData = response.data;
 
-            // Update the state with the server response
             setSubmissionDetails((prev) => ({
                 ...prev,
                 score: responseData.score,
                 isPassed: responseData.isPassed,
             }));
 
-            alert("Grading submitted successfully!");
+            alert(`Grading submitted successfully! Updated Score: ${responseData.score}`);
         } catch (err) {
             console.error(err);
             setError("Failed to submit grades.");
         }
     };
 
-    // Conditional rendering
     if (loading) return <p>Loading...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
@@ -105,10 +100,11 @@ const GradeExamPage = () => {
     }
 
     return (
-        <div>
+        <div >
             <Header />
-            <button onClick={() => navigate(-1)}>Back</button>
-            <h1>Grade Submission</h1>
+            <div style={{ padding: "20px", textAlign: "center", color: "#607d8b", top: "100px" }}>
+
+            <h1 >Grade Submission:</h1>
             <h2>Candidate: {submissionDetails?.candidateName}</h2>
             <p>
                 <strong>Certificate:</strong> {submissionDetails?.certificateName}
@@ -125,41 +121,44 @@ const GradeExamPage = () => {
                 <strong>Status:</strong>{" "}
                 {submissionDetails?.isPassed ? "Passed" : "Failed"}
             </p>
-
+           
             <h3>Answers</h3>
+            </div>
             <table>
                 <thead>
                     <tr>
                         <th>Question</th>
-                        <th>Candidate's Answer</th>
                         <th>Correct Answer</th>
-                        <th>Mark Correct?</th>
+                        <th>Options</th>
                     </tr>
                 </thead>
                 <tbody>
                     {submissionDetails?.answers.map((answer) => (
                         <tr key={answer.questionId}>
                             <td>{answer.questionText}</td>
-                            <td>{answer.answerText}</td>
                             <td>{answer.correctAnswer}</td>
                             <td>
-                                <input
-                                    type="checkbox"
-                                    checked={gradingData[answer.questionId] === answer.correctAnswerId}
-                                    onChange={(e) =>
-                                        handleCheckboxChange(
-                                            answer.questionId,
-                                            e.target.checked ? answer.correctAnswerId : null
-                                        )
-                                    }
-                                />
+                                {answer.answerOptions.map((option) => (
+                                    <label key={option.id} style={{ display: "flex", marginBottom: "5px" }}>
+                                        <input
+                                            type="radio"
+                                            name={`question-${answer.questionId}`}
+                                            value={option.id}
+                                            checked={gradingData[answer.questionId] === option.id}
+                                            onChange={() =>
+                                                handleRadioChange(answer.questionId, option.id)
+                                            }
+                                        />
+                                        {option.text} {option.isCorrect ? "(Correct)" : ""}
+                                    </label>
+                                ))}
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
 
-            <button onClick={handleSubmitGrades} disabled={loading}>
+            <button style={{ marginLeft:"300px",marginTop:"20px"}} className="btn btn-primary" onClick={handleSubmitGrades} disabled={loading}>
                 Submit Grades
             </button>
         </div>

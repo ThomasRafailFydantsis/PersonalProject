@@ -1,4 +1,4 @@
-import certsService from '/MVC/PersonalProject/personalproject.client/CertsService';
+import certsService from '../servicesE/CertsService';
 //import ProtectedComponent from './ProtectedComponent';
 
 function DeleteButton({ certId, onDelete }) {

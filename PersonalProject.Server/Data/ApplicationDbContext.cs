@@ -16,6 +16,7 @@ namespace PersonalProject.Server.Data{
         public DbSet<ExamSubmission> ExamSubmissions { get; set; }
         public DbSet<AnswerSubmission> AnswerSubmissions { get; set; }
         public DbSet<MarkerAssignment> MarkerAssignments { get; set; }
+        public DbSet<Description> Descriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -124,6 +125,10 @@ namespace PersonalProject.Server.Data{
                       .HasForeignKey(asm => asm.ExamSubmissionId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
+            builder.Entity<Certs>()
+                      .HasMany(c => c.Descriptions)
+                      .WithOne(d => d.Cert)
+                      .HasForeignKey(d => d.CertId);
         }
     }
 }

@@ -1,4 +1,4 @@
-import axios from '../../AxiosConf';
+import axios from './AxiosConf';
 
 const ExamService = {
     // Add certificate to a user

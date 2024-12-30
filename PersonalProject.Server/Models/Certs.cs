@@ -17,7 +17,6 @@ namespace PersonalProject.Server.Models
 
         public ICollection<Question> Questions { get; set; }
 
-        // New nullable fields
         public string? Description { get; set; } // Main description
         public ICollection<Description> Descriptions { get; set; } // List of additional descriptions
     }

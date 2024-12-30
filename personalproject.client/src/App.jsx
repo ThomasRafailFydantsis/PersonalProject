@@ -16,6 +16,7 @@ import MyCertificate from './pages/MyCertificate';
 import UserTable from './pages/UserTable';
 import UserProfileAdmin from './pages/UserProfileAdmin';
 import AuthPage from './pages/AuthPage';
+import ProductPage from './pages/ProductPage';
 
 
 const App = () => {
@@ -39,6 +40,7 @@ const App = () => {
         <Route path="/MyCertificate" caseSensitive={false} element={<MyCertificate />} />
         <Route path="/profile/:userId" element={<UserProfileAdmin />} />
         <Route path='/AuthPage' caseSensitive={false} element={<AuthPage />} />
+        <Route path="/certs/:id" element={<ProductPage />} />
       </Routes>
     </Router>
   );

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
-import certsService from "/MVC/PersonalProject/personalproject.client/CertsService";
+import certsService from "../servicesE/CertsService";
 import AddCertificateButton from "./AddCertificateButton";
 import DeleteButton from "./DeleteButton";
 
@@ -57,12 +57,12 @@ function CertsList({ id: userId }) {
 
     return (
         <div style={{maxWidth: "800px", margin: "0 auto"}}>
-            <h1>Certificates</h1>
+            <h1 style={{ textAlign: "center", color: "#607d8b" }}>Certificates</h1>
             <ul>
                 {certs.map((cert) => (
-                    <li key={cert.certId} className="certList">
+                    <li key={cert.certId} className="certList" onClick={() => navigate(`/certs/${cert.certId}`)}>
                         <>
-                            <div>{cert.certName}</div>
+                            <div >{cert.certName}</div>
                             {cert.imagePath ? (
                                 <img
                                     src={`https://localhost:7295${cert.imagePath}`} // Use full path

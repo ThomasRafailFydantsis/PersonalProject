@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
 import { FaHome, FaRegUserCircle } from "react-icons/fa";
 import { IoBagCheckSharp, IoCreateOutline } from "react-icons/io5";
 import { FiLogOut } from "react-icons/fi";
@@ -8,47 +7,52 @@ import { FcTodoList } from "react-icons/fc";
 import { useAuth } from "./AuthProvider";
 import axios from "axios";
 import { FaUsersGear } from "react-icons/fa6";
-const Sidebar = ({ isOpen, toggleSidebar }) => {
-    const { isAuthenticated, userData, roles, handleLogout } = useAuth();
-    const [image, setImage] = useState(null);
-    const [admin, setAdmin] = useState(false);
-    const [marker, setMarker] = useState(false);
-    const navigate = useNavigate();
+import notUploaded from "../imgs/notUploaded.png";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
-    useEffect(() => {
-        const fetchImagePath = async () => {
-            if (!userData || !userData.id) return;
-            try {
-                const response = await axios.get(
-                    `https://localhost:7295/api/ImageUpload/get-user-profile-image/${userData.id}`
-                );
-                setImage(response.data);
-            } catch (err) {
-                console.error("Error fetching image path:", err);
-            }
-        };
+const Sidebar = ({ isOpen, toggleSidebar, sidebarRef }) => {
+  const { isAuthenticated, userData, roles, handleLogout } = useAuth();
+  const [image, setImage] = useState(null);
+  const [admin, setAdmin] = useState(false);
+  const [marker, setMarker] = useState(false);
 
-        fetchImagePath();
-    }, [userData]);
-
-    useEffect(() => {
-        setAdmin(roles.includes("Admin"));
-        setMarker(roles.includes("Marker"));
-    }, [roles]);
-
-    const handleUserLogout = async () => {
-        try {
-            await handleLogout();
-            navigate("/");
-        } catch (error) {
-            console.error("Error during logout:", error);
-        }
+  useEffect(() => {
+    const fetchImagePath = async () => {
+      if (!userData || !userData.id) return;
+      try {
+        const response = await axios.get(
+          `https://localhost:7295/api/ImageUpload/get-user-profile-image/${userData.id}`
+        );
+        setImage(response.data);
+      } catch (err) {
+        console.error("Error fetching image path:", err);
+      }
     };
 
-    return (
-        <div className={`sidebar ${isOpen ? "open" : "collapsed"}`}>
+    fetchImagePath();
+  }, [userData]);
+
+  useEffect(() => {
+    setAdmin(roles.includes("Admin"));
+    setMarker(roles.includes("Marker"));
+  }, [roles]);
+
+  const handleUserLogout = async () => {
+    try {
+      await handleLogout();
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+  };
+
+  return (
+    <div
+      className={`sidebar ${isOpen ? "open" : "collapsed"}`}
+      ref={sidebarRef} // Attach ref here
+    >
             <nav>
-                <ul>
+                <ul style={{ marginTop: "-18px",marginBottom: "28px" }}>
                     <li>
                         <Link to="/dashboard" onClick={toggleSidebar}>
                             <FaHome />
@@ -92,7 +96,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     {admin && (
                         <li>
                             <Link to="/usertable" onClick={toggleSidebar}>
-                            <FaUsersGear />
+                                <FaUsersGear />
                                 {isOpen && <span>UserTable</span>}
                             </Link>
                         </li>
@@ -118,7 +122,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     <div className="user-info">
                         {!isOpen && (
                             <img
-                                src={image ? `https://localhost:7295${image}` : "/default-profile.png"}
+                                src={image ? `https://localhost:7295${image}` : notUploaded}
                                 alt="User Profile"
                                 className="profile-img"
                                 style={{ width: "40px", height: "40px" }}
@@ -126,15 +130,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                         )}
                         {isOpen && (
                             <div className="user-details">
+                                 <p className="user-name" style={{ fontSize: "16px", marginTop: "-30px" }}>{userData.userName}</p>
                                 <img
-                                    src={image ? `https://localhost:7295${image}` : "/default-profile.png"}
+                                    src={image ? `https://localhost:7295${image}` : notUploaded}
                                     alt="User Profile"
                                     className="profile-img"
                                     style={{ width: "70px", height: "70px", marginBottom: "90px" }}
                                 />
-                                <p className="user-role">{roles.join(", ")}</p>
-                                <p className="user-name">{userData.userName}</p>
-                                <p className="user-email">{userData.email}</p>
+                               
                             </div>
                         )}
                     </div>

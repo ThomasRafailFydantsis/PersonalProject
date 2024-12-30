@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AuthService from '/MVC/PersonalProject/personalproject.client/AuthService';
+import AuthService from '../servicesE/AuthService';
 import OflineHeader from '../components/OflineHeader';
 
 const RegisterPage = () => {

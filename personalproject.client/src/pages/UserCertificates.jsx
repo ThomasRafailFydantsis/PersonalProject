@@ -119,7 +119,7 @@ function UserCertificates() {
                                     <div style={{ fontSize: '25px' }}>{certificate.certName}</div>
                                     {!certificate.isPassed ? (
                                         <button
-                                            className="green-button"
+                                            className="btn btn-primary"
                                             onClick={() => handleTakeExam(certificate.certId)}
                                         >
                                             Take Exam
@@ -134,7 +134,7 @@ function UserCertificates() {
                                     )}
                                     {roles.includes("Admin") && (
                                         <button
-                                            className="red-button"
+                                            className="btn btn-danger"
                                             onClick={() => handleDelete(certificate.certId)}
                                         >
                                             Remove Certificate

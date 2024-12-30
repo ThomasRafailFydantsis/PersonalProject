@@ -94,7 +94,7 @@ const UserTable = () => {
         <div>
             <Header toggleSidebar={toggleSidebar} />
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            <h1 style={{ textAlign: "center" }}>User List</h1>
+            <h1 style={{ textAlign: "center",marginTop:"20px", color: "#607d8b" }}>User List</h1>
             <div style={{justifyContent:"center", display:"flex"}}>
                 <label style={{marginTop:"15px", fontSize:"20px"}} htmlFor="roleFilter">Filter by Role:</label>
                 <select
@@ -126,7 +126,7 @@ const UserTable = () => {
                             <td>{user.userName}</td>
                             <td>
                                 <a
-                                    href="#"
+                                    href=""
                                     onClick={() => navigate(`/profile/${user.id}`)}
                                 >
                                     {user.firstName}, {user.lastName}

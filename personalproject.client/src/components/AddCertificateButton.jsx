@@ -70,7 +70,7 @@ const AddCertificateButton = ({ certId }) => {
                     Owned   <FaCheck />
                 </button>
             ) : (
-                <button onClick={addCertificateToUser} disabled={isLoading}>
+                <button onClick={addCertificateToUser} className="btn btn-success" disabled={isLoading}>
                     {isLoading ? "Adding..." : "Add Certificate"}
                 </button>
             )}

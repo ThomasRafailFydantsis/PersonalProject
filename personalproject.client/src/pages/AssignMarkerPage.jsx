@@ -122,7 +122,7 @@ const AssignMarkerPage = () => {
         <div>
              <Header toggleSidebar={toggleSidebar} />
              <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            <h2 style={{ textAlign: "center" }}>Assign Marker</h2>
+            <h2 style={{ textAlign: "center",marginTop:'20px', color: "#607d8b" }}>Assign Marker</h2>
             {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
 
             <table border="1" style={{ width: "1150px", marginBottom: "20px", textAlign: "center" }}>

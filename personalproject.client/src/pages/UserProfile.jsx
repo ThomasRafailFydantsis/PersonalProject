@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import { useAuth } from "../components/AuthProvider";
 import UserProfileImageUpload from "../components/UserProfileImageUpload";
 import Sidebar from "../components/SideBar";
+import notUploaded from "../imgs/notUploaded.png";
 
 const UserProfile = () => {
     const { isAuthenticated, userData, AuthError } = useAuth();
@@ -102,9 +103,9 @@ const UserProfile = () => {
                     
                     }}
                 >
-                    {image ? (
+                  
                         <img
-                            src={`https://localhost:7295${image}`}
+                            src={image ?`https://localhost:7295${image}` : notUploaded}
                             alt="User Profile"
                             style={{
                                 width: "100px",
@@ -114,9 +115,7 @@ const UserProfile = () => {
                             }}
                         />
                         
-                    ) : (
-                        <p style={{ marginRight: "20px" }}>Profile image not available</p>
-                    )}
+                   
                     <h2 style={{marginLeft: "30px"}}>Hello, {userData.userName}!</h2>
                   {!isEditing ? null :  <UserProfileImageUpload userId={userData.id} />}
                 </div>

@@ -59,10 +59,10 @@ const MarkerAssignmentsPage = () => {
     }
 
     return (
-        <div>
+        <div style={{marginTop: "70px"}}>
              <Header toggleSidebar={toggleSidebar} />
              <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            <h2 style={{ textAlign: "center" }}>{userData.userName}'s Assignments</h2>
+            <h2 style={{ textAlign: "center", Marginop: "200px", color: "#607d8b" }}>{userData.userName}'s Assignments</h2>
             <table border="1" style={{ width: "1170px", textAlign: "center" }}>
                 <thead>
                     <tr>

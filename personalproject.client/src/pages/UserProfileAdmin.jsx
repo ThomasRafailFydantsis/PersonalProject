@@ -4,7 +4,6 @@ import axios from "axios";
 import Header from "../components/Header";
 import Sidebar from "../components/SideBar";
 
-
 const UserProfileAdmin = () => {
     const { userId } = useParams();
     const [user, setUser] = useState(null);
@@ -43,8 +42,10 @@ const UserProfileAdmin = () => {
         const fetchCertificates = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`https://localhost:7295/api/Exam/user-certificates/${userId}`);
-                setCertificates(response.data);
+                const response = await axios.get(
+                    `https://localhost:7295/api/Exam/user-certificates/${userId}`
+                );
+                setCertificates(response.data || []); // Ensure an empty array if the response is null/undefined
             } catch (err) {
                 console.error("Error fetching certificates:", err);
                 setError("Failed to fetch certificates.");
@@ -60,28 +61,32 @@ const UserProfileAdmin = () => {
     if (error) return <div>Error: {error}</div>;
 
     return (
-        <div>
-             <Header toggleSidebar={toggleSidebar} />
-             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            <h1>User Profile</h1>
-            {user && user.profileImagePath ? (
-                <img
-                    src={`https://localhost:7295${user.profileImagePath}`}
-                    alt="Profile"
-                    style={{ width: "100px", height: "100px" }}
-                />
-            ) : (
-                <div>No profile image available</div>
-            )}
-            {user && (
-                <>
-                    <p><strong>First Name:</strong> {user.firstName}</p>
-                    <p><strong>Last Name:</strong> {user.lastName}</p>
-                    <p><strong>Username:</strong> {user.userName}</p>
-                    <p><strong>Email:</strong> {user.email}</p>
-                    <p><strong>Roles:</strong> {user.roles.join(", ")}</p>
-                </>
-            )}
+        <div style={{ textAlign: "center" }}>
+            <Header toggleSidebar={toggleSidebar} />
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            <h1 style={{ marginTop: "20px", color: "#607d8b" }}>User Profile</h1>
+            <div style={{ display: "flex", alignItems: "center" }}>
+                <div>
+                    {user && user.profileImagePath ? (
+                        <img
+                            src={`https://localhost:7295${user.profileImagePath}`}
+                            alt="Profile"
+                            style={{ width: "150px", height: "150px" }}
+                        />
+                    ) : (
+                        <div>No profile image available</div>
+                    )}
+                </div>
+                {user && (
+                    <div style={{ marginLeft: "-420px" }}>
+                        <p><strong>First Name:</strong> {user.firstName}</p>
+                        <p><strong>Last Name:</strong> {user.lastName}</p>
+                        <p><strong>Username:</strong> {user.userName}</p>
+                        <p><strong>Email:</strong> {user.email}</p>
+                        <p><strong>Roles:</strong> {user.roles.join(", ")}</p>
+                    </div>
+                )}
+            </div>
             <h1>User Certificates</h1>
             {certificates.length === 0 ? (
                 <p>No certificates available.</p>
@@ -95,17 +100,24 @@ const UserProfileAdmin = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {certificates.map((cert) => ( cert.score != null &&
-                            <tr key={cert.id}>
-                                <td>{cert.certificateName}</td>
-                                <td>{cert.dateTaken}</td>
-                                <td>{cert.score}</td>
-                            </tr>
-                        ))}
+                        {certificates
+                            .filter((cert) => cert.score != null)
+                            .map((cert) => (
+                                <tr key={cert.id}>
+                                    <td>{cert.certificateName}</td>
+                                    <td>{cert.dateTaken}</td>
+                                    <td>{cert.score}</td>
+                                </tr>
+                            ))}
                     </tbody>
                 </table>
             )}
-            <button onClick={() => navigate("/usertable")}>Back</button>
+            <button
+                className="btn btn-success"
+                onClick={() => navigate("/usertable")}
+            >
+                Back
+            </button>
         </div>
     );
 };

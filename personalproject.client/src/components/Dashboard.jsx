@@ -1,22 +1,45 @@
-import { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import CertsList from "./CertsList";
-import { useState } from "react";
 import { useAuth } from "./AuthProvider";
-import Sidebar from "c:/Users/Thoma/OneDrive/Υπολογιστής/class/142/PersonalProject/personalproject.client/src/components/SideBar";
+import Sidebar from 'c:/Users/Thoma/OneDrive/Υπολογιστής/class/142/PersonalProject/personalproject.client/src/components/SideBar.jsx'; // Import Sidebar correctly
 
 
 function Dashboard() {
     const { isAuthenticated, userData, roles, AuthError, loading, revalidateAuth } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-    const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
-    };
-
+    
+    // Create ref for the sidebar
+    const sidebarRef = useRef(null);
     const navigate = useNavigate();
 
+    // Toggle the sidebar open and closed
+    const toggleSidebar = () => {
+        setIsSidebarOpen((prev) => !prev);
+    };
+
+    // Close the sidebar
+    const closeSidebar = () => {
+        setIsSidebarOpen(false);
+    };
+
+    // Handle click outside to close the sidebar
+    const handleClickOutside = (event) => {
+        if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+            closeSidebar(); // Close sidebar when clicked outside
+        }
+    };
+
+    // Add event listener on mount to detect clicks outside
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    // Revalidate authentication if necessary
     useEffect(() => {
         if (!loading && isAuthenticated && !userData) {
             revalidateAuth();
@@ -24,7 +47,7 @@ function Dashboard() {
     }, [loading, isAuthenticated, userData, revalidateAuth]);
 
     if (loading) {
-        return <div>Loading...</div>; 
+        return <div>Loading...</div>;
     }
 
     if (AuthError && isAuthenticated === false) {
@@ -41,30 +64,21 @@ function Dashboard() {
         return <div>Authenticating...</div>;
     }
 
+    // Check if user has the required role
     const hasNoPermission = !roles.includes("Admin") && !roles.includes("Marker") && !roles.includes("User");
 
     if (hasNoPermission) {
-        return navigate ("/");
+        return navigate("/"); // Redirect to the homepage if no permission
     }
 
     return (
         <div>
-            <Header toggleSidebar={toggleSidebar} />
-            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen}/>
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
             <div className="wrapper">
-                {/* <h2 className="welcome">Welcome Back, {userData?.userName || "User"}!</h2> */}
-                <div className="dashboard-certificates" style={{marginTop: "-100px"}}>
+                <div className="dashboard-certificates" style={{ marginTop: "-100px" }}>
                     <CertsList id={userData?.id} />
                 </div>
-                {/* <button onClick={() => navigate("/userProfile")}>User Profile</button>
-                <button onClick={() => navigate("/userCertificates")}>Your Certificates</button>
-                {roles.includes("Admin") && <button onClick={() => navigate("/CreateCert")}>Add Certificate</button>}
-                {roles.includes("Marker") && <button onClick={() => navigate("/CreateCert")}>Add Certificate</button>}
-                {roles.includes("Admin") && <button onClick={() => navigate("/userTable")}>User Table</button>}
-                {roles.includes("Admin") && <button onClick={() => navigate("/assignMarker")}>Assign Marker</button>}
-                {roles.includes("Marker") && (
-                    <button onClick={() => navigate(`/marker/assignments/${userData?.id}`)}>Your Assignments</button>
-                )} */}
             </div>
         </div>
     );

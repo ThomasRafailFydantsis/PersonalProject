@@ -76,13 +76,13 @@ console.log(certificates);
         <div>
              <Header toggleSidebar={toggleSidebar} />
              <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            <h2 style={{ textAlign: "center" }}>User Certificates</h2>
+            <h2 style={{ textAlign: "center", marginTop: "20px", color: "#607d8b" }}>User Certificates</h2>
             {certificates.length === 0 ? (
                 <p>No certificates available.</p>
             ) : (
                 <table>
                     <thead>
-                        <tr>
+                        <tr style={{color:"FF8000"}}>
                             <th>Certificate</th>
                             <th>Date Taken</th>
                             <th>Score</th>

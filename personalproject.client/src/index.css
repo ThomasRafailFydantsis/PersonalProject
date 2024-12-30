@@ -2,16 +2,18 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: aliceblue;
+  background: aliceblue;
   color: #333;
+  margin-bottom: -100px;
 }
 
 
 div {
     max-width: 100%;
-    margin: 20px auto;
+    margin: 0px auto;
     padding: 20px;
     border-radius: 8px;
+    
 }
 
 
@@ -47,11 +49,9 @@ header {
   text-decoration: none;
   font-size: 22px;
   transition: color 0.3s ease;
+  
 }
 
-.header-nav a:hover {
-  color: #FF8C00;
-}
 a{
   text-decoration: none;
 }
@@ -314,19 +314,26 @@ button{
   max-width: 600px; 
   height: 900px; 
 } */
+ .header-logo button:hover{
+   color : #FF8C00 !important;
+   background-color: rgba(183,121,37,0.2) !important;
+ }
+ .nav-link a:hover{
+  color: #FF8C00 ;
+ }
 .header-transparent{
- opacity: 1;
+ opacity: 0.8;
 }
 .header-isNotTransparent{
   opacity: 1;
 }
 .sidebar {
   position: fixed;
-  top: 40px;
+  top: 60px;
   left: 0;
   height: 100%;
   width: 240px;
-  background-color: #607d8b;
+  background-color: #627e8c;
   color: white;
   transform: translateX(-100%);
   transition: transform 0.3s ease, width 0.3s ease;
@@ -335,6 +342,7 @@ button{
   padding: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 0%;
+  opacity: 0.9;
 }
 
 .sidebar.open {
@@ -346,7 +354,7 @@ button{
   transform: translateX(0);
   padding: 10px;
   background-color: #627e8c;
-  opacity: 0.8;
+  opacity: 0.7;
 }
 
 .sidebar nav ul {
@@ -373,6 +381,11 @@ button{
   transition: color 0.3s ease, background-color 0.3s ease;
   border: none;
   background: none;
+}
+
+header a:hover{
+  color: #FF8C00 !important;
+  background-color: rgba(183,121,37,0.02) !important;
 }
 
 .sidebar nav ul li a:hover,
@@ -418,7 +431,8 @@ button{
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  object-fit: cover;
+
+ 
 }
 
 .sidebar-footer .user-details {
@@ -443,7 +457,6 @@ button{
   font-style: italic;
 }
 
-/* Adjustments for collapsed state */
 .sidebar.collapsed .sidebar-footer .user-details {
   display: none;
  
@@ -456,20 +469,151 @@ button{
   padding-top: 10px;
   margin-left: -19px;
   border: none;
+}
+
+.user-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.header-nav {
+  position: relative;
+}
+
+.user-dropdown {
+  position: relative;
+  
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 9999;
+  
+  
+  /* Add other styling here */
+}
+div::-webkit-scrollbar {
+  height: 8px;
+  background-color: black;
+}
+div::-webkit-scrollbar-thumb {
+  background-color: #28523f;
+  border-radius: 4px;
+}
+div::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.user-profile-button  :hover{
+  color: #FF8C00;
 
 }
-/* .logout-btn{
-  text-decoration: none;
-  color: white;
-  font-size: 18px;
+.cert-details-container {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.back-button {
+  background-color: #3f51b5;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.back-button:hover {
+  background-color: #283593;
+}
+
+.cert-header {
   display: flex;
   align-items: center;
-  padding: 15px;
-  transition: color 0.3s ease, background-color 0.3s ease;
-  border: none;
-  background: none;
+  gap: 20px;
 }
-.logout-btn :hover{
-  color: #FF8C00;
-  background-color: rgba(255, 140, 0, 0.1);
-} */
+
+.cert-header-image {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.cert-header-info {
+  flex: 1;
+}
+
+.cert-header-info h1 {
+  margin: 0;
+  font-size: 2em;
+  color: #333;
+}
+
+.cert-descriptions {
+  margin-top: 20px;
+}
+
+.description-card {
+  background-color: #f9f9f9;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+.certs-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-title {
+  text-align: center;
+  color: #3f51b5;
+  margin-bottom: 20px;
+}
+
+.certs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.cert-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.cert-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.cert-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.cert-details {
+  padding: 15px;
+  text-align: center;
+}
+
+.cert-name {
+  font-size: 1.5em;
+  color: #333;
+}
+
+.cert-description {
+  font-size: 1em;
+  color: #777;
+}
