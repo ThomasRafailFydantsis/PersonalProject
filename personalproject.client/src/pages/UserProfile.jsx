@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { useAuth } from "../components/AuthProvider";
 import UserProfileImageUpload from "../components/UserProfileImageUpload";
-import Sidebar from "../components/SideBar";
+import Sidebar from "../components/Sidebar1";
 import notUploaded from "../imgs/notUploaded.png";
 
 const UserProfile = () => {
@@ -13,12 +12,30 @@ const UserProfile = () => {
     const [updatedData, setUpdatedData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const [image, setImage] = useState(null);
-    const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+        
+    const sidebarRef = useRef(null);
 
     const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
+        setIsSidebarOpen((prev) => !prev);
     };
+
+    const closeSidebar = () => {
+        setIsSidebarOpen(false);
+    };
+
+    const handleClickOutside = (event) => {
+        if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+            closeSidebar(); 
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -86,26 +103,50 @@ const UserProfile = () => {
         return <div>Loading user data...</div>;
     }
 
+    const labelStyle = {
+        display: "block",
+        fontSize: "16px",
+        fontWeight: "600",
+    };
+      
+    const inputStyle = {
+        width: "100%",
+        padding: "10px",
+        borderRadius: "4px",
+        border: "1px solid #ccc",
+        marginTop: "5px",
+        fontSize: "16px",
+    };
+      
+    const buttonStyle = (bgColor) => ({
+        padding: "10px 20px",
+        backgroundColor: bgColor,
+        color: "white",
+        border: "none",
+        borderRadius: "4px",
+        cursor: "pointer",
+        fontSize: "16px",
+        transition: "background-color 0.3s",
+    });
+
     return (
-        
-        <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex" }}>
-            <Header toggleSidebar={toggleSidebar} />
-            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            <div style={{ flex: 1, padding: "20px" }}>
-                <div
-                    style={{
-                        padding: "20px",
-                        backgroundColor: " rgba(160, 158, 157, 0.1)",
-                        borderRadius: "8px",
-                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
-                        display: "flex",
-                        alignItems: "center",
-                    
-                    }}
-                >
-                  
+        <div style={{ marginLeft: isSidebarOpen ? "260px" : "0px", transition: "margin-left 0.3s ease-in-out" }}>
+            <div style={{ maxWidth: "1200px", margin: "0 auto", display: "flex" }}>
+                <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen} />
+                <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
+                <div style={{ flex: 1, padding: "20px", marginTop: "60px", }}>
+                    <div
+                        style={{
+                            padding: "20px",
+                             backgroundColor: isEditing ? "rgba(201, 240, 214, 0.8)" : "aliceblue",
+                            borderRadius: "8px",
+                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+                            display: "flex",
+                            alignItems: "center",
+                        }}
+                    >
                         <img
-                            src={image ?`https://localhost:7295${image}` : notUploaded}
+                            src={image ? `https://localhost:7295${image}` : notUploaded}
                             alt="User Profile"
                             style={{
                                 width: "100px",
@@ -114,152 +155,111 @@ const UserProfile = () => {
                                 marginRight: "20px",
                             }}
                         />
-                        
-                   
-                    <h2 style={{marginLeft: "30px"}}>Hello, {userData.userName}!</h2>
-                  {!isEditing ? null :  <UserProfileImageUpload userId={userData.id} />}
-                </div>
-                {isEditing ? (
-                   <form style={{ display: "grid", gap: "20px", marginBottom: "20px", backgroundColor:' rgba(201, 240, 214, 0.8)', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' }}>
-                   <label>
-                       First Name:
-                       <input
-                           type="text"
-                           name="firstName"
-                           value={updatedData.firstName || ""}
-                           onChange={handleInputChange}
-                           style={{
-                               width: "100%",
-                               padding: "8px",
-                               borderRadius: "4px",
-                               border: "1px solid #ccc",
-                           }}
-                       />
-                   </label>
-                   <label>
-                       Last Name:
-                       <input
-                           type="text"
-                           name="lastName"
-                           value={updatedData.lastName || ""}
-                           onChange={handleInputChange}
-                           style={{
-                               width: "100%",
-                               padding: "8px",
-                               borderRadius: "4px",
-                               border: "1px solid #ccc",
-                           }}
-                       />
-                   </label>
-                   <label>
-                       Email:
-                       <input
-                           type="email"
-                           name="email"
-                           value={updatedData.email || ""}
-                           onChange={handleInputChange}
-                           style={{
-                               width: "100%",
-                               padding: "8px",
-                               borderRadius: "4px",
-                               border: "1px solid #ccc",
-                           }}
-                       />
-                   </label>
-                   <label>
-                       Address:
-                       <input
-                           type="text"
-                           name="address1"
-                           value={updatedData.address1 || ""}
-                           onChange={handleInputChange}
-                           style={{
-                               width: "100%",
-                               padding: "8px",
-                               borderRadius: "4px",
-                               border: "1px solid #ccc",
-                           }}
-                       />
-                   </label>
-                   <label>
-                       Phone Number:
-                       <input
-                           type="text"
-                           name="phoneNumber"
-                           value={updatedData.phoneNumber || ""}
-                           onChange={handleInputChange}
-                           style={{
-                               width: "100%",
-                               padding: "8px",
-                               borderRadius: "4px",
-                               border: "1px solid #ccc",
-                           }}
-                       />
-                   </label>
-                   <div style={{ display: "flex", justifyContent: "space-between"}}>
-                       <button
-                           type="button"
-                           onClick={handleSaveChanges}
-                           style={{
-                               padding: "10px 20px",
-                               backgroundColor: "#4CAF50",
-                               color: "white",
-                               border: "none",
-                               borderRadius: "4px",
-                               cursor: "pointer",
-                               marginTop: "-40px",
-                           }}
-                       >
-                           Save Changes
-                       </button>
-                       <button
-                           type="button"
-                           onClick={() => setIsEditing(false)}
-                           style={{
-                               padding: "10px 20px",
-                               backgroundColor: "#f44336",
-                               color: "white",
-                               border: "none",
-                               borderRadius: "4px",
-                               cursor: "pointer",
-                               marginBottom: "-40px",
-                           }}
-                       >
-                           Cancel
-                       </button>
-                   </div>
-               </form>
-               
-                ) : (
-                    <div
-                        style={{
-                            padding: "20px",
-                            backgroundColor: " rgba(160, 158, 157, 0.1)",
-                            borderRadius: "8px",
-                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
-                        }}
-                    >
-                        <p>First Name: {userData.firstName || "N/A"}</p>
-                        <p>Last Name: {userData.lastName || "N/A"}</p>
-                        <p>Email: {userData.email || "N/A"}</p>
-                        <p>Address: {userData.address1 || "N/A"}</p>
-                        <p>Phone Number: {userData.phoneNumber || "N/A"}</p>
-                        <button
-                            onClick={() => setIsEditing(true)}
+                        <h2 style={{ marginLeft: "30px" }}>Hello, {userData.userName}!</h2>
+                        {isEditing ? <UserProfileImageUpload userId={userData.id} /> : null}
+                    </div>
+
+                    {isEditing ? (
+                        <form
                             style={{
-                                marginTop: "20px",
-                                padding: "10px 20px",
-                                backgroundColor: "#086d6d",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "4px",
-                                cursor: "pointer",
+                                display: "grid",
+                                gap: "20px",
+                                marginBottom: "20px",
+                                backgroundColor: "rgba(201, 240, 214, 0.8)",
+                                padding: "20px",
+                                borderRadius: "8px",
+                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+                                maxWidth: "100%",
+                                width: "1200px",
+                                margin: "0 auto",
                             }}
                         >
-                            Edit Profile
-                        </button>
-                    </div>
-                )}
+                            <label style={labelStyle}>
+                                First Name:
+                                <input
+                                    type="text"
+                                    name="firstName"
+                                    value={updatedData.firstName || ""}
+                                    onChange={handleInputChange}
+                                    style={inputStyle}
+                                />
+                            </label>
+                            <label style={labelStyle}>
+                                Last Name:
+                                <input
+                                    type="text"
+                                    name="lastName"
+                                    value={updatedData.lastName || ""}
+                                    onChange={handleInputChange}
+                                    style={inputStyle}
+                                />
+                            </label>
+                            <label style={labelStyle}>
+                                Email:
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={updatedData.email || ""}
+                                    onChange={handleInputChange}
+                                    style={inputStyle}
+                                />
+                            </label>
+                            <label style={labelStyle}>
+                                Address:
+                                <input
+                                    type="text"
+                                    name="address1"
+                                    value={updatedData.address1 || ""}
+                                    onChange={handleInputChange}
+                                    style={inputStyle}
+                                />
+                            </label>
+                            <label style={labelStyle}>
+                                Phone Number:
+                                <input
+                                    type="text"
+                                    name="phoneNumber"
+                                    value={updatedData.phoneNumber || ""}
+                                    onChange={handleInputChange}
+                                    style={inputStyle}
+                                />
+                            </label>
+
+                            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                                <button type="button" onClick={handleSaveChanges} style={buttonStyle("#4CAF50")}>
+                                    Save Changes
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditing(false)}
+                                    style={buttonStyle("#f44336")}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    ) : (
+                        <div
+                            style={{
+                                padding: "20px",
+                                backgroundColor: "rgba(160, 158, 157, 0.1)",
+                                borderRadius: "8px",
+                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+                                maxWidth: "1200px",
+                                margin: "0 auto",
+                            }}
+                        >
+                            <p>First Name: {userData.firstName || "N/A"}</p>
+                            <p>Last Name: {userData.lastName || "N/A"}</p>
+                            <p>Email: {userData.email || "N/A"}</p>
+                            <p>Address: {userData.address1 || "N/A"}</p>
+                            <p>Phone Number: {userData.phoneNumber || "N/A"}</p>
+                            <button onClick={() => setIsEditing(true)} style={buttonStyle("#086d6d")}>
+                                Edit Profile
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

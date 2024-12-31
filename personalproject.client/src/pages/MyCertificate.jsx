@@ -1,20 +1,45 @@
 import { useState, useEffect } from "react";
 import axios from "axios";  
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthProvider";
 import Header from "../components/Header";
-import Sidebar from "../components/SideBar";
+import Sidebar from "../components/Sidebar1";
+import { useRef } from "react";
+
 const MyCertificate = () => {
     const [certificates, setCertificates] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate();
     const { isAuthenticated, userData, AuthError, revalidateAuth } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-    const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
-    };
+        
+        // Create ref for the sidebar
+        const sidebarRef = useRef(null);
+        
+    
+        // Toggle the sidebar open and closed
+        const toggleSidebar = () => {
+            setIsSidebarOpen((prev) => !prev);
+        };
+    
+        // Close the sidebar
+        const closeSidebar = () => {
+            setIsSidebarOpen(false);
+        };
+    
+        // Handle click outside to close the sidebar
+        const handleClickOutside = (event) => {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                closeSidebar(); // Close sidebar when clicked outside
+            }
+        };
+    
+        // Add event listener on mount to detect clicks outside
+        useEffect(() => {
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => {
+                document.removeEventListener("mousedown", handleClickOutside);
+            };
+        }, []);
 
     useEffect(() => {
         revalidateAuth();
@@ -73,9 +98,9 @@ console.log(certificateId);
     
 console.log(certificates);
     return (
-        <div>
-             <Header toggleSidebar={toggleSidebar} />
-             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+        <div style={{marginLeft:isSidebarOpen ? "250px" : "0px", transition: "margin-left 0.3s ease-in-out"}}>
+              <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen}/>
+             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
             <h2 style={{ textAlign: "center", marginTop: "20px", color: "#607d8b" }}>User Certificates</h2>
             {certificates.length === 0 ? (
                 <p>No certificates available.</p>

@@ -547,7 +547,7 @@ namespace PersonalProject.Server.Controllers
                     submissionDate = ma.ExamSubmission.SubmissionDate,
                     score = ma.ExamSubmission.Score,
                     isPassed = ma.ExamSubmission.IsPassed,
-                    isMarked = ma.IsMarked //Todo
+                    isMarked = ma.IsMarked 
                 })
                 .ToListAsync();
 

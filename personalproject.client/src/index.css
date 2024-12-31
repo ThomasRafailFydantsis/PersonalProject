@@ -10,12 +10,44 @@ body {
 
 div {
     max-width: 100%;
-    margin: 0px auto;
-    padding: 20px;
-    border-radius: 8px;
-    
+    margin: 0 auto;
 }
 
+
+.crsl .carousel-control-prev,
+.crsl .carousel-control-next {
+    background-color: #FF8C00; /* Change to your desired color */
+    width: 50px; /* Adjust size if needed */
+    height: 50px;
+    border-radius: 50%;
+    opacity: 0.71; /* Make the button fully visible */
+    margin-top: 250px;
+}
+
+.crsl .carousel-control-prev:hover,
+.crsl .carousel-control-next:hover {
+    background-color: #FF4500;
+    color: #ddd; /* A darker shade for hover effect */
+}
+
+.crsl .carousel-control-prev-icon,
+.crsl .carousel-control-next-icon {
+  /* Removes the default arrow icon */
+    color: #FFFFFF; /* Change arrow color */
+    font-size: 24px;
+   
+}
+
+.modal-container .custom-modal .btn {
+  width: 120px;
+  margin: 0 5px;
+}
+
+.modal-container .custom-modal .form-control {
+  width: 80%;
+  margin: 0 auto;
+  padding: 10px;
+}
 
 header {
   display: flex;
@@ -76,28 +108,39 @@ ul {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid #ddd;
+    border: 1px solid #607d8b;
     background: aliceblue;
     border-radius: 8px;
     margin: 10px 0;
     padding: 15px;
+    font-size: 50px;
     transition: box-shadow 0.3s ease, transform 0.3s ease;
+    color: #607d8b;
 
 }
 
 .certList:hover {
   background: linear-gradient(32deg, rgba(54,95,114,1) 45%, rgba(183,121,37,1) 100%);
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
   transform: scale(1.02);
   color: aliceblue;
   text-align:center;
   font-display:swap;
+  
+  border: 1px solid linear-gradient(32deg,  rgba(183,121,37,1) 100%, rgba(54,95,114,1) 45%);
 }
 
 .certList > div {
   flex: 1;
   padding-right: 15px;
-  font-size: 16px;
+  font-size: 32px;
+}
+
+.logo a{
+  color: #FF8C00 !important;
+}
+.logo a:hover{
+  color: rgba(255, 141, 10, 0.8) !important;
 }
 
 table {
@@ -496,18 +539,18 @@ header a:hover{
 }
 div::-webkit-scrollbar {
   height: 8px;
-  background-color: black;
+  background-color: transparent;
 }
 div::-webkit-scrollbar-thumb {
-  background-color: #28523f;
+  background-color: transparent;
   border-radius: 4px;
 }
 div::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
-.user-profile-button  :hover{
-  color: #FF8C00;
+.user-profile-button {
+  margin-top: -6px !important;
 
 }
 .cert-details-container {
@@ -613,7 +656,26 @@ div::-webkit-scrollbar-track {
   color: #333;
 }
 
-.cert-description {
+/* .cert-description {
   font-size: 1em;
   color: #777;
 }
+.custom-accordion {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.custom-accordion-item {
+  margin-bottom: 10px;
+}
+
+.custom-accordion-header:hover {
+  background-color: #e9ecef;
+}
+
+.custom-accordion-body p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+} */

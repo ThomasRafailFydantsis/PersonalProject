@@ -4,6 +4,9 @@ import axios from "axios";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Header from "./Header";
 import { useAuth } from "./AuthProvider";
+import Sidebar from "./Sidebar1";
+import { useRef } from "react";
+
 //import ExamImageUpload from "./ExamImageUpload";
 
 
@@ -12,11 +15,42 @@ const CreateCert = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { isAuthenticated, roles, AuthError, revalidateAuth } = useAuth();
-
-    // State hooks
     const [certName, setCertName] = useState("");
     const [passingScore, setPassingScore] = useState(0);
     const [questions, setQuestions] = useState([]);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+        
+        // Create ref for the sidebar
+        const sidebarRef = useRef(null);
+        
+    
+        // Toggle the sidebar open and closed
+        const toggleSidebar = () => {
+            setIsSidebarOpen((prev) => !prev);
+        };
+    
+        // Close the sidebar
+        const closeSidebar = () => {
+            setIsSidebarOpen(false);
+        };
+    
+        // Handle click outside to close the sidebar
+        const handleClickOutside = (event) => {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                closeSidebar(); // Close sidebar when clicked outside
+            }
+        };
+    
+        // Add event listener on mount to detect clicks outside
+        useEffect(() => {
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => {
+                document.removeEventListener("mousedown", handleClickOutside);
+            };
+        }, []);
+
+    // State hooks
+    
 
     // Revalidate authentication on page load or route change
     useEffect(() => {
@@ -109,8 +143,9 @@ const CreateCert = () => {
     }
 
     return (
-        <div style={{justifyContent: "center"  }}>
-            <Header />
+        <div style={{justifyContent: "center", paddingTop: "50px", marginLeft: isSidebarOpen ? "250px" : "0", transition: "margin-left 0.3s ease"  }}>
+            <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen}/>
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
             <form onSubmit={handleSubmit} className="exam-form" style={{alignContent: "center"  }}>
                 <div style={{textAlign: "center"  }}>
                     <label>Exam Title:</label>

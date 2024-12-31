@@ -117,20 +117,22 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef }) => {
                     </li>
                 </ul>
             </nav>
-            <div className="sidebar-footer">
+            <div className="sidebar-footer" style={{ bottom: "0" }}>
                 {isAuthenticated ? (
+                    
                     <div className="user-info">
                         {!isOpen && (
                             <img
                                 src={image ? `https://localhost:7295${image}` : notUploaded}
                                 alt="User Profile"
                                 className="profile-img"
-                                style={{ width: "40px", height: "40px" }}
+                                style={{ width: "40px", height: "40px", marginLeft: "36px" ,position: "absolute", bottom: "100px" }}
                             />
                         )}
                         {isOpen && (
-                            <div className="user-details">
-                                 <p className="user-name" style={{ fontSize: "16px", marginTop: "-30px" }}>{userData.userName}</p>
+                            <div className="user-details" style={{bottom: "140px", position: "absolute"}}>
+                                 <p className="user-name" style={{ fontSize: "16px", marginTop: "-30px" }}><span style={{ fontWeight: "bold",color: "#FF8C00" }}>{userData.userName}</span></p>
+                                 <p className="user-email" style={{ fontSize: "14px" }}>{userData.email}</p>
                                 <img
                                     src={image ? `https://localhost:7295${image}` : notUploaded}
                                     alt="User Profile"

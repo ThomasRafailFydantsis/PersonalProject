@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import certsService from "../servicesE/CertsService";
+import { Button } from "react-bootstrap";
 
 function HomeCerts({ onAuthRedirect }) {
     const [certs, setCerts] = useState([]);
@@ -27,16 +28,20 @@ function HomeCerts({ onAuthRedirect }) {
             <h1 style={{ textAlign: "center", color: "#607d8b" }}>
                 Our <span style={{ color: "#FF8C00" }}>Products</span>
             </h1>
+            <h3 style={{ textAlign: "center", color: "#607d8b" }}>These helped thousend of students land their dream job </h3>
+            <h4 style={{ textAlign: "center", color: "#607d8b" }}>Start your jurney NOW</h4>
             <div
                 style={{
                     display: "flex",
                     overflowX: "auto",
                     padding: "10px 0",
                     scrollbarWidth: "thin",
+                    marginTop: "72px",
                 }}
             >
                 {certs.map((cert) => (
                     <div
+                        className="cert-card"
                         key={cert.certId}
                         style={{
                             flex: "0 0 auto",
@@ -67,19 +72,13 @@ function HomeCerts({ onAuthRedirect }) {
                                 marginBottom: "8px",
                             }}
                         />
-                        <button
+                        <Button
+                            
                             onClick={() => handleViewClick(cert.certId)}
-                            style={{
-                                background: "#5aa19b",
-                                color: "white",
-                                border: "none",
-                                padding: "8px 12px",
-                                borderRadius: "4px",
-                                cursor: "pointer",
-                            }}
+                          className="btn btn-success"
                         >
                             View
-                        </button>
+                        </Button>
                     </div>
                 ))}
             </div>

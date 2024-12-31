@@ -60,9 +60,9 @@ function CertsList({ id: userId }) {
             <h1 style={{ textAlign: "center", color: "#607d8b" }}>Certificates</h1>
             <ul>
                 {certs.map((cert) => (
-                    <li key={cert.certId} className="certList" onClick={() => navigate(`/certs/${cert.certId}`)}>
+                    <li key={cert.certId} className="certList">
                         <>
-                            <div >{cert.certName}</div>
+                            <div  onClick={() => navigate(`/certs/${cert.certId}`)} style={{ cursor: "pointer" }} >{cert.certName}</div>
                             {cert.imagePath ? (
                                 <img
                                     src={`https://localhost:7295${cert.imagePath}`} // Use full path

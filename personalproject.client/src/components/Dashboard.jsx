@@ -3,16 +3,17 @@ import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import CertsList from "./CertsList";
 import { useAuth } from "./AuthProvider";
-import Sidebar from 'c:/Users/Thoma/OneDrive/Υπολογιστής/class/142/PersonalProject/personalproject.client/src/components/SideBar.jsx'; // Import Sidebar correctly
+import Sidebar from './Sidebar1'; // Import Sidebar correctly
 
 
 function Dashboard() {
     const { isAuthenticated, userData, roles, AuthError, loading, revalidateAuth } = useAuth();
+    const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     
     // Create ref for the sidebar
     const sidebarRef = useRef(null);
-    const navigate = useNavigate();
+    
 
     // Toggle the sidebar open and closed
     const toggleSidebar = () => {
@@ -72,11 +73,11 @@ function Dashboard() {
     }
 
     return (
-        <div>
+        <div style={{paddingBottom: "100px"}}>
             <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen}/>
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
-            <div className="wrapper">
-                <div className="dashboard-certificates" style={{ marginTop: "-100px" }}>
+            <div className="wrapper" style={{ marginLeft: isSidebarOpen ? "300px" : "0px",transition: "margin-left 0.3s ease-in-out" }}>
+                <div className="dashboard-certificates" style={{ marginTop: "80px"}}>
                     <CertsList id={userData?.id} />
                 </div>
             </div>

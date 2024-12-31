@@ -3,7 +3,8 @@ import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import { useAuth } from "../components/AuthProvider";
-
+import Sidebar from "../components/Sidebar1";
+import { useRef } from "react";
 const GradeExamPage = () => {
     const { examSubmissionId } = useParams();
     const [submissionDetails, setSubmissionDetails] = useState(null);
@@ -11,7 +12,36 @@ const GradeExamPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { isAuthenticated, roles, AuthError, revalidateAuth } = useAuth();
-    const navigate = useNavigate();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+        
+        // Create ref for the sidebar
+        const sidebarRef = useRef(null);
+        
+    
+        // Toggle the sidebar open and closed
+        const toggleSidebar = () => {
+            setIsSidebarOpen((prev) => !prev);
+        };
+    
+        // Close the sidebar
+        const closeSidebar = () => {
+            setIsSidebarOpen(false);
+        };
+    
+        // Handle click outside to close the sidebar
+        const handleClickOutside = (event) => {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                closeSidebar(); // Close sidebar when clicked outside
+            }
+        };
+    
+        // Add event listener on mount to detect clicks outside
+        useEffect(() => {
+            document.addEventListener("mousedown", handleClickOutside);
+            return () => {
+                document.removeEventListener("mousedown", handleClickOutside);
+            };
+        }, []);
 
     // Revalidate authentication on page load
     useEffect(() => {
@@ -101,7 +131,8 @@ const GradeExamPage = () => {
 
     return (
         <div >
-            <Header />
+             <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen}/>
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
             <div style={{ padding: "20px", textAlign: "center", color: "#607d8b", top: "100px" }}>
 
             <h1 >Grade Submission:</h1>

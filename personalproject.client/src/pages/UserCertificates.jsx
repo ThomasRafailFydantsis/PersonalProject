@@ -4,18 +4,43 @@ import axios from 'axios';
 import Header from '../components/Header';
 import { useAuth } from '../components/AuthProvider';
 import { FaCheck } from 'react-icons/fa';
-import Sidebar from '../components/SideBar';
-
+import Sidebar from '../components/Sidebar1';
+import { useRef } from "react";
 function UserCertificates() {
     const [certificates, setCertificates] = useState([]);
     const [error, setError] = useState(null);
     const { isAuthenticated, userData, AuthError, revalidateAuth, roles } = useAuth();
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+        
+    // Create ref for the sidebar
+    const sidebarRef = useRef(null);
+    
 
+    // Toggle the sidebar open and closed
     const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
+        setIsSidebarOpen((prev) => !prev);
     };
+
+    // Close the sidebar
+    const closeSidebar = () => {
+        setIsSidebarOpen(false);
+    };
+
+    // Handle click outside to close the sidebar
+    const handleClickOutside = (event) => {
+        if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+            closeSidebar(); // Close sidebar when clicked outside
+        }
+    };
+
+    // Add event listener on mount to detect clicks outside
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     useEffect(() => {
         revalidateAuth(); // Validate authentication state
@@ -70,8 +95,9 @@ function UserCertificates() {
 
     if (error) {
         return (
-            <div>
-                <Header />
+            <div style={{ textAlign: 'center' }}>
+                <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen}/>
+                <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
                 <h1>User Certificates</h1>
                 <p>{typeof error === 'string' ? error : error.message || 'An unknown error occurred.'}</p>
                 <button className="green-button" onClick={() => navigate('/dashboard')}>Back to Dashboard</button>
@@ -94,7 +120,7 @@ function UserCertificates() {
     }
 
     return (
-        <div>
+        <div style={{marginLeft: isSidebarOpen ? "300px" : "0px", transition: "margin-left 0.3s ease-in-out" , paddingTop: '80px'}}>
             <Header toggleSidebar={toggleSidebar} />
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
             <h3 style={{ textAlign: 'center', color:'darkgreen' }}>Here you can find your added Certificates</h3>

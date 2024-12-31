@@ -137,14 +137,14 @@ const ExamPage = () => {
 
     const questions = exam?.Questions || [];
 
-    return (
-        <div className="container my-4">
+    return(
+        <div className="container my-4" style={{paddingTop: "100px"}}>
             <ExamHdr timeLeft={examStarted ? timeLeft : null} />
             <div className="text-center mb-4">
                 <h1 className="display-5">{exam.CertName}</h1>
             </div>
-
-            {!examStarted ? (
+    
+            {!examStarted && !result ? ( // Only show Start Exam button if no result is present
                 <div className="text-center">
                     <button
                         className="btn btn-primary"
@@ -153,7 +153,9 @@ const ExamPage = () => {
                         Start Exam
                     </button>
                 </div>
-            ) : (
+            ) : null}
+    
+            {examStarted && !result ? ( // Only show exam questions if exam has started and no result is present
                 <>
                     <div className="mb-4">
                         {questions.map((question) => (
@@ -178,27 +180,27 @@ const ExamPage = () => {
                             </div>
                         ))}
                     </div>
-
+    
                     {submitError && <p className="text-danger">{submitError}</p>}
-
+    
                     <button className="btn btn-primary" onClick={handleSubmit}>
                         Submit Exam
                     </button>
-
+    
                     <button className="btn btn-secondary ms-2" onClick={handleGoBack}>
                         Go Back
                     </button>
                 </>
-            )}
-
-            {result && (
+            ) : null}
+    
+            {result && ( // Only show the result when available
                 <div className="alert alert-success mt-4">
                     <h2>Result</h2>
                     <p><strong>Certificate:</strong> {result.certName || "Certificate not found"}</p>
                     <p><strong>Score:</strong>  {result.score }</p>
                     <p><strong>Passed:</strong> {result.passed ? "Yes" : "No"}</p>
-                    <p><strong>Date Taken:</strong>{result.dateTaken ? new Date(result.dateTaken).toLocaleDateString() : "-"}</p>
-                    <button className="btn btn-primary" onClick={()=> navigate(-1)}>Go Back</button>
+                    <p><strong>Date Taken:</strong> {result.dateTaken ? new Date(result.dateTaken).toLocaleDateString() : "-"}</p>
+                    <button className="btn btn-primary" onClick={() => navigate(-1)}>Go Back</button>
                 </div>
             )}
         </div>
