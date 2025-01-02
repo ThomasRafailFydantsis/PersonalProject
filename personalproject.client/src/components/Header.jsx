@@ -5,7 +5,7 @@ import { HiOutlineChevronDoubleLeft } from "react-icons/hi";
 import { useAuth } from "./AuthProvider";
 
 function Header({ toggleSidebar, isOpen }) {
-  const { userData, handleLogout } = useAuth();
+  const { userData, handleLogout, coins } = useAuth();
   const [transparent, setTransparent] = useState(false);
   const [open, setOpen] = useState(false); 
   const dropdownRef = useRef(null); 
@@ -58,7 +58,7 @@ function Header({ toggleSidebar, isOpen }) {
 
   return (
     <header
-      className={`header ${transparent ? "header-transparent" : "header-isNotTransparent"}`}
+      className={`headerHome ${transparent ? "header-transparent" : "header-isNotTransparent"}`}
       style={{
         display: "flex",
         justifyContent: "space-between",
@@ -70,7 +70,7 @@ function Header({ toggleSidebar, isOpen }) {
         className="header-logo"
         style={{
           position: "absolute",
-          left: "5px",
+          left: "10px",
           zIndex: 10,
           
         }}
@@ -84,7 +84,7 @@ function Header({ toggleSidebar, isOpen }) {
           style={{
             background: "none",
             border: "none",
-            color: "white",
+            color: "#607d8b",
             fontSize: "20px",
             cursor: "pointer",
             zIndex: 10,
@@ -94,19 +94,22 @@ function Header({ toggleSidebar, isOpen }) {
           {isOpen ? <HiOutlineChevronDoubleLeft size={23} /> : "☰"}
         </button>
       </div>
-      <div className="logo" style={{ flex: 1, textAlign: "center" }}>
-      <h1 >  <a href="/dashboard">
+      <div className="logo" style={{ flex: 1, textAlign: "center",  }}>
+      <h1 >  <a style={{fontSize: "3rem", color:"linear-gradient(32deg, rgb(169, 106, 106) 45%, rgba(183,121,37,1) 100%)"}} href="/dashboard">
          Certflix
         </a></h1>
       </div>
-      <nav className="header-nav" style={{ position: "absolute", right: "10px" }}>
-        <div className="user-dropdown">
-          <button
+      <nav className="header-nav" style={{ position: "absolute", right: "1px" }}>
+        <div style={{ display: "flex", alignItems: "center" }} className="user-dropdown">
+          <h3 style={{ cursor: "context-menu", color: "#607d8b", border:"1px solid #FF8C00", borderRadius:"9px",padding:"2px", marginTop:"12px", backgroundColor:"rgba(255, 140, 0, 0.1)" }}>
+            <span style={{ color: "#FF8C00", }}>Coins</span>Earned : {coins}</h3>
+          {/* <button
             onClick={handleToggleDropdown}
             style={{
               borderRadius: "5px",
               paddingBottom: "2px",
-              color: "aliceblue",
+              border: "none",
+              color: "#FF8C00",
               marginRight: "-22px",
             }}
           >
@@ -186,7 +189,7 @@ function Header({ toggleSidebar, isOpen }) {
                 </button>
               </li>
             </ul>
-          )}
+          )} */}
         </div>
       </nav>
     </header>

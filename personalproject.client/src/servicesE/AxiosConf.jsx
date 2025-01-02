@@ -1,20 +1,31 @@
 import axios from 'axios';
 
-// Ensure cookies are sent with requests (for HTTP-only cookie support)
-axios.defaults.withCredentials = true; // This will automatically send cookies with each request
+// Create an Axios instance
+const axiosInstance = axios.create({
+    baseURL: 'https://localhost:7295/api',
+    withCredentials: true,
+});
 
-// Set the base URL for API requests
-axios.defaults.baseURL = 'https://localhost:7295/api'; // Your API base URL
-
-// Optional: Interceptor to log or modify requests before they are sent
-axios.interceptors.request.use(
+// Add request interceptors
+axiosInstance.interceptors.request.use(
     (config) => {
-        console.log("Request Config:", config); // For debugging purposes
+        if (process.env.NODE_ENV === 'development') {
+            console.debug("Request Config:", config);
+        }
         return config;
     },
+    (error) => Promise.reject(error)
+);
+
+// Add response interceptors
+axiosInstance.interceptors.response.use(
+    (response) => response,
     (error) => {
+        if (process.env.NODE_ENV === 'development') {
+            console.error("Response Error:", error.response || error.message);
+        }
         return Promise.reject(error);
     }
 );
 
-export default axios;
+export default axiosInstance;

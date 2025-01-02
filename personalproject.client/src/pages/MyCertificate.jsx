@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";  
 import { useAuth } from "../components/AuthProvider";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar1";
-import { useRef } from "react";
 
 const MyCertificate = () => {
     const [certificates, setCertificates] = useState([]);
@@ -11,42 +10,32 @@ const MyCertificate = () => {
     const [error, setError] = useState(null);
     const { isAuthenticated, userData, AuthError, revalidateAuth } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-        
-        // Create ref for the sidebar
-        const sidebarRef = useRef(null);
-        
-    
-        // Toggle the sidebar open and closed
-        const toggleSidebar = () => {
-            setIsSidebarOpen((prev) => !prev);
-        };
-    
-        // Close the sidebar
-        const closeSidebar = () => {
-            setIsSidebarOpen(false);
-        };
-    
-        // Handle click outside to close the sidebar
-        const handleClickOutside = (event) => {
-            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-                closeSidebar(); // Close sidebar when clicked outside
-            }
-        };
-    
-        // Add event listener on mount to detect clicks outside
-        useEffect(() => {
-            document.addEventListener("mousedown", handleClickOutside);
-            return () => {
-                document.removeEventListener("mousedown", handleClickOutside);
-            };
-        }, []);
+
+    const sidebarRef = useRef(null);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen((prev) => !prev);
+    };
+
+    const closeSidebar = () => {
+        setIsSidebarOpen(false);
+    };
+
+    const handleClickOutside = (event) => {
+        if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+            closeSidebar();
+        }
+    };
 
     useEffect(() => {
-        revalidateAuth();
-    }, [location]);
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     useEffect(() => {
-        if (!userData?.id) return;
+        if (!isAuthenticated || !userData?.id) return;
 
         const fetchCertificates = async () => {
             try {
@@ -62,15 +51,13 @@ const MyCertificate = () => {
         };
 
         fetchCertificates();
-    }, [userData]);
+    }, [isAuthenticated, userData]);
 
-  
     const handleDownload = async (certificateId) => {
         try {
             const response = await axios.get(`https://localhost:7295/api/Exam/certificate/${certificateId}`, {
                 responseType: "blob",
             });
-console.log(certificateId);
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement("a");
             link.href = url;
@@ -86,28 +73,20 @@ console.log(certificateId);
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p style={{ color: "red" }}>{error}</p>;
+    if (AuthError) return <div>{AuthError}</div>;
+    if (!isAuthenticated) return <div>You are not logged in. Please log in.</div>;
 
-    if (AuthError) {
-        return <div>{AuthError}</div>;
-    }
-
-    if (!isAuthenticated) {
-        return <div>You are not logged in. Please log in.</div>;
-    }
-
-    
-console.log(certificates);
     return (
-        <div style={{marginLeft:isSidebarOpen ? "250px" : "0px", transition: "margin-left 0.3s ease-in-out"}}>
-              <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen}/>
-             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
-            <h2 style={{ textAlign: "center", marginTop: "20px", color: "#607d8b" }}>User Certificates</h2>
+        <div style={{ marginLeft: isSidebarOpen ? "250px" : "0px", transition: "margin-left 0.3s ease-in-out" }}>
+            <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen} />
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
+            <h2 style={{ textAlign: "center", marginTop: "60px", color: "#607d8b" }}>Results</h2>
             {certificates.length === 0 ? (
                 <p>No certificates available.</p>
             ) : (
                 <table>
                     <thead>
-                        <tr style={{color:"FF8000"}}>
+                        <tr style={{ color: "#FF8000" }}>
                             <th>Certificate</th>
                             <th>Date Taken</th>
                             <th>Score</th>
@@ -115,26 +94,31 @@ console.log(certificates);
                             <th>Action</th>
                         </tr>
                     </thead>
-                        <tbody>
-                            {certificates.map((cert) => (cert.score != null &&
-                            <tr key={cert.id}>
-                                <td>{cert.certificateName}</td>
-                                <td>{cert.dateTaken ? new Date(cert.dateTaken).toLocaleDateString() : "-"}</td>
-                                <td>{cert.score}</td>
-                                <td>{cert.isPassed && cert.isMarked ? "Passed & Marked" : "Pending"}</td>
-                                <td>
-                                    {cert.certificateDownloadable ? (
-                                        <button className="green-button" onClick={() => handleDownload(cert.id)}>Download</button>
-                                    ) : (
-                                        <span>Not Available</span>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
+                    <tbody>
+                        {certificates.map(
+                            (cert) =>
+                                cert.score != null &&
+                                cert.cost !== 0 && (
+                                    <tr key={cert.id}>
+                                        <td>{cert.certificateName}</td>
+                                        <td>{cert.dateTaken ? new Date(cert.dateTaken).toLocaleDateString() : "-"}</td>
+                                        <td>{cert.score}</td>
+                                        <td>{cert.isPassed && cert.isMarked ? "Passed & Marked" : "Pending"}</td>
+                                        <td>
+                                            {cert.certificateDownloadable ? (
+                                                <button className="green-button" onClick={() => handleDownload(cert.id)}>
+                                                    Download
+                                                </button>
+                                            ) : (
+                                                <span>Not Available</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                )
+                        )}
                     </tbody>
                 </table>
             )}
-          
         </div>
     );
 };

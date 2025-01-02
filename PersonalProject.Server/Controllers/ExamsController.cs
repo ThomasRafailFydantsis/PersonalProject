@@ -8,6 +8,7 @@ using NuGet.Packaging;
 using Microsoft.AspNetCore.Authorization;
 using PdfSharpCore.Drawing;
 using PdfSharpCore.Pdf;
+using static PersonalProject.Server.Models.ExamService;
 //using System;
 //using System.IO;
 //using System.Threading.Tasks;
@@ -37,102 +38,34 @@ namespace PersonalProject.Server.Controllers
         [ServiceFilter(typeof(CustomJsonSerializationFilter))]
         public async Task<IActionResult> GetExamById(int CertId)
         {
-            var exam = await _examService.GetExamByIdAsync(CertId);
-
-            if (exam == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(exam);  // Return the exam data
-        }
-
-        [HttpPost("create")]
-        [ServiceFilter(typeof(CustomJsonSerializationFilter))]
-        public async Task<IActionResult> CreateExam([FromBody] ExamCreationDto examDto)
-        {
-            if (examDto == null || !examDto.Questions.Any())
-            {
-                return BadRequest("Exam must have at least one question.");
-            }
-
-            var exam = await _examService.CreateExamAsync(examDto.CertName, examDto.PassingScore, examDto.Questions);
-
-            if (exam == null)
-            {
-                return BadRequest("An error occurred while creating the exam.");
-            }
-
-            return CreatedAtAction(nameof(GetExamById), new { certId = exam.CertId }, exam); // Examservice for context
-        }
-
-        [HttpPut("update/{certId}")]
-        public async Task<IActionResult> UpdateExam(int certId, [FromBody] ExamUpdateDto examUpdateDto) // Update
-        {
-            if (examUpdateDto == null || string.IsNullOrEmpty(examUpdateDto.CertName) || !examUpdateDto.Questions.Any())
-            {
-                return BadRequest("Invalid exam data.");
-            }
-            if (certId <= 0)
-            {
-                return BadRequest("Invalid CertId");
-            }
             try
             {
-                var cert = await _context.Certs.Include(c => c.Questions)
-                                               .ThenInclude(q => q.AnswerOptions)
-                                               .FirstOrDefaultAsync(c => c.CertId == certId);
+                var exam = await _examService.GetExamByIdAsync(CertId);
 
-                if (cert == null)
+                if (exam == null)
                 {
-                    return NotFound("Exam not found.");
+                    return NotFound();
                 }
 
-                cert.CertName = examUpdateDto.CertName;
-
-                // Update questions and answer options
-                foreach (var questionDto in examUpdateDto.Questions)
-                {
-                    var existingQuestion = cert.Questions.FirstOrDefault(q => q.Id == questionDto.Id);
-
-                    if (existingQuestion != null) // Update existing question
-                    {
-                        existingQuestion.Text = questionDto.Text;
-                        existingQuestion.CorrectAnswer = questionDto.CorrectAnswer;
-
-                        existingQuestion.AnswerOptions.Clear();
-                        foreach (var answerDto in questionDto.AnswerOptions)
-                        {
-                            existingQuestion.AnswerOptions.Add(new AnswerOption
-                            {
-                                Id = answerDto.Id,
-                                Text = answerDto.Text,
-                                IsCorrect = answerDto.IsCorrect,
-                            });
-                        }
-                    }
-                    else
-                    {
-                        cert.Questions.Add(new Question 
-                        {
-                            Text = questionDto.Text,
-                            CorrectAnswer = questionDto.CorrectAnswer,
-                            AnswerOptions = questionDto.AnswerOptions.Select(a => new AnswerOption
-                            {
-                                Text = a.Text,
-                                IsCorrect = a.IsCorrect,
-                            }).ToList()
-                        });
-                    }
-                }
-
-                await _context.SaveChangesAsync();
                 return Ok(new
                 {
-                    cert.CertId,
-                    cert.CertName,
-                    cert.PassingScore,
-                    Questions = cert.Questions.Select(q => new
+                    exam.CertId,
+                    exam.CertName,
+                    exam.Cost,
+                    exam.Reward,
+                    exam.Description,
+                    exam.CategoryId,
+                    Category = new
+                    {
+                        exam.Category.Id,
+                        exam.Category.Name 
+                    },
+                    Achievements = exam.CertAchievements.Select(a => new
+                    {
+                        a.AchievementId,
+                        a.Achievement.Title 
+                    }),
+                    Questions = exam.Questions.Select(q => new
                     {
                         q.Id,
                         q.Text,
@@ -146,104 +79,144 @@ namespace PersonalProject.Server.Controllers
                     })
                 });
             }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Exam not found.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error retrieving exam: {ex.Message}");
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+        [HttpPost("create")]
+        [ServiceFilter(typeof(CustomJsonSerializationFilter))]
+        public async Task<IActionResult> CreateExam([FromBody] ExamCreationDto examDto)
+        {
+            // Validate if the category exists
+            var categoryExists = await _context.ExamCategory.AnyAsync(c => c.Id == examDto.CategoryId);
+            if (!categoryExists)
+            {
+                return BadRequest($"Category with ID {examDto.CategoryId} does not exist.");
+            }
+
+            // Ensure each question has at least one answer option
+            if (!examDto.Questions.Any(q => q.AnswerOptions.Any()))
+            {
+                return BadRequest("Each question must have at least one answer option.");
+            }
+
+            // Create the certificate object
+            var cert = new Certs
+            {
+                CertName = examDto.CertName,
+                PassingScore = examDto.PassingScore,
+                CategoryId = examDto.CategoryId,
+                Reward = examDto.Reward,
+                Cost = examDto.Cost,
+                Questions = examDto.Questions.Select(q => new Question
+                {
+                    Text = q.Text,
+                    CorrectAnswer = q.CorrectAnswer,
+                    AnswerOptions = q.AnswerOptions.Select(a => new AnswerOption
+                    {
+                        Text = a.Text,
+                        IsCorrect = a.IsCorrect
+                    }).ToList()
+                }).ToList()
+            };
+
+            // Add and save the new certificate
+            _context.Certs.Add(cert);
+            await _context.SaveChangesAsync();
+
+            // Return a response with the newly created exam
+            return CreatedAtAction(nameof(GetExamById), new { certId = cert.CertId }, cert);
+        }
+
+        [HttpPut("update/{certId}")]
+        public async Task<IActionResult> UpdateExam(int certId, [FromBody] ExamUpdateDto examUpdateDto)
+        {
+            if (examUpdateDto == null || string.IsNullOrEmpty(examUpdateDto.CertName) || !examUpdateDto.Questions.Any())
+            {
+                return BadRequest("Invalid exam data.");
+            }
+            if (certId <= 0) return BadRequest("Invalid CertId");
+
+            try
+            {
+                var cert = await _context.Certs
+                    .Include(c => c.Questions)
+                    .ThenInclude(q => q.AnswerOptions)
+                    .Include(c => c.CertAchievements)
+                    .FirstOrDefaultAsync(c => c.CertId == certId);
+
+                if (cert == null) return NotFound("Exam not found.");
+
+                cert.CertName = examUpdateDto.CertName;
+                cert.CategoryId = examUpdateDto.CategoryId;
+                cert.Cost = examUpdateDto.Cost;
+                cert.Reward = examUpdateDto.Reward;
+
+                cert.CertAchievements.Clear(); 
+                foreach (var achievementId in examUpdateDto.AchievementIds)
+                {
+                    cert.CertAchievements.Add(new CertAchievement
+                    {
+                        CertId = cert.CertId,
+                        AchievementId = achievementId 
+                    });
+                }
+
+                cert.Questions = examUpdateDto.Questions.Select(q => new Question
+                {
+                    Id = q.Id,
+                    Text = q.Text,
+                    CorrectAnswer = q.CorrectAnswer,
+                    AnswerOptions = q.AnswerOptions.Select(a => new AnswerOption
+                    {
+                        Id = a.Id,
+                        Text = a.Text,
+                        IsCorrect = a.IsCorrect
+                    }).ToList()
+                }).ToList();
+
+                await _context.SaveChangesAsync();
+                return Ok(cert);
+            }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error updating exam: {ex.Message}");
                 return StatusCode(500, "Internal server error.");
             }
         }
-
         [HttpPost("submit")]
         public async Task<IActionResult> SubmitExam([FromBody] SubmitExamDto submitDto)
         {
             if (submitDto == null || submitDto.AnswerIds == null || !submitDto.AnswerIds.Any())
-            {
-                return BadRequest("Invalid request. Please provide answers.");
-            }
+                return BadRequest("Invalid submission data. Answers are required.");
 
             try
             {
-                var certificate = await _context.Certs
-                    .Include(c => c.Questions)
-                    .ThenInclude(q => q.AnswerOptions)
-                    .FirstOrDefaultAsync(c => c.CertId == submitDto.CertId);
+                var result = await _examService.SubmitExamAsync(submitDto.UserId, submitDto.CertId, submitDto.AnswerIds);
 
-                if (certificate == null)
-                {
-                    return NotFound("Certificate not found.");
-                }
-
-                int score = 0;
-                var answers = new List<AnswerSubmission>();
-                foreach (var answerId in submitDto.AnswerIds)
-                {
-                    var question = certificate.Questions
-                        .FirstOrDefault(q => q.AnswerOptions.Any(a => a.Id == answerId));
-
-                    if (question != null)
-                    {
-                        var selectedAnswer = question.AnswerOptions.First(a => a.Id == answerId);
-                        answers.Add(new AnswerSubmission
-                        {
-                            QuestionId = question.Id,
-                            SelectedAnswerId = selectedAnswer.Id,
-                            IsCorrect = selectedAnswer.IsCorrect
-                        });
-
-                        if (selectedAnswer.IsCorrect)
-                        {
-                            score++;
-                        }
-                    }
-                }
-               
-                bool isPassed = score >= certificate.PassingScore; 
-
-                var examSubmission = new ExamSubmission
-                {
-                    UserId = submitDto.UserId,
-                    CertId = submitDto.CertId,
-                    SubmissionDate = DateTime.UtcNow,
-                    Score = score,
-                    IsPassed = isPassed,
-                    Answers = answers
-                };
-
-                _context.ExamSubmissions.Add(examSubmission);
-
-                var existingCertificate = await _context.UserCertificates
-                    .FirstOrDefaultAsync(uc => uc.UserId == submitDto.UserId && uc.CertId == submitDto.CertId); 
-
-                if (existingCertificate != null)
-                {
-                    existingCertificate.Score = score;
-                    existingCertificate.DateTaken = DateTime.UtcNow;
-                    existingCertificate.IsPassed = isPassed;
-                }
-                else 
-                {
-                    var userCertificate = new UserCertificate
-                    {
-                        UserId = submitDto.UserId,
-                        CertId = submitDto.CertId,
-                        Score = score,
-                        DateTaken = DateTime.UtcNow,
-                        IsPassed = isPassed
-                    };
-
-                    _context.UserCertificates.Add(userCertificate);
-                }
-
-                await _context.SaveChangesAsync();
-
-                
                 return Ok(new
                 {
-                    CertName = certificate.CertName,
-                    Score = score,
-                    Passed = isPassed,
-                    DateTaken = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+                    CertName = result.Certificate?.CertName ?? "Unknown",
+                    Score = result.Score,
+                    Passed = result.IsPassed,
+                    DateTaken = DateTime.UtcNow,
+                    Reward = result.IsPassed && result.Certificate?.IsFree == true ? result.Certificate.Reward : 0
                 });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -329,7 +302,6 @@ namespace PersonalProject.Server.Controllers
                 return NotFound("Exam submission not found.");
             }
 
-            // Check if the submission is already assigned
             var existingAssignment = await _context.MarkerAssignments
                 .FirstOrDefaultAsync(ma => ma.ExamSubmissionId == assignmentDto.ExamSubmissionId);
 
@@ -365,7 +337,6 @@ namespace PersonalProject.Server.Controllers
                 return BadRequest("Certificate not available for this user.");
             }
 
-            //if passed and marked 
             var submission = await _context.ExamSubmissions
                 .FirstOrDefaultAsync(es => es.UserId == userCertificate.UserId && es.CertId == userCertificate.CertId);
 
@@ -567,7 +538,6 @@ namespace PersonalProject.Server.Controllers
                 return BadRequest("Invalid grading data.");
             }
 
-            // Fetch the exam submission along with related entities
             var submission = await _context.ExamSubmissions
                 .Include(es => es.Answers)
                 .ThenInclude(a => a.Question)
@@ -583,21 +553,17 @@ namespace PersonalProject.Server.Controllers
 
             foreach (var answer in submission.Answers)
             {
-                // Check if the marker provided a new selected answer ID for the question
                 if (dto.GradingData.TryGetValue(answer.QuestionId, out var selectedAnswerId))
                 {
                     answer.SelectedAnswerId = selectedAnswerId;
 
-                    // Determine if the selected answer is correct based on the updated selection
                     answer.IsCorrect = answer.Question?.AnswerOptions?.Any(a => a.Id == selectedAnswerId && a.IsCorrect) ?? false;
                 }
             }
 
-            // Recalculate the score based on updated answers
             submission.Score = submission.Answers.Count(a => a.IsCorrect);
             submission.IsPassed = submission.Score >= submission.Certificate.PassingScore;
 
-            // Update marker assignment
             var markerAssignment = submission.MarkerAssignments.FirstOrDefault();
             if (markerAssignment != null)
             {
@@ -625,6 +591,7 @@ namespace PersonalProject.Server.Controllers
                 {
                     uc.Id,
                     CertificateName = uc.Certificate.CertName,
+                    Cost = uc.Certificate.Cost,
                     uc.DateTaken,
                     uc.Score,
                     uc.IsPassed,
@@ -664,6 +631,9 @@ namespace PersonalProject.Server.Controllers
         public string CertName { get; set; }
         public int PassingScore { get; set; }
         public List<QuestionDto> Questions { get; set; }
+        public int Reward { get; set; }
+        public int Cost { get; set; }
+        public int CategoryId { get; set; }
     }
 
     public class UserCertificateDto
@@ -679,12 +649,17 @@ namespace PersonalProject.Server.Controllers
         public string UserId { get; set; }
         public int CertId { get; set; }
         public List<int> AnswerIds { get; set; }
+
     }
 
     public class ExamUpdateDto
     {
         public string CertName { get; set; }
         public List<QuestionDto> Questions { get; set; }
+        public int Cost { get; set; }
+        public List<int> AchievementIds { get; set; } // Changed to List<int>
+        public int Reward { get; set; }
+        public int CategoryId { get; set; }
     }
 
     public class AnswerOptionDto
@@ -737,5 +712,11 @@ namespace PersonalProject.Server.Controllers
         public int QuestionId { get; set; }
         public int SelectedAnswerId { get; set; }
         public bool IsCorrect { get; set; }
+    }
+    public class ExamSubmissionDto
+    {
+        public string UserId { get; set; }
+        public int CertId { get; set; }
+        public List<int> AnswerIds { get; set; }
     }
 }

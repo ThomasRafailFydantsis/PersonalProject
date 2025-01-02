@@ -10,6 +10,8 @@ export const AuthProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isAuthLoading, setIsAuthLoading] = useState(true);
+    const [coins , setCoins] = useState(null);
+    const [imagePath,setImagePath] = useState(null);
    
 
 
@@ -23,6 +25,8 @@ export const AuthProvider = ({ children }) => {
                 const user = await AuthService.getCurrentUserData();
                 setUserData(user);
                 setRoles(user.roles || []);
+                setCoins(user.coins || 0);
+                setImagePath(user.profileImagePath || null);
             } else {
                 setUserData(null);
                 setRoles([]);
@@ -54,7 +58,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, userData, roles, error, loading, revalidateAuth, handleLogout, isAuthLoading }}>
+        <AuthContext.Provider value={{ isAuthenticated, userData, roles, error,coins,  loading, revalidateAuth, handleLogout, imagePath, isAuthLoading }}>
             {children}
         </AuthContext.Provider>
     );

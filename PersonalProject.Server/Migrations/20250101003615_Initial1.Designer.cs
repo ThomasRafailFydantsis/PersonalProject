@@ -12,8 +12,8 @@ using PersonalProject.Server.Data;
 namespace PersonalProject.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241230085554_Descr")]
-    partial class Descr
+    [Migration("20250101003615_Initial1")]
+    partial class Initial1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -158,6 +158,37 @@ namespace PersonalProject.Server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PersonalProject.Server.Models.Achievement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IconPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RewardCoins")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UnlockCondition")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Achievements");
+                });
+
             modelBuilder.Entity("PersonalProject.Server.Models.AnswerOption", b =>
                 {
                     b.Property<int>("Id")
@@ -223,6 +254,9 @@ namespace PersonalProject.Server.Migrations
                     b.Property<string>("Address1")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Coins")
+                        .HasColumnType("int");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -236,6 +270,9 @@ namespace PersonalProject.Server.Migrations
 
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Gold")
+                        .HasColumnType("int");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
@@ -289,6 +326,29 @@ namespace PersonalProject.Server.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("PersonalProject.Server.Models.CertAchievement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AchievementId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CertId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AchievementId");
+
+                    b.HasIndex("CertId");
+
+                    b.ToTable("CertAchievement");
+                });
+
             modelBuilder.Entity("PersonalProject.Server.Models.Certs", b =>
                 {
                     b.Property<int>("CertId")
@@ -297,10 +357,16 @@ namespace PersonalProject.Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CertId"));
 
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("CertName")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("Cost")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -308,10 +374,18 @@ namespace PersonalProject.Server.Migrations
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsFree")
+                        .HasColumnType("bit");
+
                     b.Property<int>("PassingScore")
                         .HasColumnType("int");
 
+                    b.Property<int>("Reward")
+                        .HasColumnType("int");
+
                     b.HasKey("CertId");
+
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Certs");
                 });
@@ -344,6 +418,22 @@ namespace PersonalProject.Server.Migrations
                     b.HasIndex("CertId");
 
                     b.ToTable("Descriptions");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.ExamCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExamCategory");
                 });
 
             modelBuilder.Entity("PersonalProject.Server.Models.ExamSubmission", b =>
@@ -437,6 +527,38 @@ namespace PersonalProject.Server.Migrations
                     b.HasIndex("CertId");
 
                     b.ToTable("Questions");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.UserAchievement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AchievementId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ExamSubmissionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UnlockedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AchievementId");
+
+                    b.HasIndex("ExamSubmissionId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserAchievements");
                 });
 
             modelBuilder.Entity("PersonalProject.Server.Models.UserCertificate", b =>
@@ -563,6 +685,36 @@ namespace PersonalProject.Server.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("PersonalProject.Server.Models.CertAchievement", b =>
+                {
+                    b.HasOne("PersonalProject.Server.Models.Achievement", "Achievement")
+                        .WithMany()
+                        .HasForeignKey("AchievementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PersonalProject.Server.Models.Certs", "Cert")
+                        .WithMany("CertAchievements")
+                        .HasForeignKey("CertId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Achievement");
+
+                    b.Navigation("Cert");
+                });
+
+            modelBuilder.Entity("PersonalProject.Server.Models.Certs", b =>
+                {
+                    b.HasOne("PersonalProject.Server.Models.ExamCategory", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("PersonalProject.Server.Models.Description", b =>
                 {
                     b.HasOne("PersonalProject.Server.Models.Certs", "Cert")
@@ -623,6 +775,29 @@ namespace PersonalProject.Server.Migrations
                     b.Navigation("Certs");
                 });
 
+            modelBuilder.Entity("PersonalProject.Server.Models.UserAchievement", b =>
+                {
+                    b.HasOne("PersonalProject.Server.Models.Achievement", "Achievement")
+                        .WithMany()
+                        .HasForeignKey("AchievementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PersonalProject.Server.Models.ExamSubmission", null)
+                        .WithMany("EarnedAchievements")
+                        .HasForeignKey("ExamSubmissionId");
+
+                    b.HasOne("PersonalProject.Server.Models.ApplicationUser", "User")
+                        .WithMany("UserAchievements")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Achievement");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PersonalProject.Server.Models.UserCertificate", b =>
                 {
                     b.HasOne("PersonalProject.Server.Models.Certs", "Certificate")
@@ -644,11 +819,15 @@ namespace PersonalProject.Server.Migrations
 
             modelBuilder.Entity("PersonalProject.Server.Models.ApplicationUser", b =>
                 {
+                    b.Navigation("UserAchievements");
+
                     b.Navigation("UserCertificates");
                 });
 
             modelBuilder.Entity("PersonalProject.Server.Models.Certs", b =>
                 {
+                    b.Navigation("CertAchievements");
+
                     b.Navigation("Descriptions");
 
                     b.Navigation("Questions");
@@ -657,6 +836,8 @@ namespace PersonalProject.Server.Migrations
             modelBuilder.Entity("PersonalProject.Server.Models.ExamSubmission", b =>
                 {
                     b.Navigation("Answers");
+
+                    b.Navigation("EarnedAchievements");
 
                     b.Navigation("MarkerAssignments");
                 });

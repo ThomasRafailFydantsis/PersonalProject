@@ -16,6 +16,10 @@ const CertForm = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [category, setCategory] = useState("");
+    const [cost, setCost] = useState(0);
+    const [reward, setReward] = useState(0);
+    const [achievements, setAchievements] = useState([]);
 
     const sidebarRef = useRef(null);
 
@@ -47,34 +51,42 @@ const CertForm = () => {
             if (!isAuthenticated || !isAdminOrMarker) {
                 navigate("/login");
             } else if (certId) {
-                fetchExam(certId);
+                fetchData(certId);
             } else {
                 setLoading(false);
             }
         }
     }, [certId, isAuthenticated, isAdminOrMarker, isAuthLoading, navigate]);
 
-    const fetchExam = async (certId) => {
-        try {
-            setLoading(true);
-            const examData = await ExamService.fetchExam(certId);
-            setCertName(examData.certName);
-            setQuestions(examData.questions);
-        } catch (error) {
-            setError(error.message || "Failed to fetch exam data.");
-        } finally {
-            setLoading(false);
-        }
-    };
+   
+        const fetchData = async () => {
+            if (certId) {
+                try {
+                    setLoading(true);
+                    const examData = await ExamService.fetchExam(certId);
+                    setCertName(examData.certName);
+                    setCategory(examData.category);
+                    setCost(examData.cost);
+                    setReward(examData.reward);
+                    setAchievements(examData.achievements);
+                    setQuestions(examData.questions);
+                } catch (error) {
+                    setError(error.message || "Failed to fetch exam data.");
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+      
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await ExamService.submitExam(certId, certName, questions);
+            await ExamService.submitExam(certId, certName, category, cost, reward, achievements, questions);
             alert(certId ? "Exam updated successfully!" : "Exam created successfully!");
             navigate(-1);
         } catch (error) {
-            alert(error.message || "Submission failed.");
+            alert(error || "Submission failed.");
         }
     };
 
@@ -85,28 +97,13 @@ const CertForm = () => {
     return (
         <div
             style={{
-                margin: "0 auto",
                 marginLeft: isSidebarOpen ? "250px" : "0px",
                 transition: "margin-left 0.3s ease-in-out",
             }}
         >
             <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen} />
-            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
-            <form
-                onSubmit={handleSubmit}
-                className="exam-form"
-                style={{
-                    paddingTop: "50px",
-                    maxWidth: "800px",
-                    margin: "0 auto",
-                    padding: "20px",
-                    backgroundColor: "#f9f9f9",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                    transition: "margin-left 0.3s ease-in-out",
-                    marginTop: "100px",
-                }}
-            >
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            <form style={{ marginTop: "60px" }} onSubmit={handleSubmit} className="exam-form">
                 <div className="form-group">
                     <label>Exam Title:</label>
                     <input
@@ -116,7 +113,54 @@ const CertForm = () => {
                         required
                         className="form-control"
                     />
-                    <ExamImageUpload certId={certId} />
+                </div>
+                <ExamImageUpload certId={certId} />
+                <div className="form-group">
+                    <label>Category ID:</label>
+                    <input
+                        type="number"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        required
+                        className="form-control"
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Cost:</label>
+                    <input
+                        type="number"
+                        value={cost}
+                        onChange={(e) => setCost(parseInt(e.target.value, 10))}
+                        required
+                        className="form-control"
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Reward:</label>
+                    <input
+                        type="number"
+                        value={reward}
+                        onChange={(e) => setReward(parseInt(e.target.value, 10))}
+                        required
+                        className="form-control"
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Achievements (Comma-separated IDs):</label>
+                    <input
+                        type="text"
+                        value={achievements.map((a) => a.id).join(",")}
+                        onChange={(e) =>
+                            setAchievements(
+                                e.target.value
+                                    .split(",")
+                                    .map((id) => ({ id: parseInt(id.trim(), 10) }))
+                            )
+                        }
+                        placeholder="1, 2, 3"
+                        required
+                        className="form-control"
+                    />
                 </div>
                 {questions.map((question, questionIndex) => (
                     <div key={questionIndex} className="question-section">
@@ -127,11 +171,14 @@ const CertForm = () => {
                             value={question.text}
                             onChange={(e) => {
                                 const updatedQuestions = [...questions];
-                                updatedQuestions[questionIndex].text = e.target.value;
+                                updatedQuestions[questionIndex] = {
+                                    ...updatedQuestions[questionIndex],
+                                    text: e.target.value,
+                                };
                                 setQuestions(updatedQuestions);
                             }}
-                            className="form-control"
                             required
+                            className="form-control"
                         />
                         <label>Correct Answer:</label>
                         <input
@@ -139,11 +186,14 @@ const CertForm = () => {
                             value={question.correctAnswer}
                             onChange={(e) => {
                                 const updatedQuestions = [...questions];
-                                updatedQuestions[questionIndex].correctAnswer = e.target.value;
+                                updatedQuestions[questionIndex] = {
+                                    ...updatedQuestions[questionIndex],
+                                    correctAnswer: e.target.value,
+                                };
                                 setQuestions(updatedQuestions);
                             }}
-                            className="form-control"
                             required
+                            className="form-control"
                         />
                         <h5>Answer Options</h5>
                         {question.answerOptions.map((option, optionIndex) => (
@@ -154,12 +204,14 @@ const CertForm = () => {
                                     value={option.text}
                                     onChange={(e) => {
                                         const updatedQuestions = [...questions];
-                                        updatedQuestions[questionIndex].answerOptions[optionIndex].text =
-                                            e.target.value;
+                                        updatedQuestions[questionIndex].answerOptions[optionIndex] = {
+                                            ...updatedQuestions[questionIndex].answerOptions[optionIndex],
+                                            text: e.target.value,
+                                        };
                                         setQuestions(updatedQuestions);
                                     }}
-                                    className="form-control"
                                     required
+                                    className="form-control"
                                 />
                                 <label>
                                     <input
@@ -167,8 +219,10 @@ const CertForm = () => {
                                         checked={option.isCorrect}
                                         onChange={(e) => {
                                             const updatedQuestions = [...questions];
-                                            updatedQuestions[questionIndex].answerOptions[optionIndex].isCorrect =
-                                                e.target.checked;
+                                            updatedQuestions[questionIndex].answerOptions[optionIndex] = {
+                                                ...updatedQuestions[questionIndex].answerOptions[optionIndex],
+                                                isCorrect: e.target.checked,
+                                            };
                                             setQuestions(updatedQuestions);
                                         }}
                                     />
@@ -176,36 +230,8 @@ const CertForm = () => {
                                 </label>
                             </div>
                         ))}
-                        <button
-                            type="button"
-                            className="btn btn-secondary mt-2"
-                            onClick={() => {
-                                const updatedQuestions = [...questions];
-                                updatedQuestions[questionIndex].answerOptions.push({
-                                    id: null,
-                                    text: "",
-                                    isCorrect: false,
-                                });
-                                setQuestions(updatedQuestions);
-                            }}
-                        >
-                            Add Answer Option
-                        </button>
                     </div>
                 ))}
-                <button
-                    type="button"
-                    className="btn btn-secondary mt-3"
-                    onClick={() =>
-                        setQuestions([
-                            ...questions,
-                            { id: null, text: "", correctAnswer: "", answerOptions: [] },
-                        ])
-                    }
-                >
-                    Add Question
-                </button>
-                <br />
                 <button type="submit" className="btn btn-primary mt-3">
                     Submit
                 </button>

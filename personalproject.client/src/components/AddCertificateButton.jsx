@@ -1,36 +1,43 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "./AuthProvider";
-import { FaCheck  } from "react-icons/fa";
+import { FaCheck } from "react-icons/fa";
 
 const AddCertificateButton = ({ certId }) => {
+    const { userData, coins } = useAuth(); // Ensure `coins` is properly passed from AuthProvider
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
-    const [isOwned, setIsOwned] = useState(false); // State to track if the certificate is owned
+    const [isOwned, setIsOwned] = useState(false);
+    const [cost, setCost] = useState(0);
+    const [userCoins, setUserCoins] = useState(coins); // Use coins from userData or props
 
-    const { userData } = useAuth();
-
-    // Fetch owned certificates to check if the certificate is already owned
     useEffect(() => {
-        const fetchOwnedCerts = async () => {
+        const fetchDetails = async () => {
             try {
-                const response = await axios.get(`https://localhost:7295/api/Certs/${userData.id}/owned`);
-                const ownedCerts = response.data;
-                // Check if the user owns the certificate
-                const certificateOwned = ownedCerts.some(cert => cert.certId === certId);
-                setIsOwned(certificateOwned);
+                // Fetch the exam details
+                const examData = await axios.get(`https://localhost:7295/api/Exam/${certId}`);
+                setCost(examData.data.Cost);
+
+                // Fetch owned certificates for the user
+                const ownedCertsResponse = await axios.get(
+                    `https://localhost:7295/api/Certs/${userData.id}/owned`
+                );
+                const ownedCerts = ownedCertsResponse.data;
+
+                // Check if the user already owns the certificate
+                setIsOwned(ownedCerts.some((cert) => cert.certId === certId));
             } catch (error) {
-                console.error("Error fetching owned certificates:", error);
+                console.error("Error fetching details:", error);
             }
         };
 
         if (userData) {
-            fetchOwnedCerts();
+            fetchDetails();
         }
     }, [userData, certId]);
 
-    // Add certificate to the user's account
+    // Add certificate to user
     const addCertificateToUser = async () => {
         setIsLoading(true);
         setErrorMessage("");
@@ -51,7 +58,8 @@ const AddCertificateButton = ({ certId }) => {
 
             if (response.status === 200) {
                 setSuccessMessage("Certificate added successfully!");
-                setIsOwned(true); // Update state to reflect that the certificate is now owned
+                setUserCoins(response.data.UpdatedBalance); // Update the displayed coins
+                setIsOwned(true); // Mark the certificate as owned
             }
         } catch (error) {
             console.error("Error adding certificate:", error);
@@ -64,18 +72,27 @@ const AddCertificateButton = ({ certId }) => {
     };
 
     return (
-        <>
+        <div>
             {isOwned ? (
                 <button className="btn btn-success" disabled>
-                    Owned   <FaCheck />
+                    Owned <FaCheck />
                 </button>
             ) : (
-                <button onClick={addCertificateToUser} className="btn btn-success" disabled={isLoading}>
-                    {isLoading ? "Adding..." : "Add Certificate"}
+                <button
+                    onClick={addCertificateToUser}
+                    className="btn btn-success"
+                    disabled={isLoading || cost > userCoins} // Check against userCoins
+                >
+                    {isLoading
+                        ? "Processing..."
+                        : cost > 0
+                        ? `Buy for ${cost}`
+                        : "Add for Free"}
                 </button>
             )}
-            {errorMessage && <div className="error-message">{errorMessage}</div>}
-        </>
+            
+         
+        </div>
     );
 };
 

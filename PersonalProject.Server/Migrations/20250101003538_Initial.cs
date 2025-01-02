@@ -6,11 +6,28 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PersonalProject.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Achievements",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RewardCoins = table.Column<int>(type: "int", nullable: false),
+                    IconPath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UnlockCondition = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Achievements", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -34,6 +51,8 @@ namespace PersonalProject.Server.Migrations
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ProfileImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Address1 = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Coins = table.Column<int>(type: "int", nullable: false),
+                    Gold = table.Column<int>(type: "int", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -55,19 +74,16 @@ namespace PersonalProject.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Certs",
+                name: "ExamCategory",
                 columns: table => new
                 {
-                    CertId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CertName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PassingScore = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Certs", x => x.CertId);
+                    table.PrimaryKey("PK_ExamCategory", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -177,7 +193,59 @@ namespace PersonalProject.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Description",
+                name: "Certs",
+                columns: table => new
+                {
+                    CertId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CertName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PassingScore = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsFree = table.Column<bool>(type: "bit", nullable: false),
+                    Cost = table.Column<int>(type: "int", nullable: false),
+                    Reward = table.Column<int>(type: "int", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Certs", x => x.CertId);
+                    table.ForeignKey(
+                        name: "FK_Certs_ExamCategory_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "ExamCategory",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CertAchievement",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CertId = table.Column<int>(type: "int", nullable: false),
+                    AchievementId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CertAchievement", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CertAchievement_Achievements_AchievementId",
+                        column: x => x.AchievementId,
+                        principalTable: "Achievements",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CertAchievement_Certs_CertId",
+                        column: x => x.CertId,
+                        principalTable: "Certs",
+                        principalColumn: "CertId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Descriptions",
                 columns: table => new
                 {
                     DescriptionId = table.Column<int>(type: "int", nullable: false)
@@ -189,9 +257,9 @@ namespace PersonalProject.Server.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Description", x => x.DescriptionId);
+                    table.PrimaryKey("PK_Descriptions", x => x.DescriptionId);
                     table.ForeignKey(
-                        name: "FK_Description_Certs_CertId",
+                        name: "FK_Descriptions_Certs_CertId",
                         column: x => x.CertId,
                         principalTable: "Certs",
                         principalColumn: "CertId",
@@ -309,6 +377,39 @@ namespace PersonalProject.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserAchievements",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    AchievementId = table.Column<int>(type: "int", nullable: false),
+                    UnlockedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExamSubmissionId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserAchievements", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserAchievements_Achievements_AchievementId",
+                        column: x => x.AchievementId,
+                        principalTable: "Achievements",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UserAchievements_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserAchievements_ExamSubmissions_ExamSubmissionId",
+                        column: x => x.ExamSubmissionId,
+                        principalTable: "ExamSubmissions",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AnswerOptions",
                 columns: table => new
                 {
@@ -412,8 +513,23 @@ namespace PersonalProject.Server.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Description_CertId",
-                table: "Description",
+                name: "IX_CertAchievement_AchievementId",
+                table: "CertAchievement",
+                column: "AchievementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CertAchievement_CertId",
+                table: "CertAchievement",
+                column: "CertId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Certs_CategoryId",
+                table: "Certs",
+                column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Descriptions_CertId",
+                table: "Descriptions",
                 column: "CertId");
 
             migrationBuilder.CreateIndex(
@@ -440,6 +556,21 @@ namespace PersonalProject.Server.Migrations
                 name: "IX_Questions_CertId",
                 table: "Questions",
                 column: "CertId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserAchievements_AchievementId",
+                table: "UserAchievements",
+                column: "AchievementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserAchievements_ExamSubmissionId",
+                table: "UserAchievements",
+                column: "ExamSubmissionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserAchievements_UserId",
+                table: "UserAchievements",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserCertificates_CertId",
@@ -478,10 +609,16 @@ namespace PersonalProject.Server.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Description");
+                name: "CertAchievement");
+
+            migrationBuilder.DropTable(
+                name: "Descriptions");
 
             migrationBuilder.DropTable(
                 name: "MarkerAssignments");
+
+            migrationBuilder.DropTable(
+                name: "UserAchievements");
 
             migrationBuilder.DropTable(
                 name: "UserCertificates");
@@ -493,6 +630,9 @@ namespace PersonalProject.Server.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "Achievements");
+
+            migrationBuilder.DropTable(
                 name: "ExamSubmissions");
 
             migrationBuilder.DropTable(
@@ -500,6 +640,9 @@ namespace PersonalProject.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "Certs");
+
+            migrationBuilder.DropTable(
+                name: "ExamCategory");
         }
     }
 }

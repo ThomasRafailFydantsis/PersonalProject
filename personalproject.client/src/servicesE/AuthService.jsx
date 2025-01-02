@@ -1,9 +1,9 @@
-import axios from './AxiosConf';
+import axiosInstance from './AxiosConf';
 
 const AuthService = {
     register: async (username, email, password, FirstName, LastName) => {
         try {
-            const response = await axios.post('/Account/register', {
+            const response = await axiosInstance.post('/Account/register', {
                 username,
                 email,
                 password,
@@ -19,18 +19,8 @@ const AuthService = {
 
     login: async (username, password) => {
         try {
-            const response = await axios.post('/Account/login',
-                { username, password },
-                { withCredentials: true }
-            );
-
-            if (response.status === 200 && response.data) {
-                console.log('Login successful');
-                return response.data; // Return user data or token as provided by the API
-            } else {
-                console.warn('Login failed');
-                throw new Error(response.data?.message || 'Invalid credentials');
-            }
+            const response = await axiosInstance.post('/Account/login', { username, password });
+            return response.data;
         } catch (error) {
             console.error('Login failed:', error.response?.data || error.message);
             throw new Error(error.response?.data?.message || 'Unable to log in');
@@ -39,27 +29,26 @@ const AuthService = {
 
     logout: async () => {
         try {
-            await axios.post('/Account/logout', {}, { withCredentials: true });
-            console.log('Logout successful');
+            await axiosInstance.post('/Account/logout');
         } catch (error) {
-            console.error('Error during logout:', error.response?.data || error.message);
+            console.error('Logout error:', error.response?.data || error.message);
             throw new Error(error.response?.data?.message || 'Logout failed');
         }
     },
 
     getAuthStatus: async () => {
         try {
-            const response = await axios.get('/Account/auth-status', { withCredentials: true });
+            const response = await axiosInstance.get('/Account/auth-status');
             return response.data?.isAuthenticated || false;
         } catch (error) {
             console.error('Error fetching auth status:', error.response?.data || error.message);
-            return false; // Return false if any error occurs
+            return false;
         }
     },
 
     getCurrentUserData: async () => {
         try {
-            const response = await axios.get('/Account/me', { withCredentials: true });
+            const response = await axiosInstance.get('/Account/me');
             return response.data;
         } catch (error) {
             console.error('Error fetching user data:', error.response?.data || error.message);
@@ -67,16 +56,5 @@ const AuthService = {
         }
     },
 };
-
-// Axios interceptors for consistent error handling or additional configurations
-axios.interceptors.request.use(
-    (config) => {
-        // Add any common headers or configurations
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
 
 export default AuthService;

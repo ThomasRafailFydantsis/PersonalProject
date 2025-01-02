@@ -102,20 +102,6 @@ namespace PersonalProject.Server.Controllers
                 return StatusCode(500, "Internal server error.");
             }
         }
-        [HttpGet("get-user-profile-image/{userId}")]
-        [SwaggerOperation(OperationId = "GetUserProfileImage")]
-        public async Task<IActionResult> GetUserProfileImage(string userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return NotFound("User not found.");
-            }
 
-            var imagePath = user.ProfileImagePath;
-            
-
-            return Ok(imagePath);
-        }
     }
 }

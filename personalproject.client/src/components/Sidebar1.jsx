@@ -3,35 +3,17 @@ import { FaHome, FaRegUserCircle } from "react-icons/fa";
 import { IoBagCheckSharp, IoCreateOutline } from "react-icons/io5";
 import { FiLogOut } from "react-icons/fi";
 import { PiCertificateDuotone } from "react-icons/pi";
-import { FcTodoList } from "react-icons/fc";
 import { useAuth } from "./AuthProvider";
-import axios from "axios";
 import { FaUsersGear } from "react-icons/fa6";
 import notUploaded from "../imgs/notUploaded.png";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { LuListTodo } from "react-icons/lu";
 
-const Sidebar = ({ isOpen, toggleSidebar, sidebarRef }) => {
+const Sidebar = ({ isOpen, toggleSidebar, sidebarRef,imagePath }) => {
   const { isAuthenticated, userData, roles, handleLogout } = useAuth();
-  const [image, setImage] = useState(null);
   const [admin, setAdmin] = useState(false);
   const [marker, setMarker] = useState(false);
-
-  useEffect(() => {
-    const fetchImagePath = async () => {
-      if (!userData || !userData.id) return;
-      try {
-        const response = await axios.get(
-          `https://localhost:7295/api/ImageUpload/get-user-profile-image/${userData.id}`
-        );
-        setImage(response.data);
-      } catch (err) {
-        console.error("Error fetching image path:", err);
-      }
-    };
-
-    fetchImagePath();
-  }, [userData]);
 
   useEffect(() => {
     setAdmin(roles.includes("Admin"));
@@ -88,7 +70,7 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef }) => {
                     {marker && (
                         <li>
                             <Link to="/marker/assignments" onClick={toggleSidebar}>
-                                <FcTodoList />
+                                <LuListTodo />
                                 {isOpen && <span>Assignments</span>}
                             </Link>
                         </li>
@@ -104,7 +86,7 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef }) => {
                     {admin && (
                         <li>
                             <Link to="/assignMarker" onClick={toggleSidebar}>
-                                <FcTodoList />
+                                <LuListTodo />
                                 {isOpen && <span>Submissions</span>}
                             </Link>
                         </li>
@@ -123,7 +105,7 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef }) => {
                     <div className="user-info">
                         {!isOpen && (
                             <img
-                                src={image ? `https://localhost:7295${image}` : notUploaded}
+                            src={imagePath ? `https://localhost:7295${imagePath}` : notUploaded}
                                 alt="User Profile"
                                 className="profile-img"
                                 style={{ width: "40px", height: "40px", marginLeft: "36px" ,position: "absolute", bottom: "100px" }}
@@ -134,7 +116,7 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef }) => {
                                  <p className="user-name" style={{ fontSize: "16px", marginTop: "-30px" }}><span style={{ fontWeight: "bold",color: "#FF8C00" }}>{userData.userName}</span></p>
                                  <p className="user-email" style={{ fontSize: "14px" }}>{userData.email}</p>
                                 <img
-                                    src={image ? `https://localhost:7295${image}` : notUploaded}
+                                    src={imagePath ? `https://localhost:7295${imagePath}` : notUploaded}
                                     alt="User Profile"
                                     className="profile-img"
                                     style={{ width: "70px", height: "70px", marginBottom: "90px" }}

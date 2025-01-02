@@ -4,6 +4,7 @@ import axios from "axios";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar1";
 import AddCertificateButton from "../components/AddCertificateButton";
+import { GrAchievement } from "react-icons/gr";
 
 function ProductPage() {
     const { id } = useParams();
@@ -151,6 +152,22 @@ function ProductPage() {
                         <p>No additional descriptions available.</p>
                     )}
                 </div>
+            </div>
+            <div className="card-container">
+                {cert.achievements.map((achievement) => (
+                    <div className="card" style={{width: '30rem', display: 'flex', flexDirection: 'row', backgroundColor: 'rgba(132, 231, 170, 0.1)', padding: '10px'}} key={achievement.achievementId}>
+                    
+                        <div style={{padding: '10px', color:' #FF8C00'}}>  <GrAchievement size={50}  /></div>
+                    
+                   
+                        <div className="card-content">
+                            <h3>{achievement.title}</h3>
+                            <p>{achievement.achievementDescription}</p>
+                        </div>
+                    </div>
+                    
+                ))}
+                
             </div>
         </>
     );

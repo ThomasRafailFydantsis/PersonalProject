@@ -1,30 +1,18 @@
 import axios from './AxiosConf';
 
 const ExamService = {
-    // Add certificate to a user
-    //addCertificateToUser: async (userId, certId) => {
-    //    try {
-    //        const response = await axios.post(
-    //            'https://localhost:7295/api/Certificates/add',
-    //            { userId, certId },
-    //            { headers: { 'Content-Type': 'application/json' }, withCredentials: true }
-    //        );
-    //        return response.data;
-    //    } catch (error) {
-    //        console.error('Error adding certificate:', error);
-    //        throw error.response?.data || 'Failed to add certificate';
-    //    }
-    //},
-
-    // Fetch exam by certificate ID
+   
     fetchExam: async (certId) => {
         try {
             const response = await axios.get(`https://localhost:7295/api/Exam/${certId}`);
-            const { CertName, Questions } = response.data;
-
-            // Transform data if necessary before returning
+            const { CertName, Cost, Reward, Questions, Category, Achievements } = response.data;
+    
             return {
                 certName: CertName,
+                cost: Cost,
+                reward: Reward,
+                category: Category.Id,
+                achievements: Achievements.map((a) => ({ id: a.AchievementId })), 
                 questions: Questions.map((q) => ({
                     id: q.Id,
                     text: q.Text,
@@ -43,15 +31,18 @@ const ExamService = {
     },
 
 
-    // Create or update an exam
-    submitExam: async (certId, certName, questions) => {
+    submitExam: async (certId, certName, category, cost, reward, achievements, questions) => {
         const url = certId
             ? `https://localhost:7295/api/Exam/update/${certId}`
             : 'https://localhost:7295/api/Exam/create';
         const method = certId ? 'put' : 'post';
-
+    
         const payload = {
             certName,
+            categoryId: category, // Fixed category reference
+            cost,
+            reward,
+            achievementIds: achievements.map((a) => a.id), // Ensure achievements are mapped to IDs
             questions: questions.map((q) => ({
                 id: q.id || 0,
                 text: q.text,
@@ -63,7 +54,7 @@ const ExamService = {
                 })),
             })),
         };
-
+    
         try {
             const response = await axios[method](url, payload);
             return response.data;
@@ -73,8 +64,6 @@ const ExamService = {
         }
     },
 
-
-    // Assign marker to submission
     assignMarker: async (submissionId, markerId) => {
         const payload = { examSubmissionId: submissionId, markerId };
 

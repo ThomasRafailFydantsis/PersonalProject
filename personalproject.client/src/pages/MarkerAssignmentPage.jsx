@@ -5,7 +5,6 @@ import { useAuth } from "../components/AuthProvider";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar1";
 import { Form } from "react-bootstrap";
-import { Col } from "react-bootstrap";
 
 const MarkerAssignmentsPage = () => {
     const [assignments, setAssignments] = useState([]);

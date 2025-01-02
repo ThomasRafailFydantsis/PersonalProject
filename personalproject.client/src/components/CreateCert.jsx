@@ -1,14 +1,9 @@
-import { useEffect } from "react";
-import { useState } from "react";
-import axios from "axios";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 import Header from "./Header";
 import { useAuth } from "./AuthProvider";
 import Sidebar from "./Sidebar1";
-import { useRef } from "react";
-
-//import ExamImageUpload from "./ExamImageUpload";
-
 
 const CreateCert = () => {
     const { certId } = useParams();
@@ -18,52 +13,39 @@ const CreateCert = () => {
     const [certName, setCertName] = useState("");
     const [passingScore, setPassingScore] = useState(0);
     const [questions, setQuestions] = useState([]);
+    const [reward, setReward] = useState(0);
+    const [cost, setCost] = useState(0);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-        
-        // Create ref for the sidebar
-        const sidebarRef = useRef(null);
-        
-    
-        // Toggle the sidebar open and closed
-        const toggleSidebar = () => {
-            setIsSidebarOpen((prev) => !prev);
-        };
-    
-        // Close the sidebar
-        const closeSidebar = () => {
-            setIsSidebarOpen(false);
-        };
-    
-        // Handle click outside to close the sidebar
-        const handleClickOutside = (event) => {
-            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
-                closeSidebar(); // Close sidebar when clicked outside
-            }
-        };
-    
-        // Add event listener on mount to detect clicks outside
-        useEffect(() => {
-            document.addEventListener("mousedown", handleClickOutside);
-            return () => {
-                document.removeEventListener("mousedown", handleClickOutside);
-            };
-        }, []);
+    const [categoryId, setCategoryId] = useState(0);
 
-    // State hooks
-    
+    const sidebarRef = useRef(null);
 
-    // Revalidate authentication on page load or route change
+    // Handle opening and closing of the sidebar
+    const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+    const closeSidebar = () => setIsSidebarOpen(false);
+    const handleClickOutside = (event) => {
+        if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+            closeSidebar();
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     useEffect(() => {
         revalidateAuth();
     }, [location]);
 
-    // Pre-checks for rendering
     const isLoading = isAuthenticated === null;
     const hasNoPermission = !roles.includes("Admin") && !roles.includes("Marker");
 
-    // Handlers
     const handleCertNameChange = (e) => setCertName(e.target.value);
     const handlePassingScoreChange = (e) => setPassingScore(Number(e.target.value));
+    const handleRewardChange = (e) => setReward(Number(e.target.value));
+    const handleCategoryChange = (e) => setCategoryId(Number(e.target.value));
+    const handleCostChange = (e) => setCost(Number(e.target.value));
 
     const handleQuestionChange = (index, key, value) => {
         const updatedQuestions = [...questions];
@@ -92,6 +74,12 @@ const CreateCert = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+    
+        if ( certName.trim() === "" || questions.length === 0) {
+            alert("Please complete all fields correctly.");
+            return;
+        }
+    
         const payload = {
             certName,
             passingScore,
@@ -105,16 +93,19 @@ const CreateCert = () => {
                     isCorrect: a.isCorrect,
                 })),
             })),
+            reward,
+            cost,
+            categoryId
         };
-
+    
         try {
             const response = await axios.post("https://localhost:7295/api/Exam/create", payload);
-            console.log("Response:", response.data); 
+            console.log("Response:", response.data);
             alert(certId ? "Exam updated successfully!" : "Exam created successfully!");
             navigate(-1);
         } catch (err) {
             if (err.response) {
-                console.error("Backend error:", err.response.data); 
+                console.error("Backend error:", err.response.data);
                 alert(`Error: ${err.response.data}`);
             } else {
                 console.error("Error submitting exam:", err.message);
@@ -122,7 +113,8 @@ const CreateCert = () => {
             }
         }
     };
-    if(!roles.includes("Admin") && !roles.includes("Marker")){
+
+    if (!roles.includes("Admin") && !roles.includes("Marker")) {
         return <div>You do not have permission to access this page.</div>;
     }
 
@@ -143,18 +135,29 @@ const CreateCert = () => {
     }
 
     return (
-        <div style={{justifyContent: "center", paddingTop: "50px", marginLeft: isSidebarOpen ? "250px" : "0", transition: "margin-left 0.3s ease"  }}>
-            <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen}/>
+        <div
+            style={{
+                justifyContent: "center",
+                paddingTop: "50px",
+                marginLeft: isSidebarOpen ? "250px" : "0",
+                transition: "margin-left 0.3s ease",
+            }}
+        >
+            <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen} />
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
-            <form onSubmit={handleSubmit} className="exam-form" style={{alignContent: "center"  }}>
-                <div style={{textAlign: "center"  }}>
+            <form onSubmit={handleSubmit} className="exam-form" style={{ alignContent: "center" }}>
+                <div style={{ textAlign: "center" }}>
                     <label>Exam Title:</label>
-                    <input type="text" value={certName} onChange={handleCertNameChange} required  style={{ width: "100%" }} />
-                    {/*<ExamImageUpload certId={certId}/>*/}
+                    <input type="text" value={certName} onChange={handleCertNameChange} required style={{ width: "100%" }} />
+                    <label>Category:</label>
+                    <input type="number" value={categoryId} onChange={handleCategoryChange} required style={{ width: "100%" }}/>
                     <label>Passing Score:</label>
-                    <input type="number" value={passingScore} onChange={handlePassingScoreChange} required  style={{ width: "100%" }} />
+                    <input type="number" value={passingScore} onChange={handlePassingScoreChange} required style={{ width: "100%" }} />
+                    <label>Reward:</label>
+                    <input type="number" value={reward} onChange={handleRewardChange} required style={{ width: "100%" }} />
+                    <label>Cost:</label>
+                    <input type="number" value={cost} onChange={handleCostChange} required style={{ width: "100%" }} />
                 </div>
-
                 {questions.map((question, questionIndex) => (
                     <div key={questionIndex}>
                         <h4>Question {questionIndex + 1}</h4>
@@ -166,6 +169,7 @@ const CreateCert = () => {
                             required
                             style={{ width: "100%" }}
                         />
+
                         <label>Correct Answer:</label>
                         <input
                             type="text"
@@ -174,6 +178,7 @@ const CreateCert = () => {
                             required
                             style={{ width: "100%" }}
                         />
+
                         <h5>Answer Options</h5>
                         {question.answerOptions.map((option, optionIndex) => (
                             <div key={optionIndex}>
@@ -187,6 +192,7 @@ const CreateCert = () => {
                                     }
                                     required
                                 />
+
                                 <label>
                                     <input
                                         type="checkbox"
@@ -199,6 +205,7 @@ const CreateCert = () => {
                                 </label>
                             </div>
                         ))}
+
                         <button type="button" onClick={() => addAnswerOption(questionIndex)}>
                             Add Answer Option
                         </button>
@@ -208,9 +215,12 @@ const CreateCert = () => {
                 <button type="button" onClick={addQuestion}>
                     Add Question
                 </button>
+
                 <br />
                 <button type="submit">Submit</button>
-                <button type="button" onClick={() => navigate(-1)}>Back</button>
+                <button type="button" onClick={() => navigate(-1)}>
+                    Back
+                </button>
             </form>
         </div>
     );

@@ -136,6 +136,8 @@ namespace PersonalProject.Server.Controllers
                 user.LastName,
                 user.Address1,
                 user.PhoneNumber,
+                user.Coins,
+                user.ProfileImagePath,
                 Roles = roles
             };
 

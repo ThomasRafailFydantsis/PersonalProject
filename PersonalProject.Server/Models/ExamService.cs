@@ -15,9 +15,12 @@ namespace PersonalProject.Server.Models
         public async Task<Certs> GetExamByIdAsync(int certId)
         {
             var exam = await _context.Certs
-                                     .Include(e => e.Questions)
-                                         .ThenInclude(q => q.AnswerOptions)
-                                     .FirstOrDefaultAsync(e => e.CertId == certId);
+                .Include(e => e.Questions)
+                    .ThenInclude(q => q.AnswerOptions)
+                .Include(e => e.CertAchievements)
+                    .ThenInclude(ca => ca.Achievement)
+                .Include(e => e.Category)
+                .FirstOrDefaultAsync(e => e.CertId == certId);
 
             if (exam == null)
             {
@@ -37,71 +40,98 @@ namespace PersonalProject.Server.Models
                                             .FirstOrDefaultAsync(c => c.CertId == certId);
 
             if (certificate == null)
-            {
                 throw new KeyNotFoundException($"Certificate with ID {certId} not found.");
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
+
+            if (!certificate.IsFree)
+            {
+                // Paid exam logic
+                if (user.Coins < certificate.Cost)
+                    throw new InvalidOperationException("Insufficient coins for this exam.");
+
+                user.Coins -= certificate.Cost; // Deduct the cost
             }
 
-            var score = CalculateScore(answerIds, certId);
-            Console.WriteLine($"Calculated Score: {score}");
+            int score = 0;
+            bool isPassed = false;
+
+            if (certificate.IsFree)
+            {
+                // Free exam logic
+                score = CalculateScore(answerIds, certId);
+                isPassed = score >= certificate.PassingScore;
+
+                if (isPassed)
+                {
+                    user.Coins += certificate.Reward; // Reward coins for passing
+                }
+
+                Console.WriteLine($"Free exam processed: Score={score}, Passed={isPassed}, Reward={certificate.Reward}");
+            }
+            else
+            {
+                // Paid exam logic: Submit for grading
+                score = CalculateScore(answerIds, certId);
+                isPassed = score >= certificate.PassingScore;
+
+                Console.WriteLine($"Paid exam processed: Score={score}, Passed={isPassed}");
+            }
 
             var existingCertificate = await _context.UserCertificates
                                                     .FirstOrDefaultAsync(c => c.UserId == userId && c.CertId == certId);
 
             if (existingCertificate != null)
             {
+                // Update existing record
                 existingCertificate.Score = score;
                 existingCertificate.DateTaken = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-                return existingCertificate;
+                existingCertificate.IsPassed = isPassed;
+            }
+            else
+            {
+                // Create a new record
+                var userCertificate = new UserCertificate
+                {
+                    UserId = userId,
+                    CertId = certId,
+                    Score = score,
+                    DateTaken = DateTime.UtcNow,
+                    IsPassed = isPassed
+                };
+
+                _context.UserCertificates.Add(userCertificate);
             }
 
-            var userCertificate = new UserCertificate
-            {
-                UserId = userId,
-                CertId = certId,
-                Score = score,
-                DateTaken = DateTime.UtcNow
-            };
-
-            _context.UserCertificates.Add(userCertificate);
-
-            var examSubmission = new ExamSubmission
-            {
-                UserId = userId,
-                CertId = certId,
-                SubmissionDate = DateTime.UtcNow,
-                Score = score,
-                IsPassed = score >= certificate.PassingScore,
-                Answers = answerIds.Select(answerId => new AnswerSubmission
-                {
-                    QuestionId = certificate.Questions.FirstOrDefault(q => q.AnswerOptions.Any(a => a.Id == answerId))?.Id ?? 0,
-                    SelectedAnswerId = answerId,
-                    IsCorrect = certificate.Questions.Any(q => q.AnswerOptions.Any(a => a.Id == answerId && a.IsCorrect))
-                }).ToList()
-            };
-
-            _context.ExamSubmissions.Add(examSubmission);
+            // Save changes to the database
             await _context.SaveChangesAsync();
 
-            return userCertificate;
+            return existingCertificate;
         }
 
-        private int? CalculateScore(List<int> answerIds, int certId)
+        private int CalculateScore(List<int> answerIds, int certId)
         {
             var exam = _context.Certs.Include(e => e.Questions)
                 .ThenInclude(q => q.AnswerOptions)
                 .FirstOrDefault(e => e.CertId == certId);
 
-            if (exam == null) throw new KeyNotFoundException($"Exam with CertId {certId} not found.");
+            if (exam == null)
+                throw new KeyNotFoundException($"Exam with CertId {certId} not found.");
 
             int score = 0;
-            var orderedQuestions = exam.Questions.OrderBy(q => q.Id).ToList();
 
-            for (int i = 0; i < orderedQuestions.Count; i++)
+            foreach (var question in exam.Questions)
             {
-                var question = orderedQuestions[i];
-                var selectedAnswer = question.AnswerOptions.FirstOrDefault(a => a.Id == answerIds[i]);
-                if (selectedAnswer != null && selectedAnswer.IsCorrect) score++;
+                var selectedAnswerId = answerIds.FirstOrDefault(a =>
+                    question.AnswerOptions.Any(o => o.Id == a));
+
+                var selectedAnswer = question.AnswerOptions.FirstOrDefault(a => a.Id == selectedAnswerId);
+                if (selectedAnswer != null && selectedAnswer.IsCorrect)
+                {
+                    score++;
+                }
             }
 
             return score;
@@ -110,45 +140,13 @@ namespace PersonalProject.Server.Models
         {
             return await _context.UserCertificates
                                  .Where(r => r.UserId == userId)
-                                 .Include(r => r.Certificate) // Include the entire Certificate navigation property
-                                 .OrderByDescending(r => r.DateTaken) // Order by DateTaken
+                                 .Include(r => r.Certificate) 
+                                 .OrderByDescending(r => r.DateTaken) 
                                  .ToListAsync();
         }
-        public async Task<Certs> CreateExamAsync(string title, int passingScore, List<QuestionDto> questionDtos)
-        {
-            if (!questionDtos.Any(q => q.AnswerOptions.Any()))
-            {
-                throw new ArgumentException("Each question must have at least one answer option.");
-            }
 
-            var cert = new Certs
-            {
-                CertName = title,
-                PassingScore = passingScore,
-                Questions = questionDtos.Select(q => new Question
-                {
-                    Text = q.Text,
-                    CorrectAnswer = q.CorrectAnswer,
-                    AnswerOptions = q.AnswerOptions.Select(a => new AnswerOption
-                    {
-                        Text = a.Text,
-                        IsCorrect = a.IsCorrect
-                    }).ToList()
-                }).ToList()
-            };
 
-            _context.Certs.Add(cert);
-            await _context.SaveChangesAsync();
 
-            return cert;
-        }
-    
-    }
-    public class ExamCreationDto
-    {
-        public string CertName { get; set; }
-        public int PassingScore { get; set; }
-        public List<QuestionDto> Questions { get; set; }
     }
     public class QuestionDto
     {

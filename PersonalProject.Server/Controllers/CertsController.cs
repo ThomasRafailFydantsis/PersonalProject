@@ -35,6 +35,9 @@ namespace PersonalProject.Server.Controllers
                 CertName = c.CertName,
                 ImagePath = c.ImagePath,
                 Description = c.Description,
+                Cost = c.Cost,
+                Category = c.CategoryId,
+
                
             }));
         }
@@ -84,63 +87,7 @@ namespace PersonalProject.Server.Controllers
             }));
         }
 
-        // PUT: api/Certs/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCerts(int id, [FromBody] CertDto certDto)
-        {
-            if (id != certDto.CertId)
-            {
-                return BadRequest(new { message = "ID mismatch." });
-            }
-
-            var cert = await _context.Certs.FindAsync(id);
-            if (cert == null)
-            {
-                return NotFound(new { message = $"Certificate with ID {id} not found." });
-            }
-
-            cert.Description= certDto.Description;
-           
-
-            _context.Entry(cert).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CertsExists(id))
-                {
-                    return NotFound(new { message = "Certificate not found during update." });
-                }
-                throw;
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Certs
-        [HttpPost]
-        public async Task<ActionResult<CertDto>> PostCerts([FromBody] CertDto certDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var cert = new Certs
-            {
-                CertName = certDto.CertName
-               
-            };
-
-            _context.Certs.Add(cert);
-            await _context.SaveChangesAsync();
-
-            certDto.CertId = cert.CertId; // Update DTO with ID from database
-            return CreatedAtAction(nameof(GetCertsData), new { id = certDto.CertId }, certDto);
-        }
+        
 
         // DELETE: api/Certs/{id}
         [HttpDelete("{id}")]
@@ -163,11 +110,13 @@ namespace PersonalProject.Server.Controllers
             return _context.Certs.Any(e => e.CertId == id);
         }
         [HttpGet("{id}/description")]
-        public async Task<ActionResult<CertDto>> GetCertById(int id)
+        public async Task<ActionResult<CertDto1>> GetCertById(int id)
         {
             var cert = await _context.Certs
-                .Include(c => c.Descriptions)
-                .FirstOrDefaultAsync(c => c.CertId == id);
+               .Include(c => c.CertAchievements)
+               .ThenInclude(ca => ca.Achievement)
+               .Include(c => c.Descriptions)
+               .FirstOrDefaultAsync(c => c.CertId == id);
 
             if (cert == null)
             {
@@ -179,14 +128,22 @@ namespace PersonalProject.Server.Controllers
                 CertId = cert.CertId,
                 CertName = cert.CertName,
                 ImagePath = cert.ImagePath,
+                Reward = cert.Reward,
+                Achievements = cert.CertAchievements?.Select(a => new AchievementDto
+                {
+                    AchievementId = a.Achievement.Id,  
+                    Title = a.Achievement.Title,
+                    AchievementDescription = a.Achievement.Description,
+                   
+                }).ToList() ?? new List<AchievementDto>(),  
                 MainDescription = cert.Description,
-                Descriptions = cert.Descriptions.Select(d => new DescriptionDto
+                Descriptions = cert.Descriptions?.Select(d => new DescriptionDto
                 {
                     DescriptionId = d.DescriptionId,
                     Text1 = d.Text1,
                     Text2 = d.Text2,
                     Text3 = d.Text3
-                }).ToList()
+                }).ToList() ?? new List<DescriptionDto>() 
             };
 
             return Ok(certDto);
@@ -239,6 +196,9 @@ namespace PersonalProject.Server.Controllers
         public string? CertName { get; set; }
         public string? Description { get; set; }
         public string? ImagePath { get; set; }
+        public int Cost { get; set; }
+        public int Category { get; set; }
+        
     }
     public class CertDto1
     {
@@ -247,6 +207,8 @@ namespace PersonalProject.Server.Controllers
         public string? ImagePath { get; set; }
         public string? MainDescription { get; set; }
         public List<DescriptionDto> Descriptions { get; set; }
+        public int Reward { get; set; }
+        public List<AchievementDto> Achievements { get; set; } 
     }
     public class DescriptionDto
     {
@@ -254,5 +216,12 @@ namespace PersonalProject.Server.Controllers
         public string? Text1 { get; set; }
         public string? Text2 { get; set; }
         public string? Text3 { get; set; }
+    }
+    public class AchievementDto
+    {
+        public int AchievementId { get; set; }
+        public string Title { get; set; } 
+        public string AchievementDescription { get; set; } 
+        
     }
 }

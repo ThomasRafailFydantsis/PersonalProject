@@ -26,30 +26,57 @@ namespace PersonalProject.Server.Controllers
         {
             try
             {
+                if (string.IsNullOrEmpty(model.UserId) || model.CertId == 0)
+                {
+                    return BadRequest("Invalid UserId or CertId.");
+                }
+
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == model.UserId);
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
+
+                var cert = await _context.Certs.FirstOrDefaultAsync(c => c.CertId == model.CertId);
+                if (cert == null)
+                {
+                    return NotFound("Certificate not found.");
+                }
+
                 var existingAssociation = await _context.UserCertificates
                     .FirstOrDefaultAsync(uc => uc.UserId == model.UserId && uc.CertId == model.CertId);
 
                 if (existingAssociation != null)
                 {
-                    return BadRequest("Already associated.");
+                    return BadRequest("Certificate already associated with the user.");
+                }
+
+                if (cert.Cost >0)
+                {
+                    if (user.Coins < cert.Cost)
+                    {
+                        return BadRequest("Insufficient balance to buy this certificate.");
+                    }
+
+                    // Deduct cost
+                    user.Coins -= cert.Cost;
                 }
 
                 var userCertificate = new UserCertificate
                 {
                     UserId = model.UserId,
                     CertId = model.CertId,
-                    DateAdded = DateTime.Now
-
+                    DateAdded = DateTime.UtcNow
                 };
-                if (string.IsNullOrEmpty(model.UserId) || model.CertId == 0)
-                {
-                    return BadRequest("Invalid UserId or CertId.");
-                }
 
                 _context.UserCertificates.Add(userCertificate);
                 await _context.SaveChangesAsync();
 
-                return Ok("Done.");
+                return Ok(new
+                {
+                    Message = "Certificate added successfully.",
+                    UpdatedBalance = user.Coins
+                });
             }
             catch (Exception ex)
             {
