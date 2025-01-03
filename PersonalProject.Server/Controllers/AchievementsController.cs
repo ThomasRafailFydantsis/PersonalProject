@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,32 +30,51 @@ namespace PersonalProject.Server.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Achievement>> GetAchievement(int id)
+        public async Task<IActionResult> GetAchievementById(int id)
         {
             var achievement = await _context.Achievements.FindAsync(id);
-
             if (achievement == null)
             {
-                return NotFound();
+                return NotFound(new { Message = $"Achievement with ID {id} not found." });
             }
 
-            return achievement;
+            return Ok(achievement);
         }
-        [HttpGet("/Achievements/{userId}")]
-        public async Task<ActionResult<IEnumerable<Achievement>>> GetAchievementsByUserId(string userId)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateAchievement([FromBody] CreateAchievementDto achievementDto)
         {
-            var userAchievements = await _context.UserAchievements
-                .Where(uc => uc.UserId == userId)
-                .Include(uc => uc.Achievement)
-                .ThenInclude(a => a.Title)
-                .ToListAsync();
-            return Ok(userAchievements.Select(uc => new
+            if (achievementDto == null)
             {
-                uc.Id,
-                uc.Achievement,
-                uc.Achievement.Title,
-                uc.Achievement.Description
-            }));
+                return BadRequest(new { Message = "Achievement data is required." });
+            }
+
+            // Validate UnlockCondition for PassingStreak achievements
+            if (achievementDto.Type == AchievementType.PassingStreak && !int.TryParse(achievementDto.UnlockCondition, out _))
+            {
+                return BadRequest(new { Message = "UnlockCondition must be a valid integer for PassingStreak achievements." });
+            }
+
+            var achievement = new Achievement
+            {
+                Title = achievementDto.Title,
+                Description = achievementDto.Description,
+                RewardCoins = achievementDto.RewardCoins,
+                UnlockCondition = achievementDto.UnlockCondition,
+                Type = achievementDto.Type
+            };
+
+            try
+            {
+                _context.Achievements.Add(achievement);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetAchievementById), new { id = achievement.Id }, achievement);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating achievement: {ex.Message}");
+                return StatusCode(500, new { Message = "An error occurred while creating the achievement." });
+            }
         }
 
         [HttpPut("{id}")]
@@ -85,14 +106,7 @@ namespace PersonalProject.Server.Controllers
             return NoContent();
         }
 
-        [HttpPost]
-        public async Task<ActionResult<Achievement>> PostAchievement(Achievement achievement)
-        {
-            _context.Achievements.Add(achievement);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetAchievement", new { id = achievement.Id }, achievement);
-        }
+        
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAchievement(int id)
@@ -113,5 +127,25 @@ namespace PersonalProject.Server.Controllers
         {
             return _context.Achievements.Any(e => e.Id == id);
         }
+    }
+    public class CreateAchievementDto
+    {
+        [Required]
+        [MaxLength(255)]
+        public string Title { get; set; } = string.Empty;
+
+        [Required]
+        public string Description { get; set; } = string.Empty;
+
+        [Required]
+        [Range(0, int.MaxValue)]
+        public int RewardCoins { get; set; } = 0;
+
+        [Required]
+        public string UnlockCondition { get; set; } = string.Empty;
+
+        [Required]
+        [JsonConverter(typeof(JsonStringEnumConverter))] 
+        public AchievementType Type { get; set; } = AchievementType.ExamBased;
     }
 }

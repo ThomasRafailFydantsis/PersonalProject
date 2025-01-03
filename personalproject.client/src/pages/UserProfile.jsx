@@ -5,9 +5,10 @@ import { useAuth } from "../components/AuthProvider";
 import UserProfileImageUpload from "../components/UserProfileImageUpload";
 import Sidebar from "../components/Sidebar1";
 import notUploaded from "../imgs/notUploaded.png";
+import UserAchievements from "../components/UserAchievements";
 
 const UserProfile = () => {
-    const { isAuthenticated, userData, AuthError } = useAuth();
+    const { isAuthenticated, userData, AuthError, imagePath } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [updatedData, setUpdatedData] = useState({});
     const [isLoading, setIsLoading] = useState(true);
@@ -79,22 +80,7 @@ const UserProfile = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchImagePath = async () => {
-            if (!userData || !userData.id) return;
-            try {
-                const response = await axios.get(
-                    `https://localhost:7295/api/ImageUpload/get-user-profile-image/${userData.id}`
-                );
-                setImage(response.data);
-            } catch (err) {
-                console.error("Error fetching image path:", err);
-            }
-        };
-
-        fetchImagePath();
-    }, [userData]);
-
+  
     if (isLoading) return <div>Loading...</div>;
     if (AuthError) return <div>{AuthError}</div>;
     if (!isAuthenticated) return <div>You are not logged in. Please log in.</div>;
@@ -138,15 +124,17 @@ const UserProfile = () => {
                     <div
                         style={{
                             padding: "20px",
-                             backgroundColor: isEditing ? "rgba(201, 240, 214, 0.8)" : "aliceblue",
+                             background: isEditing ? "linear-gradient(32deg, rgba(169, 106, 106,0.7) 45%, rgba(183,121,37,0.5) 100%)" : "linear-gradient(32deg, rgba(169, 106, 106,0.7) 45%, rgba(183,121,37,0.5) 100%)",
                             borderRadius: "8px",
                             boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
                             display: "flex",
                             alignItems: "center",
+                            color: "aliceblue",
+                            marginTop: "20px",
                         }}
                     >
                         <img
-                            src={image ? `https://localhost:7295${image}` : notUploaded}
+                              src={imagePath ? `https://localhost:7295${imagePath}` : notUploaded}
                             alt="User Profile"
                             style={{
                                 width: "100px",
@@ -165,7 +153,7 @@ const UserProfile = () => {
                                 display: "grid",
                                 gap: "20px",
                                 marginBottom: "20px",
-                                backgroundColor: "rgba(201, 240, 214, 0.8)",
+                                background: "linear-gradient(32deg, rgba(169, 106, 106,0.7) 45%, rgba(183,121,37,0.5) 100%)",
                                 padding: "20px",
                                 borderRadius: "8px",
                                 boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
@@ -239,14 +227,18 @@ const UserProfile = () => {
                             </div>
                         </form>
                     ) : (
+                        <div>
                         <div
                             style={{
                                 padding: "20px",
-                                backgroundColor: "rgba(160, 158, 157, 0.1)",
+                                background:"linear-gradient(32deg, rgba(169, 106, 106,0.7) 45%, rgba(183,121,37,0.5) 100%)",
                                 borderRadius: "8px",
                                 boxShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
                                 maxWidth: "1200px",
                                 margin: "0 auto",
+                                marginTop: "2rem",
+                                color: "#fff",
+                                fontSize: "20px",
                             }}
                         >
                             <p>First Name: {userData.firstName || "N/A"}</p>
@@ -254,12 +246,17 @@ const UserProfile = () => {
                             <p>Email: {userData.email || "N/A"}</p>
                             <p>Address: {userData.address1 || "N/A"}</p>
                             <p>Phone Number: {userData.phoneNumber || "N/A"}</p>
-                            <button onClick={() => setIsEditing(true)} style={buttonStyle("#086d6d")}>
+                            <button onClick={() => setIsEditing(true)} className="green-button">
                                 Edit Profile
                             </button>
                         </div>
+                        <div>
+                            <UserAchievements />
+                            </div>
+                        </div>
                     )}
                 </div>
+                
             </div>
         </div>
     );

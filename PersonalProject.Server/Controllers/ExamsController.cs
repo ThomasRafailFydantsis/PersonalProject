@@ -94,20 +94,17 @@ namespace PersonalProject.Server.Controllers
         [ServiceFilter(typeof(CustomJsonSerializationFilter))]
         public async Task<IActionResult> CreateExam([FromBody] ExamCreationDto examDto)
         {
-            // Validate if the category exists
             var categoryExists = await _context.ExamCategory.AnyAsync(c => c.Id == examDto.CategoryId);
             if (!categoryExists)
             {
                 return BadRequest($"Category with ID {examDto.CategoryId} does not exist.");
             }
 
-            // Ensure each question has at least one answer option
             if (!examDto.Questions.Any(q => q.AnswerOptions.Any()))
             {
                 return BadRequest("Each question must have at least one answer option.");
             }
 
-            // Create the certificate object
             var cert = new Certs
             {
                 CertName = examDto.CertName,
@@ -127,11 +124,9 @@ namespace PersonalProject.Server.Controllers
                 }).ToList()
             };
 
-            // Add and save the new certificate
             _context.Certs.Add(cert);
             await _context.SaveChangesAsync();
 
-            // Return a response with the newly created exam
             return CreatedAtAction(nameof(GetExamById), new { certId = cert.CertId }, cert);
         }
 
@@ -195,11 +190,32 @@ namespace PersonalProject.Server.Controllers
         public async Task<IActionResult> SubmitExam([FromBody] SubmitExamDto submitDto)
         {
             if (submitDto == null || submitDto.AnswerIds == null || !submitDto.AnswerIds.Any())
+            {
                 return BadRequest("Invalid submission data. Answers are required.");
+            }
 
             try
             {
                 var result = await _examService.SubmitExamAsync(submitDto.UserId, submitDto.CertId, submitDto.AnswerIds);
+
+                var user = await _context.Users
+                                         .Include(u => u.UserAchievements!)
+                                         .ThenInclude(ua => ua.Achievement)
+                                         .FirstOrDefaultAsync(u => u.Id == submitDto.UserId);
+
+                if (user == null)
+                {
+                    return NotFound(new { Message = "User not found." });
+                }
+
+                var unlockedAchievements = user.UserAchievements?
+                    .Where(ua => ua.UnlockedOn >= DateTime.UtcNow.AddMinutes(-1) && ua.Achievement != null)
+                    .Select(ua => new
+                    {
+                        title = ua.Achievement.Title, 
+                        description = ua.Achievement.Description 
+                    })
+                    .ToList();
 
                 return Ok(new
                 {
@@ -207,16 +223,17 @@ namespace PersonalProject.Server.Controllers
                     Score = result.Score,
                     Passed = result.IsPassed,
                     DateTaken = DateTime.UtcNow,
-                    Reward = result.IsPassed && result.Certificate?.IsFree == true ? result.Certificate.Reward : 0
+                    Reward = result.IsPassed && result.Certificate?.IsFree == true ? result.Certificate.Reward : 0,
+                    Achievements = unlockedAchievements
                 });
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { Message = ex.Message });
+                return NotFound(new { ex.Message });
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { Message = ex.Message });
+                return BadRequest(new { ex.Message });
             }
             catch (Exception ex)
             {
@@ -718,5 +735,6 @@ namespace PersonalProject.Server.Controllers
         public string UserId { get; set; }
         public int CertId { get; set; }
         public List<int> AnswerIds { get; set; }
+       
     }
 }

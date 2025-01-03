@@ -13,7 +13,7 @@ function DeleteButton({ certId, onDelete }) {
 
     return (
     
-            <button className="red-button" onClick={handleDelete}>Delete</button>
+            <button className="green-button" onClick={handleDelete}>Delete</button>
      
     );
 

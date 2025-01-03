@@ -1,14 +1,16 @@
-import  { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import ExamService from "../servicesE/ExamService";
 import { useAuth } from "../components/AuthProvider";
-import ExamHdr from "../components/ExamHdr"; 
+import ExamHdr from "../components/ExamHdr";
 
 const ExamPage = () => {
     const { certId } = useParams();
-    const location = useLocation();
-    const userId = location.state?.userId;
+    const navigate = useNavigate();
+    const { isAuthenticated, AuthError, revalidateAuth, userData} = useAuth();
+    
 
+    // State Variables
     const [exam, setExam] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -17,10 +19,8 @@ const ExamPage = () => {
     const [submitError, setSubmitError] = useState(null);
     const [examStarted, setExamStarted] = useState(false);
     const [timeLeft, setTimeLeft] = useState(null);
-
-    const navigate = useNavigate();
-    const { isAuthenticated, AuthError, revalidateAuth } = useAuth();
-
+    const userId = userData ? userData.id : null;
+    // Effects
     useEffect(() => {
         revalidateAuth();
     }, [location]);
@@ -32,7 +32,7 @@ const ExamPage = () => {
             return;
         }
 
-        const fetchExamById = async () => {
+        const fetchExam = async () => {
             try {
                 const examData = await ExamService.fetchExam(certId);
                 setExam(examData);
@@ -43,22 +43,23 @@ const ExamPage = () => {
             }
         };
 
-        fetchExamById();
+        fetchExam();
     }, [certId, userId]);
 
     useEffect(() => {
         if (examStarted && timeLeft > 0) {
-            const timer = setInterval(() => {
-                setTimeLeft((prevTime) => prevTime - 1);
-            }, 1000);
-
+            const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
             return () => clearInterval(timer);
         }
 
-        if (timeLeft === 0 && examStarted) {
-            handleSubmit();
-        }
+        if (timeLeft === 0 && examStarted) handleSubmit();
     }, [timeLeft, examStarted]);
+
+    // Event Handlers
+    const handleStartExam = () => {
+        setExamStarted(true);
+        setTimeLeft(600); // Set timer to 10 minutes
+    };
 
     const handleAnswerChange = (questionId, answerId) => {
         setSelectedAnswers((prev) => ({
@@ -68,18 +69,17 @@ const ExamPage = () => {
     };
 
     const handleSubmit = async () => {
-        const confirmed = timeLeft === 0 || window.confirm("Are you sure you want to submit the exam?");
-        if (!confirmed) return;
+        if (timeLeft > 0 && !window.confirm("Are you sure you want to submit the exam?")) return;
 
         try {
             const answerIds = Object.values(selectedAnswers);
-            if (exam?.questions?.length === 0 || answerIds.length !== exam.questions.length) {
+            if (!exam?.questions || answerIds.length !== exam.questions.length) {
                 setSubmitError("Please answer all questions.");
                 return;
             }
 
             const resultData = await ExamService.submitExamAnswers(userId, certId, answerIds);
-            setResult(resultData);
+            setResult(resultData); // Includes achievements from the API response
         } catch (err) {
             setSubmitError(err.message);
         } finally {
@@ -87,22 +87,12 @@ const ExamPage = () => {
         }
     };
 
-    const handleStartExam = () => {
-        setExamStarted(true);
-        setTimeLeft(600);
-    };
-
-    if (!userId) return <p className="text-danger">Error: User ID not found.</p>;
-    if (loading) return <div className="spinner-border text-center" role="status"><span className="visually-hidden">Loading...</span></div>;
-    if (error) return <p className="text-danger">{error}</p>;
-
-    if (AuthError) {
-        return <div className="alert alert-danger">{AuthError}</div>;
-    }
-
-    if (!isAuthenticated) {
-        return <div className="alert alert-warning">You are not logged in. Please log in.</div>;
-    }
+    // Render Logic
+    if (!userId) return <ErrorMessage message="Error: User ID not found." />;
+    if (loading) return <LoadingSpinner />;
+    if (error) return <ErrorMessage message={error} />;
+    if (AuthError) return <ErrorMessage message={AuthError} />;
+    if (!isAuthenticated) return <WarningMessage message="You are not logged in. Please log in." />;
 
     return (
         <div className="container my-4" style={{ paddingTop: "100px" }}>
@@ -122,51 +112,96 @@ const ExamPage = () => {
             {examStarted && !result && (
                 <>
                     {exam.questions.map((question) => (
-                        <div key={question.id} className="mb-3">
-                            <h3 className="h6">{question.text}</h3>
-                            <ul className="list-group">
-                                {question.answerOptions.map((option) => (
-                                    <li key={option.id} className="list-group-item">
-                                        <label className="form-check-label">
-                                            <input
-                                                type="radio"
-                                                name={`question-${question.id}`}
-                                                value={option.id}
-                                                className="form-check-input me-2"
-                                                onChange={() => handleAnswerChange(question.id, option.id)}
-                                            />
-                                            {option.text}
-                                        </label>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                        <QuestionBlock
+                            key={question.id}
+                            question={question}
+                            handleAnswerChange={handleAnswerChange}
+                        />
                     ))}
-
-                    {submitError && <p className="text-danger">{submitError}</p>}
-
-                    <button className="btn btn-primary" onClick={handleSubmit}>
-                        Submit Exam
-                    </button>
-                    <button className="btn btn-secondary ms-2" onClick={() => navigate(-1)}>
-                        Go Back
-                    </button>
+                    {submitError && <ErrorMessage message={submitError} />}
+                    <div className="mt-4">
+                        <button className="btn btn-primary" onClick={handleSubmit}>
+                            Submit Exam
+                        </button>
+                        <button className="btn btn-secondary ms-2" onClick={() => navigate(-1)}>
+                            Go Back
+                        </button>
+                    </div>
                 </>
             )}
 
-            {result && (
-                <div className="alert alert-success mt-4">
-                    <h2>Result</h2>
-                    <p><strong>Certificate:</strong> {result.certName || "Certificate not found"}</p>
-                    <p><strong>Score:</strong> {result.score}</p>
-                    <p><strong>Passed:</strong> {result.passed ? "Yes" : "No"}</p>
-                    <p><strong>Date Taken:</strong> {result.dateTaken ? new Date(result.dateTaken).toLocaleDateString() : "-"}</p>
-                    <p><strong>Coins Awarded :</strong>+{result.reward}</p>
-                    <button className="btn btn-primary" onClick={() => navigate(-1)}>Go Back</button>
-                </div>
-            )}
+            {result && <ResultBlock question={exam.questions} result={result} navigate={navigate} />}
         </div>
     );
 };
+
+// Reusable Components
+const ErrorMessage = ({ message }) => <p className="text-danger">{message}</p>;
+
+const WarningMessage = ({ message }) => <div className="alert alert-warning">{message}</div>;
+
+const LoadingSpinner = () => (
+    <div className="spinner-border text-center" role="status">
+        <span className="visually-hidden">Loading...</span>
+    </div>
+);
+
+const QuestionBlock = ({ question, handleAnswerChange }) => (
+    <div className="mb-3">
+        <h3 className="h6">{question.text}</h3>
+        <ul className="list-group">
+            {question.answerOptions.map((option) => (
+                <li key={option.id} className="list-group-item">
+                    <label className="form-check-label">
+                        <input
+                            type="radio"
+                            name={`question-${question.id}`}
+                            value={option.id}
+                            className="form-check-input me-2"
+                            onChange={() => handleAnswerChange(question.id, option.id)}
+                        />
+                        {option.text}
+                    </label>
+                </li>
+            ))}
+        </ul>
+    </div>
+);
+
+const ResultBlock = ({ result, navigate, question }) => (
+    <div className="alert alert-success mt-4">
+        <h2>Result</h2>
+        <p>
+            <strong>Certificate:</strong> {result.certName || "Certificate not found"}
+        </p>
+        <p>
+            <strong>Score:</strong> {Math.round((result.score / question.length) * 100)}% 
+        </p>
+        <p>
+            <strong>Passed:</strong> {result.passed ? "Yes" : "No"}
+        </p>
+        <p>
+            <strong>Date Taken:</strong> {result.dateTaken ? new Date(result.dateTaken).toLocaleDateString() : "-"}
+        </p>
+        <p>
+            <strong>Coins Awarded:</strong> +{result.reward}
+        </p>
+        {result.passed && result.achievements && (
+            <div className="mt-3">
+                <h3>Achievements Earned</h3>
+                <ul className="list-group">
+                    {result.achievements.map((achievement, index) => (
+                        <li key={index} className="list-group-item">
+                            <strong>{achievement.title}</strong>: {achievement.description}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )}
+        <button className="btn btn-primary mt-3" onClick={() => navigate(-1)}>
+            Go Back
+        </button>
+    </div>
+);
 
 export default ExamPage;

@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
             setUserData(null);
             setRoles([]);
             setError(null);
-            
+            navigate('/');
         } catch (error) {
             console.error("Logout error:", error);
             setError("Failed to log out. Please try again.");

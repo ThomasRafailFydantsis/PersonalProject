@@ -7,13 +7,14 @@ import { useAuth } from "./AuthProvider";
 import { FaUsersGear } from "react-icons/fa6";
 import notUploaded from "../imgs/notUploaded.png";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LuListTodo } from "react-icons/lu";
 
 const Sidebar = ({ isOpen, toggleSidebar, sidebarRef,imagePath }) => {
   const { isAuthenticated, userData, roles, handleLogout } = useAuth();
   const [admin, setAdmin] = useState(false);
   const [marker, setMarker] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setAdmin(roles.includes("Admin"));
@@ -23,6 +24,7 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef,imagePath }) => {
   const handleUserLogout = async () => {
     try {
       await handleLogout();
+      navigate("/");
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -56,7 +58,7 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef,imagePath }) => {
                     <li>
                         <Link to="/MyCertificate" onClick={toggleSidebar}>
                             <PiCertificateDuotone />
-                            {isOpen && <span>Passed</span>}
+                            {isOpen && <span>Results</span>}
                         </Link>
                     </li>
                     {admin && (
@@ -92,7 +94,7 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef,imagePath }) => {
                         </li>
                     )}
                     <li>
-                        <button className="logout-btn" onClick={handleUserLogout}>
+                        <button className="logout-btn" onClick={handleUserLogout} >
                             <FiLogOut />
                             {isOpen && <span>Logout</span>}
                         </button>

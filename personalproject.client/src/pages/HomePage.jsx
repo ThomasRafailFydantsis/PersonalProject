@@ -11,6 +11,9 @@ import img2 from '../imgs/coding.jpg';
 import img3 from '../imgs/kineza.jpg';
 import img4 from '../imgs/tetragwnh-laptop.jpg';
 import img5 from '../imgs/tetragwnh-programming.jpg';
+import img6 from '../imgs/coinToCert.png';
+import img7 from '../imgs/bookToCoin.png';
+import img8 from '../imgs/achieve.png';
 
 const HomePage = () => {
   const [showModal, setShowModal] = useState(false);
@@ -136,10 +139,10 @@ const handleScrollToSection = (sectionId, index) => {
        <>
        <header className={`headerHome ${transparent ? "header-transparent" : ""}`}>
     <a href="/" className="header-title"><h1 style={{fontSize:"40px"}}>Certflix</h1></a>
-    <ul className="header-nav">
+    <ul className="header-nav" style={{marginTop:"1rem"}}>
     {[
         { text: "Start", href: "#scrollspyHeading1" },
-        { text: "Products", href: "#scrollspyHeading2" },
+        { text: "Progress", href: "#scrollspyHeading2" },
         { text: "Programming", href: "#scrollspyHeading3" },
         { text: "Goal", href: "#scrollspyHeading4" },
         { text: "Reviews", href: "#scrollspyHeading5" },
@@ -164,20 +167,24 @@ const handleScrollToSection = (sectionId, index) => {
        </>
 
      
-       <div id="scrollspyHeading1" className="full-screen-section" style={{ backgroundColor: '#f0f0f0' }}>
+       <div id="scrollspyHeading1" className="full-screen-section" style={{ backgroundColor: 'aliceblue' }}>
     <div className="text-center my-5" style={{color: '#607d8b ', boxShadow: '0 0px 0px rgba(0, 0, 0, 0.4)'}}>
         <h1  >Welcome to < span style={{color: '#FF8C00'}}>Certflix</span></h1>
         <h3 className="my-3" >
             Learning to code is like learning a new language. The more you practice, the easier it becomes.
         </h3>
     </div>
+    <HomeCerts onAuthRedirect={handleAuthRedirect} />
    
-   <>
+    </div>
+    
+    <div id="scrollspyHeading2" style={{ backgroundColor: '#e9f6ef' }} className="full-screen-section">
+    <>
     <Carousel className='crsl'  style={{margin:'0px auto',maxWidth: '60rem', color: '#607d8b' , boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', marginBottom: '2rem', marginTop: '0rem'}}>
         <Carousel.Item interval={10000} style={{marginTop: '-30px'}}>
         <img
                 className="d-block w-100"
-                src={img1}
+                src={img7}
                 alt="Third slide"
                 style={{paddingTop: '14px'}}
                 height={550}
@@ -189,10 +196,10 @@ const handleScrollToSection = (sectionId, index) => {
                 <p>In the age of information, knowledge is power, and Certflix is here to empower you</p>
             </Carousel.Caption>
         </Carousel.Item>
-        <Carousel.Item interval={1000} style={{marginTop: '-30px'}}> 
+        <Carousel.Item interval={10000} style={{marginTop: '-30px'}}> 
         <img
                 className="d-block w-100"
-                src={img2}
+                src={img6}
                 alt="Third slide"
                 height={550}
                 style={{paddingTop: '14px'}}
@@ -205,7 +212,7 @@ const handleScrollToSection = (sectionId, index) => {
         <Carousel.Item interval={10000} style={{marginTop: '-30px'}}>
         <img
                 className="d-block w-100"
-                src={img3}
+                src={img8}
                 alt="Third slide"
                 style={{paddingTop: '14px'}}
                 height={550}
@@ -217,10 +224,7 @@ const handleScrollToSection = (sectionId, index) => {
         </Carousel.Item>
     </Carousel>
     </>
-    </div>
-    
-    <div id="scrollspyHeading2" style={{ backgroundColor: '#e9f6ef' }} className="full-screen-section">
-         <HomeCerts onAuthRedirect={handleAuthRedirect} />
+      
     </div>
     <div id="scrollspyHeading3" className="full-screen-section">
     <div  className="d-flex justify-content-between align-items-center my-5" style={{maxWidth:'1200px', margintop : '30px'}}>

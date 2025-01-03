@@ -20,6 +20,7 @@ namespace PersonalProject.Server.Data
         public DbSet<Description> Descriptions { get; set; }
         public DbSet<Achievement> Achievements { get; set; }
         public DbSet<UserAchievement> UserAchievements { get; set; }
+        public DbSet<ExamCategory> ExamCategory { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -155,7 +156,12 @@ namespace PersonalProject.Server.Data
                       .HasForeignKey(ca => ca.AchievementId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
+            builder.Entity<UserAchievement>()
+                      .HasOne(ua => ua.Achievement)
+                      .WithMany()
+                      .HasForeignKey(ua => ua.AchievementId)
+                      .OnDelete(DeleteBehavior.Cascade);
         }
-        public DbSet<PersonalProject.Server.Models.ExamCategory> ExamCategory { get; set; } = default!;
+        
     }
 }

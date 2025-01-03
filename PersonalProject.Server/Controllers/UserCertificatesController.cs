@@ -107,6 +107,42 @@ namespace PersonalProject.Server.Controllers
                 return StatusCode(500, "An error occurred while removing the certificate.");
             }
         }
+        [HttpGet("{userId}/achievements")]
+        public async Task<IActionResult> GetUserAchievements(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("User ID is required.");
+            }
+
+            try
+            {
+                var userAchievements = await _context.UserAchievements
+                                                     .Where(ua => ua.UserId == userId)
+                                                     .Select(ua => new
+                                                     {
+                                                         ua.Id,
+                                                         ua.UserId,
+                                                         ua.AchievementId,
+                                                         AchievementTitle = ua.Achievement.Title,
+                                                         AchievementDescription = ua.Achievement.Description,
+                                                         AchievementRewardCoins = ua.Achievement.RewardCoins,
+                                                         ua.UnlockedOn
+                                                     })
+                                                     .ToListAsync();
+
+                if (!userAchievements.Any())
+                {
+                    return NotFound(new { Message = $"No achievements found for user ID {userId}." });
+                }
+
+                return Ok(userAchievements);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while fetching user achievements." + ex.Message);
+            }
+        }
 
     }
     public class AddCertificateDto

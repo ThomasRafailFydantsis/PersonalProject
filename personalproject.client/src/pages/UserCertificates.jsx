@@ -123,7 +123,7 @@ function UserCertificates() {
         <div style={{marginLeft: isSidebarOpen ? "300px" : "0px", transition: "margin-left 0.3s ease-in-out" , paddingTop: '80px'}}>
             <Header toggleSidebar={toggleSidebar} />
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            <h3 style={{ textAlign: 'center', color:'darkgreen' }}>Here you can find your added Certificates</h3>
+            <h3 style={{ textAlign: 'center', color:'darkgreen' }}>Here you can find your Exams <br/> <span style={{fontSize: '20px'}}>Tip: You can try again if you fail </span></h3>
             {certificates.length === 0 ? (
                 <div>No certificates found for the user.</div>
             ) : (
@@ -143,29 +143,35 @@ function UserCertificates() {
                             >
                                 <div>
                                     <div style={{ fontSize: '25px' }}>{certificate.certName}</div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-around' }}>
                                     {!certificate.isPassed ? (
                                         <button
-                                            className="btn btn-primary"
+                                            className="green-button"
                                             onClick={() => handleTakeExam(certificate.certId)}
+                                            style={{margin:"1rem"}}
+                                           
                                         >
                                             Take Exam
                                         </button>
                                     ) : (
                                         <button
-                                                className="btn btn-success"
+                                                className="green-button"
                                             onClick={() => navigate('/myCertificate')}
+                                            style={{margin:"1rem"}}
                                         >
-                                            Owned <FaCheck />
+                                            Owned 
                                         </button>
                                     )}
                                     {roles.includes("Admin") && (
                                         <button
-                                            className="btn btn-danger"
+                                            className="green-button"
                                             onClick={() => handleDelete(certificate.certId)}
+                                            style={{margin:"1rem"}}
                                         >
-                                            Remove Certificate
+                                            Remove 
                                         </button>
                                     )}
+                                    </div>
                                 </div>
                             </li>
                         ))}

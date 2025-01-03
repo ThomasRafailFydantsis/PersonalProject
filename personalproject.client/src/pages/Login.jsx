@@ -32,7 +32,7 @@ const LoginPage = () => {
     return (
         <div>
             <OflineHeader />
-            <h2 style={{ textAlign: 'center', color: '#607d8b' }}>Login</h2>
+            <h2 style={{ textAlign: 'center', color: '#607d8b', paddingTop: '6rem' }}>Login</h2>
             {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
             <form onSubmit={handleSubmit} style={{width: '380px', margin: '0 auto', borderRadius: '8px', padding: '20px', background: 'linear-gradient(32deg, rgba(54,95,114,1) 45%, rgba(183,121,37,1) 100%)', boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)'}}>
                 <div >
@@ -43,6 +43,7 @@ const LoginPage = () => {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
+                        style={{width: '100%'}}
                     />
                 </div>
                 <div>
@@ -54,10 +55,11 @@ const LoginPage = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        style={{width: '100%'}}
                     />
                 </div>
                 <button className='green-button' type="submit">Login</button>
-                <button className='green-button' onClick={() => navigate("/register")}>Register</button>
+               <p style={{color: 'aliceblue', textAlign: 'center', marginTop: '10px'}}>You dont have an Account? click <a style={{color: 'aliceblue', cursor: 'pointer',borderBottom: '1px solid aliceblue'}} onClick={() => navigate("/register")}>here</a></p> 
                 {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
             </form>
         </div>

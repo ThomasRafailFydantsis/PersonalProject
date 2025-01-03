@@ -9,14 +9,14 @@ namespace PersonalProject.Server.Models
         public int Id { get; set; }
 
         [Required]
-        public string UserId { get; set; }  // Matches the ApplicationUser Id
+        public string UserId { get; set; }  
 
-        public virtual ApplicationUser User { get; set; }  // Navigation Property
+        public virtual ApplicationUser User { get; set; }  
 
         [Required]
         public int CertId { get; set; }
 
-        public virtual Certs Certificate { get; set; }  // Navigation Property
+        public virtual Certs Certificate { get; set; } 
 
         public DateTime DateAdded { get; set; } = DateTime.UtcNow;
 
@@ -24,10 +24,10 @@ namespace PersonalProject.Server.Models
 
         public DateTime? DateTaken { get; set; }
 
-        public bool IsPassed { get; set; } = false;  // True if the user passes the exam
+        public bool IsPassed { get; set; } = false;  
 
-        public bool IsCertificateGenerated { get; set; } = false;  // Track if a certificate has been issued
+        public bool IsCertificateGenerated { get; set; } = false;  
 
-        public string? CertificateFilePath { get; set; }  // Path to the generated certificate file
+        public string? CertificateFilePath { get; set; }  
     }
 }

@@ -112,14 +112,15 @@ ul {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    border: 1px solid #607d8b;
+    border: 1px solid #9a5400;
     background: aliceblue;
     border-radius: 8px;
     margin: 10px 0;
     padding: 15px;
     font-size: 50px;
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-    color: #607d8b;
+    transition: all 0.3s ease, transform 0.3s ease;
+    color: #b96805;
+    text-align:center;
 
 }
 .Bon {
@@ -162,10 +163,17 @@ ul {
   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
   transform: scale(1.02);
   color: aliceblue;
-  text-align:center;
-  font-display:swap;
   
+  font-display:swap;
+  transition: box-shadow 0.4s ease-in-out, transform 0.4s ease-in-out, background-color 0.3s ease-in-out;
   border: 1px solid linear-gradient(32deg,  rgba(183,121,37,1) 100%, rgba(54,95,114,1) 45%);
+  button{
+    background: aliceblue !important;
+    color:rgb(193, 106, 0) !important;
+    box-shadow:  rgba(0, 0, 0, 0.3) 0px 2px 4px -1px;
+    transform: scale(1.10);
+    transition: all 0.4s ease-in-out;
+  }
 }
 
 .certList > div {
@@ -277,7 +285,7 @@ th {
   margin: 0 auto;
 }
 .green-button{
-  background-color: #607d8b;
+  background:linear-gradient(32deg, rgb(169, 106, 106) 45%, rgba(183,121,37,1) 100%) !important;
   color: #fff;
   border: 1px solid aliceblue !important;
   border-radius: 3px;
@@ -288,14 +296,11 @@ th {
   font-size: 24px;
 }
 .green-button:hover {
-  background-color: #455a64;
-  color: #FF8C00;
+  background-color:#FF8C00;
+  color:  aliceblue !important;
   border: 1px solid aliceblue;
 }
-.green-button:focus {
-  background-color: #455a64;
-  color: #FF8C00;
-}
+
 .green-button:disabled {
   background-color: #607d8b;
   color: #fff;
@@ -423,7 +428,7 @@ button{
   left: 0;
   height: 100%;
   width: 240px;
-  background: linear-gradient(32deg, rgb(169, 106, 106) 45%, rgba(183,121,37,1) 100%) !important;
+  
 
   transform: translateX(-100%);
   transition: transform 0.3s ease, width 0.3s ease, all 0.3s ease;
@@ -437,13 +442,14 @@ button{
 
 .sidebar.open {
   transform: translateX(0);
+  background: linear-gradient(32deg, rgb(169, 106, 106) 45%, rgba(183,121,37,1) 100%) ;
 }
 
 .sidebar.collapsed {
   width: 60px;
   transform: translateX(0);
   padding: 10px;
-  background-color: #ff8c00;
+  background:  linear-gradient(32deg, rgba(169, 106, 106,0.7) 45%, rgba(183,121,37,0.5) 100%) ;
   opacity: 0.7;
 }
 
@@ -851,4 +857,17 @@ div::-webkit-scrollbar-track {
 
 .full-screen-section:nth-child(odd) {
   background-color: #fff;
+}
+.achievement-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.achievement-title {
+  font-weight: bold;
+}
+
+.loading, .error {
+  color: red;
 }

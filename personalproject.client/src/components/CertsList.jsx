@@ -91,11 +91,11 @@ console.log("Selected Category:", categoryId);
 console.log("FilterExams:", filterExams);
     return (
         <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-            <h1 style={{ textAlign: "center", color: "#607d8b" }}>Certificates</h1>
+            <h1 style={{ textAlign: "center", color: "#607d8b" }}>Shop</h1>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                 <Form.Group style={{ display: "flex", alignItems: "center" }}>
                     <Form.Label style={{ fontWeight: "bold", marginRight: "10px", color: "#607d8b" }}>Filter by Category</Form.Label>
-                    <Form.Select onChange={handleCategoryChange} value={selectedCategory}>
+                    <Form.Select  onChange={handleCategoryChange} value={selectedCategory}>
                         <option value="all">All Categories</option>
                         {categories.map((category) => (
                             <option key={category.id} value={category.id}>
@@ -106,7 +106,7 @@ console.log("FilterExams:", filterExams);
                 </Form.Group>
                 <Form.Group style={{ display: "flex", alignItems: "center" }}>
                     <Form.Label style={{ fontWeight: "bold", marginRight: "10px",marginTop: "10px", color: "#607d8b", fontSize: "21px" }}>Premium</Form.Label>
-                    <Form.Check type="switch" id="custom-switch" defaultChecked={false} onChange={toggleExam} />
+                    <Form.Check style={{ width: "30px", height: "30px", marginTop: "10px"}} type="switch" id="custom-switch" defaultChecked={false} onChange={toggleExam} />
                 </Form.Group>
             </div>
             <ul>
@@ -115,26 +115,33 @@ console.log("FilterExams:", filterExams);
                 ) : (
                     filterExams.map((cert) => (
                         <li key={cert.certId} className="certList">
-                            <div onClick={() => navigate(`/certs/${cert.certId}`)} style={{ display: "flex", alignItems: "center", justifyContent: "space-around", alignContent: "center"}} >
-                             <p style={{ cursor: "pointer" }}>{cert.certName}</p>   
-                            </div>
-                            <div>
-                            {cert.imagePath ? (
+                        
+                            <div style={{ marginRight: "8rem" }}>
+                             {cert.imagePath ? (
+                                
                                 <img
                                     src={`https://localhost:7295${cert.imagePath}`}
                                     alt={cert.certName}
                                     className="cert-image"
-                                    style={{ width: "130px", height: "130px", justifySelf: "center" }}
+                                    style={{ width: "130px", height: "130px" }}
                                 />
                             ) : (
                                 <div>No image available</div>
                             )}
                             </div>
-                            <div> <AddCertificateButton certId={cert.certId} /></div>
-                            {isAdmin && <DeleteButton certId={cert.certId} onDelete={handleDelete} />}
-                            {isAdmin && <button onClick={() => handleUpdateExam(cert.certId)}>Edit</button>}
-                            {isMarker && <button onClick={() => handleUpdateExam(cert.certId)}>Edit</button>}
+                            <div onClick={() => navigate(`/certs/${cert.certId}`)} style={{ cursor: "pointer", textAlign: "center"}} >
+                             <p style={{ cursor: "pointer", textAlign: "center"}}>{cert.certName}</p>   
+                            </div>
+                            <div>
                            
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}> 
+                            <AddCertificateButton certId={cert.certId} />
+                            {isAdmin && <DeleteButton certId={cert.certId} onDelete={handleDelete} />}
+                            {isAdmin && <button className="green-button" onClick={() => handleUpdateExam(cert.certId)}>Edit</button>}
+                            {isMarker && <button  className="green-button" onClick={() => handleUpdateExam(cert.certId)}>Edit</button>}
+                            </div>
+                            
                         </li>
                     ))
                 )}

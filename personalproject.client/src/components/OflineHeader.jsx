@@ -22,7 +22,7 @@ function OflineHeader( ) {
     return (
         <>
       {transparent === false ? (
-        <header className="header" >
+        <header className="headerHome" >
             <div style={{ display: 'flex', alignItems: 'center' }}>
                 <a className="header-notTransparent"  href="/"><h1>Certflix</h1></a>
             </div>

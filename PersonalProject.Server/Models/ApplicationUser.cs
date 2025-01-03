@@ -13,7 +13,9 @@ namespace PersonalProject.Server.Models
      [NotMapped]
      public ClaimsIdentity? Username { get; internal set; }
      public ICollection<UserCertificate>? UserCertificates { get; set; }
-     public ICollection<UserAchievement>? UserAchievements { get; set; } = new List<UserAchievement>(); 
+     public ICollection<UserAchievement>? UserAchievements { get; set; } = new List<UserAchievement>();
+     public int PassingStreak { get; set; } = 0;
+     public DateTime? LastExamDate { get; set; }
      public string? Address1 { get; set; }
      public int Coins { get; set; } = 0; 
      public int Gold { get; set; } = 0;
