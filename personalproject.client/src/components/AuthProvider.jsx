@@ -12,9 +12,7 @@ export const AuthProvider = ({ children }) => {
     const [isAuthLoading, setIsAuthLoading] = useState(true);
     const [coins , setCoins] = useState(null);
     const [imagePath,setImagePath] = useState(null);
-   
-
-
+    
     const revalidateAuth = async () => {
         setLoading(true);
         try {
@@ -46,7 +44,7 @@ export const AuthProvider = ({ children }) => {
             setUserData(null);
             setRoles([]);
             setError(null);
-            navigate('/');
+           
         } catch (error) {
             console.error("Logout error:", error);
             setError("Failed to log out. Please try again.");

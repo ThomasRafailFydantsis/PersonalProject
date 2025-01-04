@@ -46,17 +46,18 @@ namespace PersonalProject.Server.Models
 
             var user = await _context.Users
                 .Include(u => u.UserAchievements)
+                .Include(u => u.UserCertificates) // Include certificates for streak calculation
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
                 throw new KeyNotFoundException($"User with ID {userId} not found.");
 
-            int score = 0;
             var answers = new List<AnswerSubmission>();
+            int correctAnswers = 0;
+
             foreach (var answerId in answerIds)
             {
-                var question = certificate.Questions
-                    .FirstOrDefault(q => q.AnswerOptions.Any(a => a.Id == answerId));
+                var question = certificate.Questions.FirstOrDefault(q => q.AnswerOptions.Any(a => a.Id == answerId));
 
                 if (question != null)
                 {
@@ -69,11 +70,35 @@ namespace PersonalProject.Server.Models
                     });
 
                     if (selectedAnswer.IsCorrect)
-                        score++;
+                        correctAnswers++;
                 }
             }
 
-            bool isPassed = score >= certificate.PassingScore;
+            int totalQuestions = certificate.Questions.Count;
+            int scorePercentage = totalQuestions > 0 ? (int)Math.Round((double)correctAnswers / totalQuestions * 100) : 0;
+            bool isPassed = scorePercentage >= certificate.PassingScore;
+            if (isPassed)
+            {
+              
+                var userCertificates = user.UserCertificates
+                    .OrderByDescending(c => c.DateTaken)
+                    .ToList();
+
+                int streakCount = 1; 
+                foreach (var cert in userCertificates)
+                {
+                    if (cert.DateTaken == DateTime.UtcNow) continue; 
+                    if (cert.IsPassed) streakCount++;
+                    else break; 
+                }
+
+                user.PassingStreak = streakCount;
+            }
+            else
+            {
+                user.PassingStreak = 0; 
+            }
+
 
             if (certificate.Cost > 0)
             {
@@ -82,7 +107,7 @@ namespace PersonalProject.Server.Models
                     UserId = userId,
                     CertId = certId,
                     SubmissionDate = DateTime.UtcNow,
-                    Score = score,
+                    Score = scorePercentage,
                     IsPassed = isPassed,
                     Answers = answers
                 };
@@ -94,7 +119,7 @@ namespace PersonalProject.Server.Models
 
             if (existingCertificate != null)
             {
-                existingCertificate.Score = score;
+                existingCertificate.Score = scorePercentage;
                 existingCertificate.DateTaken = DateTime.UtcNow;
                 existingCertificate.IsPassed = isPassed;
             }
@@ -104,9 +129,11 @@ namespace PersonalProject.Server.Models
                 {
                     UserId = userId,
                     CertId = certId,
-                    Score = score,
+                    Score = scorePercentage,
                     DateTaken = DateTime.UtcNow,
-                    IsPassed = isPassed
+                    IsPassed = isPassed,
+                  
+                    
                 };
                 _context.UserCertificates.Add(userCertificate);
             }
@@ -133,7 +160,7 @@ namespace PersonalProject.Server.Models
                 }
             }
 
-            await EvaluateAndAwardAchievements(user, score, isPassed);
+            await EvaluateAndAwardAchievements(user, scorePercentage, isPassed);
 
             await _context.SaveChangesAsync();
 
@@ -143,10 +170,10 @@ namespace PersonalProject.Server.Models
                 {
                     CertId = certId,
                     UserId = userId,
-                    Score = score,
+                    Score = scorePercentage,
                     IsPassed = isPassed,
                     DateTaken = DateTime.UtcNow,
-                    Certificate = certificate 
+                    Certificate = certificate
                 };
             }
 
@@ -155,30 +182,31 @@ namespace PersonalProject.Server.Models
             return existingCertificate;
         }
 
-       public int CalculateScore(List<int> answerIds, int certId)
+        public int CalculateScore(List<int> answerIds, int certId)
         {
-            var exam = _context.Certs.Include(e => e.Questions)
+            var exam = _context.Certs
+                .Include(e => e.Questions)
                 .ThenInclude(q => q.AnswerOptions)
                 .FirstOrDefault(e => e.CertId == certId);
 
             if (exam == null)
                 throw new KeyNotFoundException($"Exam with CertId {certId} not found.");
 
-            int score = 0;
+            int correctAnswers = 0;
 
             foreach (var question in exam.Questions)
             {
-                var selectedAnswerId = answerIds.FirstOrDefault(a =>
-                    question.AnswerOptions.Any(o => o.Id == a));
-
+                var selectedAnswerId = answerIds.FirstOrDefault(a => question.AnswerOptions.Any(o => o.Id == a));
                 var selectedAnswer = question.AnswerOptions.FirstOrDefault(a => a.Id == selectedAnswerId);
+
                 if (selectedAnswer != null && selectedAnswer.IsCorrect)
                 {
-                    score++;
+                    correctAnswers++;
                 }
             }
 
-            return score;
+            int totalQuestions = exam.Questions.Count;
+            return totalQuestions > 0 ? (int)Math.Round((double)correctAnswers / totalQuestions * 100) : 0;
         }
         public async Task<List<UserCertificate>> GetUserResultsAsync(string userId)
         {
@@ -189,9 +217,9 @@ namespace PersonalProject.Server.Models
                                  .ToListAsync();
         }
 
-        private async Task EvaluateAndAwardAchievements(ApplicationUser user, int score, bool isPassed)
+        private async Task EvaluateAndAwardAchievements(ApplicationUser user, int scorePercentage, bool isPassed)
         {
-            if (!isPassed) return; 
+            if (!isPassed) return;
 
             var achievements = new List<Achievement>();
 
@@ -203,6 +231,7 @@ namespace PersonalProject.Server.Models
                                                       .ToListAsync();
             }
 
+            // Award "First Exam Passed" achievement
             if (!user.UserAchievements.Any(ua => ua.Achievement?.Type == AchievementType.FirstExamPassed))
             {
                 var firstExamAchievement = await _context.Achievements
@@ -218,27 +247,33 @@ namespace PersonalProject.Server.Models
                         UnlockedOn = DateTime.UtcNow
                     });
 
-                    user.Coins += firstExamAchievement.RewardCoins; 
+                    user.Coins += firstExamAchievement.RewardCoins;
                 }
             }
 
-            if (user.LastExamDate.HasValue && (DateTime.UtcNow - user.LastExamDate.Value).TotalDays <= 1)
+            // Calculate the passing streak
+            var userCertificates = user.UserCertificates
+                                        .OrderByDescending(c => c.DateTaken)
+                                        .ToList();
+
+            int streakCount = 1; // Start with the current exam as passed
+
+            foreach (var cert in userCertificates)
             {
-                user.PassingStreak++;
-            }
-            else
-            {
-                user.PassingStreak = 1; 
+                if (cert.DateTaken == DateTime.UtcNow) continue; // Skip the current exam
+                if (cert.IsPassed) streakCount++; // Increment streak for consecutive passes
+                else break; // Stop counting on the first failed exam
             }
 
+            user.PassingStreak = streakCount;
+
+            // Award "Passing Streak" achievement if the streak matches a required value
             var streakAchievement = await _context.Achievements
-                                                  .FirstOrDefaultAsync(a =>
-                                                      a.Type == AchievementType.PassingStreak &&
-                                                      a.UnlockCondition == user.PassingStreak.ToString());
+                .FirstOrDefaultAsync(a => a.Type == AchievementType.PassingStreak &&
+                                          a.RequiredStreak == user.PassingStreak);
 
             if (streakAchievement != null && !user.UserAchievements.Any(ua => ua.AchievementId == streakAchievement.Id))
             {
-                achievements.Add(streakAchievement);
                 user.UserAchievements.Add(new UserAchievement
                 {
                     AchievementId = streakAchievement.Id,
@@ -246,15 +281,12 @@ namespace PersonalProject.Server.Models
                     UnlockedOn = DateTime.UtcNow
                 });
 
-                user.Coins += streakAchievement.RewardCoins; 
+                user.Coins += streakAchievement.RewardCoins;
             }
 
-            user.LastExamDate = DateTime.UtcNow; 
-
             await _context.SaveChangesAsync();
-
-            Console.WriteLine($"Awarded {achievements.Count} achievements to user {user.Id}");
         }
+
 
     }
     public class QuestionDto

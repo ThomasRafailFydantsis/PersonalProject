@@ -60,6 +60,7 @@ const AddCertificateButton = ({ certId }) => {
                 setSuccessMessage("Certificate added successfully!");
                 setUserCoins(response.data.UpdatedBalance); 
                 setIsOwned(true); 
+
             }
         } catch (error) {
             console.error("Error adding certificate:", error);
@@ -95,6 +96,7 @@ const AddCertificateButton = ({ certId }) => {
                 >
                   <ImCoinDollar />  {buttonText}
                 </button>
+                // <Modal show={handleOpenScheduler }
             )}
         </>
     );

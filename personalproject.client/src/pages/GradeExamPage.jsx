@@ -146,7 +146,7 @@ const GradeExamPage = () => {
             </p>
             <p>
                 <strong>Score:</strong> {submissionDetails?.score} /{" "}
-                {submissionDetails?.answers.length}
+                100
             </p>
             <p>
                 <strong>Status:</strong>{" "}

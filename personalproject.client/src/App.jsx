@@ -17,6 +17,7 @@ import UserTable from './pages/UserTable';
 import UserProfileAdmin from './pages/UserProfileAdmin';
 import AuthPage from './pages/AuthPage';
 import ProductPage from './pages/ProductPage';
+import AfterLogin from './pages/AfterLogin';
 
 
 const App = () => {
@@ -35,12 +36,13 @@ const App = () => {
         <Route path="/certForm/:certId" caseSensitive={false} element={<CertForm />} />
         <Route path="/CreateCert" caseSensitive={false} element={<CreateCert />} />
         <Route path="/assignMarker" caseSensitive={false} element={<AssignMarkerPage />} />
-        <Route path="/marker/assignments" element={<MarkerAssignmentsPage />} />
-        <Route path="/exam/submission/:examSubmissionId" element={<GradeExamPage />} />
+        <Route path="/marker/assignments" caseSensitive={false} element={<MarkerAssignmentsPage />} />
+        <Route path="/exam/submission/:examSubmissionId" caseSensitive={false} element={<GradeExamPage />} />
         <Route path="/MyCertificate" caseSensitive={false} element={<MyCertificate />} />
-        <Route path="/profile/:userId" element={<UserProfileAdmin />} />
+        <Route path="/profile/:userId" caseSensitive={false} element={<UserProfileAdmin />} />
         <Route path='/AuthPage' caseSensitive={false} element={<AuthPage />} />
-        <Route path="/certs/:id" element={<ProductPage />} />
+        <Route path="/certs/:id" caseSensitive={false} element={<ProductPage />} />
+        <Route path="/afterLogin" caseSensitive={false} element={<AfterLogin />} />
       </Routes>
     </Router>
   );

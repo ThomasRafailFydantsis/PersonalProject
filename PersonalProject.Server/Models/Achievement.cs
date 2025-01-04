@@ -12,6 +12,7 @@ namespace PersonalProject.Server.Models
         public string? IconPath { get; set; }
         public string UnlockCondition { get; set; } = string.Empty;
         public AchievementType Type { get; set; } = AchievementType.ExamBased; 
+        public int RequiredStreak { get; set; }
     }
     public enum AchievementType
     {

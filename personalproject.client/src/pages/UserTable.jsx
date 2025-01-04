@@ -7,7 +7,7 @@ import Sidebar from "../components/Sidebar1";
 import { useRef } from "react";
 
 const UserTable = () => {
-  const { roles, isAuthenticated, AuthError, isAuthLoading } = useAuth();
+  const { isAuthenticated, userData, roles, AuthError, loading, revalidateAuth } = useAuth();
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [filterRole, setFilterRole] = useState("All");
@@ -47,11 +47,11 @@ const UserTable = () => {
   }, []);
 
   useEffect(() => {
-    if (isAuthLoading) return;
+
 
     if (!isAuthenticated || !isAdmin) {
       console.warn("is admin and is auth:" + isAdmin + isAuthenticated);
-      navigate("/login");
+    
     } else {
       const fetchUsers = async () => {
         try {
@@ -77,6 +77,7 @@ const UserTable = () => {
       setFilteredUsers(users.filter((user) => user.roles.includes(filterRole)));
     }
   }, [filterRole, users]);
+  
 
   const handleDelete = async (userId) => {
     try {
@@ -115,16 +116,41 @@ const UserTable = () => {
     ? [...filteredUsers].sort((a, b) => a.userName.localeCompare(b.userName)) // Ascending
     : [...filteredUsers].sort((a, b) => b.userName.localeCompare(a.userName)); // Descending
 
-  if (isAuthLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (AuthError) return <div>{AuthError}</div>;
+    useEffect(() => {
+      if (!loading && isAuthenticated === false) {
+          navigate("/");
+      }
+  }, [loading, isAuthenticated, navigate]);
+
+
+
+  if (AuthError && isAuthenticated === false) {
+      return (
+          <div>
+              <h3>Error</h3>
+              <p>{AuthError}</p>
+              <button onClick={() => window.location.reload()}>Retry</button>
+          </div>
+      );
+  }
+
+  if (isAuthenticated === null) {
+      return <div>Authenticating...</div>;
+  }
+
+  const hasNoPermission = !isAuthenticated || !isAdmin;
+
+  if (hasNoPermission) {
+      return <div>Access denied</div>;
+  }
+  
 
   return (
     <div style={{paddingTop: "40px"}}>
      <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen}/>
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
-      <h1 style={{ textAlign: "center", marginTop: "20px", color: "#607d8b" }}>User List</h1>
-      <div style={{ justifyContent: "center", display: "flex" }}>
+      
+      <div style={{marginTop: "20px", justifyContent: "center", display: "flex" }}>
         <label style={{ marginTop: "15px", fontSize: "20px" }} htmlFor="roleFilter">
           Filter by Role:
         </label>
@@ -140,14 +166,13 @@ const UserTable = () => {
           <option value="Marker">Markers</option>
         </select>
       </div>
-      <div style={{height: "500px", overflow: "scroll",border: "none", marginTop: "20px",marginLeft: isSidebarOpen ? "300px" : "0px", transition: "margin-left 0.3s ease-in-out" }}>
+      <div style={{margin:"0 auto", height: "38rem", overflow: "scroll",border: "none", marginTop: "20px",marginLeft: isSidebarOpen ? "300px" : "0px", transition: "margin-left 0.3s ease-in-out" }}>
       <table style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <thead style={{position: "sticky", top: "0"}}>
           <tr>
             <th style={{ width: "250px" }}>ID</th>
-            <th style={{ width: "300px" }}>
-              Username{" "}
-              <button
+            <th style={{ width: "10rem" }}>
+              Username<button
                 style={{ border: "none", background: "transparent", cursor: "pointer" }}
                 onClick={handleSort}
               >
@@ -155,6 +180,8 @@ const UserTable = () => {
               </button>
             </th>
             <th style={{ width: "300px" }}>Name</th>
+            <th style={{ width: "300px" }}>HighScore</th>
+            <th style={{ width: "300px" }}>LowestScore</th>
             <th style={{ width: "300px" }}>Role</th>
             <th style={{ width: "300px" }}>Actions</th>
           </tr>
@@ -169,6 +196,8 @@ const UserTable = () => {
                   {user.firstName}, {user.lastName}
                 </a>
               </td>
+              <td>{user.highestScore || "-"}%</td>
+              <td>{user.lowestScore}%</td>
               <td>
                 <select
                   onChange={(e) => handleAssignRole(user.id, e.target.value)}

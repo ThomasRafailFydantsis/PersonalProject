@@ -28,6 +28,7 @@ namespace PersonalProject.Server.Models
 
         public bool IsCertificateGenerated { get; set; } = false;  
 
-        public string? CertificateFilePath { get; set; }  
+        public string? CertificateFilePath { get; set; } 
+        public bool? LastExamPassed { get; set; }
     }
 }

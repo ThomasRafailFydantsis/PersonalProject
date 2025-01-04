@@ -61,16 +61,16 @@ namespace PersonalProject.Server.Controllers
                 uc.Certificate.CertId,
                 uc.Certificate.CertName,
                 uc.IsPassed,
-                uc.DateAdded
+                uc.DateAdded,
+                
             }));
         }
         [HttpGet("{userId}/owned")]
         public async Task<IActionResult> GetOwnedCerts(string userId)
         {
-            // Fetch all certificates owned by the user
             var ownedCerts = await _context.UserCertificates
                 .Where(uc => uc.UserId == userId && uc.Certificate != null)
-                .Include(uc => uc.Certificate)  // Include certificate details
+                .Include(uc => uc.Certificate)  
                 .ToListAsync();
 
             if (ownedCerts == null || !ownedCerts.Any())

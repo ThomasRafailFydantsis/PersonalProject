@@ -62,20 +62,18 @@ function CertsList({ id: userId }) {
     const handleUpdateExam = (certId) => {
         navigate(`/certForm/${certId}`);
     };
-
+    
     const handleCategoryChange = (e) => {
         const categoryId = e.target.value;
         setSelectedCategory(categoryId);
-console.log("Selected Category:", categoryId);
-        if (categoryId === "all") {
-            // Show all exams if "all" is selected
+        if (categoryId === "all") {  
             setFilterExams(certs);
         } else {
-            // Filter exams by selected category
             const filtered = certs.filter((cert) => cert.category=== parseInt(categoryId));
             setFilterExams(filtered);
         }
     };
+    
 
     const toggleExam = () => {
         if (filterExams.length === certs.length) {
@@ -88,7 +86,7 @@ console.log("Selected Category:", categoryId);
     if (AuthError) {
         return <div>Error: {AuthError}</div>;
     }
-console.log("FilterExams:", filterExams);
+
     return (
         <div style={{ maxWidth: "800px", margin: "0 auto" }}>
             <h1 style={{ textAlign: "center", color: "#607d8b" }}>Shop</h1>

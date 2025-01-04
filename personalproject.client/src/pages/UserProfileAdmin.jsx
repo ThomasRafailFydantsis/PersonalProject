@@ -4,6 +4,7 @@ import axios from "axios";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar1";
 import { useRef } from "react";
+import { useAuth } from "../components/AuthProvider";
 
 const UserProfileAdmin = () => {
     const { userId } = useParams();
@@ -13,7 +14,10 @@ const UserProfileAdmin = () => {
     const [certificates, setCertificates] = useState([]);
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-        
+    const {userData,isAuthenticated,revalidateAuth} = useAuth();
+    useEffect(() => {
+        revalidateAuth();
+    }, []);
     // Create ref for the sidebar
     const sidebarRef = useRef(null);
     
@@ -82,6 +86,8 @@ const UserProfileAdmin = () => {
         fetchCertificates();
     }, [userId]);
 
+
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
@@ -89,7 +95,7 @@ const UserProfileAdmin = () => {
         <div style={{ textAlign: "center",marginLeft: isSidebarOpen ? "300px" : "0px", transition: "margin-left 0.3s ease-in-out"  }}>
              <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen}/>
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
-            <h1 style={{ marginTop: "20px", color: "#607d8b" }}>User Profile</h1>
+            <h1 style={{ marginTop: "5rem", color: "#607d8b" }}>{user && user.firstName}'s Profile</h1>
             <div style={{ display: "flex", alignItems: "center" }}>
                 <div>
                     {user && user.profileImagePath ? (

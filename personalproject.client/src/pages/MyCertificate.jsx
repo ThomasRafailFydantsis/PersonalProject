@@ -75,7 +75,7 @@ const MyCertificate = () => {
     if (error) return <p style={{ color: "red" }}>{error}</p>;
     if (AuthError) return <div>{AuthError}</div>;
     if (!isAuthenticated) return <div>You are not logged in. Please log in.</div>;
-
+console.log(certificates);
     return (
         <div style={{ marginLeft: isSidebarOpen ? "250px" : "0px", transition: "margin-left 0.3s ease-in-out" }}>
             <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen} />
@@ -95,27 +95,43 @@ const MyCertificate = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {certificates.map(
-                            (cert) =>
+                        {certificates.map((cert) => {
+                            let status = "Pending";
+                            let action = "-";
+
+                            if (cert.isPassed && cert.isMarked) {
+                                status = "Passed & Marked";
+                                action = cert.certificateDownloadable ? (
+                                    <button
+                                        className="green-button"
+                                        onClick={() => handleDownload(cert.id)}
+                                    >
+                                        Download
+                                    </button>
+                                ) : (
+                                    <span>Not Available</span>
+                                );
+                            } else if (cert.isMarked && cert.isPassed === false) {
+                                status = "Exam Failed";
+                            }
+
+                            return (
                                 cert.score != null &&
                                 cert.cost !== 0 && (
                                     <tr key={cert.id}>
                                         <td>{cert.certificateName}</td>
-                                        <td>{cert.dateTaken ? new Date(cert.dateTaken).toLocaleDateString() : "-"}</td>
-                                        <td>{cert.score}</td>
-                                        <td>{cert.isPassed && cert.isMarked ? "Passed & Marked" : "Pending"}</td>
                                         <td>
-                                            {cert.certificateDownloadable ? (
-                                                <button className="green-button" onClick={() => handleDownload(cert.id)}>
-                                                    Download
-                                                </button>
-                                            ) : (
-                                                <span>Not Available</span>
-                                            )}
+                                            {cert.dateTaken
+                                                ? new Date(cert.dateTaken).toLocaleDateString()
+                                                : "-"}
                                         </td>
+                                        <td>{cert.score}%</td>
+                                        <td>{status}</td>
+                                        <td>{action}</td>
                                     </tr>
                                 )
-                        )}
+                            );
+                        })}
                     </tbody>
                 </table>
             )}

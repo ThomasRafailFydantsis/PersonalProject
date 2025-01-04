@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.IdentityModel.Tokens;
+using PersonalProject.Server.Data;
 using PersonalProject.Server.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
@@ -21,12 +22,14 @@ namespace PersonalProject.Server.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly ApplicationDbContext _context;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, RoleManager<IdentityRole> roleManager, ApplicationDbContext context)
         {
             _userManager = userManager;
             _configuration = configuration;
             this.roleManager = roleManager;
+            this._context = context;
         }
         [HttpGet("roles")]
         public async Task<IActionResult> GetUserRoles()
@@ -52,6 +55,20 @@ namespace PersonalProject.Server.Controllers
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
+
+                var highestScore = _context.UserCertificates
+                    .Where(uc => uc.UserId == user.Id)
+                    .OrderByDescending(uc => uc.Score)
+                    .Select(uc => uc.Score)
+                    .FirstOrDefault();
+                var lowestScore = _context.UserCertificates
+                   .Where(uc => uc.UserId == user.Id)
+                   .OrderBy(uc => uc.Score)
+                   .Select(uc => uc.Score)
+                   .FirstOrDefault();
+                var totalAchievements = _context.UserAchievements
+                    .Count(ua => ua.UserId == user.Id);
+
                 userList.Add(new
                 {
                     user.Id,
@@ -59,12 +76,17 @@ namespace PersonalProject.Server.Controllers
                     user.Email,
                     user.FirstName,
                     user.LastName,
-                    Roles = roles
+                    user.Coins,
+                    Roles = roles,
+                    HighestScore = highestScore,
+                    TotalAchievements = totalAchievements,
+                    LowestScore = lowestScore
                 });
             }
 
             return Ok(userList);
         }
+
         [HttpGet("get-user-profile/{userId}")]
         public async Task<IActionResult> GetUserProfile(string userId)
         {

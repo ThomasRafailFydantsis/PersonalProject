@@ -39,8 +39,7 @@ function Dashboard() {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
-
-    // Revalidate authentication if necessary
+    
     useEffect(() => {
         if (!loading && isAuthenticated && !userData) {
             revalidateAuth();

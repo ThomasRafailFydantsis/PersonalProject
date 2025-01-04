@@ -35,6 +35,16 @@ internal class Program
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
+        builder.Services.ConfigureApplicationCookie(options =>
+        {
+            options.Cookie.Name = "MyAppAuthCookie";
+            options.LoginPath = "/Account/Login";
+            options.LogoutPath = "/Account/Logout";
+            options.AccessDeniedPath = "/Account/AccessDenied";
+            options.SlidingExpiration = true;
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        });
+
         var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -61,12 +71,7 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "Personal Project API",
-                Version = "v1",
-                Description = "API documentation for the Personal Project"
-            });
+         
 
             options.OperationFilter<FileUploadOperationFilter>();
             options.EnableAnnotations();
@@ -82,7 +87,6 @@ internal class Program
 
         Console.WriteLine($"Uploads directory initialized at: {uploadsPath}");
 
-        // Middleware
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();

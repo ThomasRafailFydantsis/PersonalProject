@@ -147,6 +147,7 @@ const AssignMarkerPage = () => {
     if (!isAuthenticated) {
         return <div>You are not logged in. Please log in.</div>;
     }
+   
 
     return (
         <div

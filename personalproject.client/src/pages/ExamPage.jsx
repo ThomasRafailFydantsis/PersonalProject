@@ -10,7 +10,7 @@ const ExamPage = () => {
     const { isAuthenticated, AuthError, revalidateAuth, userData} = useAuth();
     
 
-    // State Variables
+    
     const [exam, setExam] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -20,7 +20,7 @@ const ExamPage = () => {
     const [examStarted, setExamStarted] = useState(false);
     const [timeLeft, setTimeLeft] = useState(null);
     const userId = userData ? userData.id : null;
-    // Effects
+  
     useEffect(() => {
         revalidateAuth();
     }, [location]);
@@ -55,10 +55,10 @@ const ExamPage = () => {
         if (timeLeft === 0 && examStarted) handleSubmit();
     }, [timeLeft, examStarted]);
 
-    // Event Handlers
+    
     const handleStartExam = () => {
         setExamStarted(true);
-        setTimeLeft(600); // Set timer to 10 minutes
+        setTimeLeft(600); 
     };
 
     const handleAnswerChange = (questionId, answerId) => {
@@ -79,7 +79,7 @@ const ExamPage = () => {
             }
 
             const resultData = await ExamService.submitExamAnswers(userId, certId, answerIds);
-            setResult(resultData); // Includes achievements from the API response
+            setResult(resultData); 
         } catch (err) {
             setSubmitError(err.message);
         } finally {
@@ -87,7 +87,6 @@ const ExamPage = () => {
         }
     };
 
-    // Render Logic
     if (!userId) return <ErrorMessage message="Error: User ID not found." />;
     if (loading) return <LoadingSpinner />;
     if (error) return <ErrorMessage message={error} />;
@@ -109,73 +108,116 @@ const ExamPage = () => {
                 </div>
             )}
 
-            {examStarted && !result && (
-                <>
-                    {exam.questions.map((question) => (
-                        <QuestionBlock
-                            key={question.id}
-                            question={question}
-                            handleAnswerChange={handleAnswerChange}
-                        />
-                    ))}
-                    {submitError && <ErrorMessage message={submitError} />}
-                    <div className="mt-4">
-                        <button className="btn btn-primary" onClick={handleSubmit}>
-                            Submit Exam
-                        </button>
-                        <button className="btn btn-secondary ms-2" onClick={() => navigate(-1)}>
-                            Go Back
-                        </button>
-                    </div>
-                </>
-            )}
+       {examStarted && !result && (
+          <>
+        {exam.questions.map((question, index) => (
+            <QuestionBlock
+                key={question.id}
+                question={question}
+                handleAnswerChange={handleAnswerChange}
+                index={index}
+            />
+        ))}
+        {submitError && <ErrorMessage message={submitError} />}
+        <div className="mt-4 d-flex justify-content-center">
+            <button className="green-button" onClick={handleSubmit}>
+                Submit Exam
+            </button>
+            <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+                Go Back
+            </button>
+        </div>
+        </>
+        )}
 
-            {result && <ResultBlock question={exam.questions} result={result} navigate={navigate} />}
+            {result && <ResultBlock result={result} navigate={navigate} />}
         </div>
     );
 };
-
 // Reusable Components
-const ErrorMessage = ({ message }) => <p className="text-danger">{message}</p>;
+const ErrorMessage = ({ message }) => (
+    <p className="text-danger text-center">{message}</p>
+);
 
-const WarningMessage = ({ message }) => <div className="alert alert-warning">{message}</div>;
+const WarningMessage = ({ message }) => (
+    <div className="alert alert-warning text-center">{message}</div>
+);
 
 const LoadingSpinner = () => (
-    <div className="spinner-border text-center" role="status">
-        <span className="visually-hidden">Loading...</span>
+    <div className="d-flex justify-content-center">
+        <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+        </div>
     </div>
 );
 
-const QuestionBlock = ({ question, handleAnswerChange }) => (
-    <div className="mb-3">
-        <h3 className="h6">{question.text}</h3>
-        <ul className="list-group">
-            {question.answerOptions.map((option) => (
-                <li key={option.id} className="list-group-item">
-                    <label className="form-check-label">
-                        <input
-                            type="radio"
-                            name={`question-${question.id}`}
-                            value={option.id}
-                            className="form-check-input me-2"
-                            onChange={() => handleAnswerChange(question.id, option.id)}
-                        />
+const QuestionBlock = ({ question, handleAnswerChange, index }) => (
+    <div className="mb-4 p-3 border rounded" style={{ background: "#f9f9f9" }}>
+        <h3 className="h6">
+            <span className="fw-bold">{index + 1}. </span>
+            {question.text}
+        </h3>
+        <ul className="list-group mt-2">
+            {question.answerOptions.map((option, optionIndex) => (
+                <li
+                    key={option.id}
+                    className="list-group-item d-flex align-items-center"
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "10px 15px",
+                        borderRadius: "6px",
+                        background: "#fff",
+                        marginBottom: "5px",
+                        boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                    }}
+                >
+                    <label
+                        className="form-check-label d-flex align-items-center"
+                        style={{ cursor: "pointer", marginBottom: "0" }}
+                    >
+                        <span
+                            className="fw-bold me-2"
+                            style={{
+                              color: "#FF8C00",
+                                padding: "5px 10px",
+                                borderRadius: "50%",
+                                minWidth: "24px",
+                                textAlign: "center",
+
+                            }}
+                        >
+                            {String.fromCharCode(97 + optionIndex)}
+                        </span>
                         {option.text}
                     </label>
+                    <input
+                        type="radio"
+                        name={`question-${question.id}`}
+                        value={option.id}
+                        className="form-check-input"
+                        onChange={() => handleAnswerChange(question.id, option.id)}
+                        style={{
+                            width: "20px",
+                            height: "20px",
+                            boxShadow: "0px 0px 5px rgba(0, 0, 0, 0.3)",
+                        }}
+                    />
                 </li>
             ))}
         </ul>
     </div>
 );
 
-const ResultBlock = ({ result, navigate, question }) => (
+
+const ResultBlock = ({ result, navigate }) => (
     <div className="alert alert-success mt-4">
         <h2>Result</h2>
         <p>
             <strong>Certificate:</strong> {result.certName || "Certificate not found"}
         </p>
         <p>
-            <strong>Score:</strong> {Math.round((result.score / question.length) * 100)}% 
+            <strong>Score:</strong> {result.score}% 
         </p>
         <p>
             <strong>Passed:</strong> {result.passed ? "Yes" : "No"}

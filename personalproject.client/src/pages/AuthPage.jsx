@@ -57,7 +57,7 @@ const AuthPage = () => {
     return (
         <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px',height: '500px'}}>
             <OflineHeader />
-            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '20px', marginTop: '4rem' }}>
                 <button
                     style={{
                         padding: '10px 20px',
@@ -85,16 +85,17 @@ const AuthPage = () => {
             </div>
             {errorMessage && <div style={{ color: 'red', textAlign: 'center' }}>{errorMessage}</div>}
             {activeTab === 'signup' ? (
-                <form onSubmit={handleRegister}>
+                <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <h2 style={{ textAlign: 'center' , marginBottom: '-30px'}}>Register</h2>
                     <div style={{ marginBottom: '-50px' }}>
-                        <label htmlFor="firstName">First Name:</label>
+                        <label htmlFor="firstName" style={{ marginTop: '4rem' }}>First Name:</label>
                         <input
                             type="text"
                             id="firstName"
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
                             required
+                            style={{ marginBottom: '4rem' }}
                         />
                     </div>
                     <div style={{ marginBottom: '-50px' }}>
@@ -105,6 +106,7 @@ const AuthPage = () => {
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                             required
+                            style={{ marginBottom: '4rem' }}
                         />
                     </div>
                     <div style={{ marginBottom: '-50px' }}>
@@ -115,6 +117,7 @@ const AuthPage = () => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
+                            style={{ marginBottom: '4rem' }}
                         />
                     </div>
                     <div style={{ marginBottom: '-50px' }}>
@@ -125,6 +128,7 @@ const AuthPage = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
+                            style={{ marginBottom: '4rem' }}
                         />
                     </div>
                     <div style={{ marginBottom: '-50px' }}>
@@ -135,14 +139,15 @@ const AuthPage = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
+                            style={{ marginBottom: '4rem' }}
                         />
                     </div>
                     <button className='green-button' style={{ marginTop: '50px' }} type="submit">Register</button>
                 </form>
             ) : (
-                <form onSubmit={handleLogin}>
+                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <h2 style={{ textAlign: 'center', marginBottom: '-30px' }}>Login</h2>
-                    <div style={{ marginBottom: '-50px' }}>
+                    <div style={{ marginTop: '4rem' }}>
                         <label htmlFor="username">Username:</label>
                         <input
                             type="text"
@@ -152,7 +157,7 @@ const AuthPage = () => {
                             required
                         />
                     </div>
-                    <div style={{ marginBottom: '-50px' }}>
+                    <div >
                         <label htmlFor="password">Password:</label>
                         <input
                             type="password"
@@ -163,7 +168,7 @@ const AuthPage = () => {
                         />
                     </div>
                     
-                    <button className='green-button' style={{ marginTop: '50px' }}  type="submit">Login</button>
+                    <button className='green-button' style={{ marginTop: '20px' }}  type="submit">Login</button>
                 </form>
             )}
         </div>

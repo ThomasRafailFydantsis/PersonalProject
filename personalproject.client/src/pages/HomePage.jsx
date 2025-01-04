@@ -28,6 +28,7 @@ const HomePage = () => {
   const { isAuthenticated } = useAuth();
   const [transparent, setTransparent] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
+  const [showModal2, setShowModal2] = useState(false);
   const navigate = useNavigate();
     
 
@@ -179,52 +180,10 @@ const handleScrollToSection = (sectionId, index) => {
     </div>
     
     <div id="scrollspyHeading2" style={{ backgroundColor: '#e9f6ef' }} className="full-screen-section">
-    <>
-    <Carousel className='crsl'  style={{margin:'0px auto',maxWidth: '60rem', color: '#607d8b' , boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', marginBottom: '2rem', marginTop: '0rem'}}>
-        <Carousel.Item interval={10000} style={{marginTop: '-30px'}}>
-        <img
-                className="d-block w-100"
-                src={img7}
-                alt="Third slide"
-                style={{paddingTop: '14px'}}
-                height={550}
-                width={1000}
-
-            />
-            <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
-                <h3>Create the future</h3>
-                <p>In the age of information, knowledge is power, and Certflix is here to empower you</p>
-            </Carousel.Caption>
-        </Carousel.Item>
-        <Carousel.Item interval={10000} style={{marginTop: '-30px'}}> 
-        <img
-                className="d-block w-100"
-                src={img6}
-                alt="Third slide"
-                height={550}
-                style={{paddingTop: '14px'}}
-            />
-            <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
-                <h3>Succeed in your career</h3>
-                <p>Our oroducts are specifically designed to help you succeed in your career, land your dreamjob</p>
-            </Carousel.Caption>
-        </Carousel.Item>
-        <Carousel.Item interval={10000} style={{marginTop: '-30px'}}>
-        <img
-                className="d-block w-100"
-                src={img8}
-                alt="Third slide"
-                style={{paddingTop: '14px'}}
-                height={550}
-            />
-            <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
-                <h3 >Learn with passion</h3>
-                <p>Be able to learn and master new programming languages</p>
-            </Carousel.Caption>
-        </Carousel.Item>
-    </Carousel>
-    </>
-      
+  
+      <button onClick={() => { setShowModal2(true)}} style={{ backgroundColor: 'transparent', border: 'none', color:"#FF8C00" }}>
+        <FaRegUserCircle size={30} />
+    </button>
     </div>
     <div id="scrollspyHeading3" className="full-screen-section">
     <div  className="d-flex justify-content-between align-items-center my-5" style={{maxWidth:'1200px', margintop : '30px'}}>
@@ -362,6 +321,64 @@ const handleScrollToSection = (sectionId, index) => {
 </footer>
          <div style={{marginBottom: '52px'}}></div>
          <div className="modal-container">
+         <Modal
+    show={showModal2}
+    onHide={() => setShowModal2(false)}
+    centered
+    dialogClassName="second-modal"
+    size='lg'
+    aria-describedby="modal-1"
+    
+  >
+         <Modal.Body style={{width: '60rem', background: 'aliceblue', margin: '0 ', borderRadius: '7px' }}>
+         <>
+    <Carousel className='crsl'  style={{margin:'0px auto',maxWidth: '60rem', color: '#607d8b' , boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', marginBottom: '2rem', marginTop: '0rem'}}>
+        <Carousel.Item interval={10000} style={{marginTop: '-30px'}}>
+        <img
+                className="d-block w-100"
+                src={img7}
+                alt="Third slide"
+                style={{paddingTop: '14px'}}
+                height={550}
+                width={1000}
+
+            />
+            <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
+                <h3>Create the future</h3>
+                <p>In the age of information, knowledge is power, and Certflix is here to empower you</p>
+            </Carousel.Caption>
+        </Carousel.Item>
+        <Carousel.Item interval={10000} style={{marginTop: '-30px'}}> 
+        <img
+                className="d-block w-100"
+                src={img6}
+                alt="Third slide"
+                height={550}
+                style={{paddingTop: '14px'}}
+            />
+            <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
+                <h3>Succeed in your career</h3>
+                <p>Our oroducts are specifically designed to help you succeed in your career, land your dreamjob</p>
+            </Carousel.Caption>
+        </Carousel.Item>
+        <Carousel.Item interval={10000} style={{marginTop: '-30px'}}>
+        <img
+                className="d-block w-100"
+                src={img8}
+                alt="Third slide"
+                style={{paddingTop: '14px'}}
+                height={550}
+            />
+            <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
+                <h3 >Learn with passion</h3>
+                <p>Be able to learn and master new programming languages</p>
+            </Carousel.Caption>
+        </Carousel.Item>
+    </Carousel>
+    {/* <button onClick={navigate('/authpage')} style={{marginBottom: '1rem'}} className='green-button'>Get Started</button> */}
+    </>
+    </Modal.Body>
+  </Modal>
   <Modal
     show={showModal}
     onHide={() => setShowModal(false)}

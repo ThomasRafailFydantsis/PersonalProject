@@ -9,11 +9,10 @@ import Header from "./Header";
 const CertForm = () => {
     const { certId } = useParams();
     const navigate = useNavigate();
-    const { isAuthenticated, roles, error: AuthError, isAuthLoading } = useAuth();
+  const { isAuthenticated, userData, roles, AuthError, loading, revalidateAuth } = useAuth();
 
     const [certName, setCertName] = useState("");
     const [questions, setQuestions] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [category, setCategory] = useState("");
@@ -90,9 +89,36 @@ const CertForm = () => {
         }
     };
 
-    if (isAuthLoading || loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error}</p>;
-    if (AuthError) return <div>{AuthError}</div>;
+     useEffect(() => {
+           if (!loading && isAuthenticated && !userData) {
+               revalidateAuth();
+           }
+       }, [loading, isAuthenticated, userData, revalidateAuth]);
+   
+       if (loading) {
+           return <div>Loading...</div>;
+       }
+   
+       if (AuthError && isAuthenticated === false) {
+           return (
+               <div>
+                   <h3>Error</h3>
+                   <p>{AuthError}</p>
+                   <button onClick={() => window.location.reload()}>Retry</button>
+               </div>
+           );
+       }
+   
+       if (isAuthenticated === null) {
+           return <div>Authenticating...</div>;
+       }
+   
+       // Check if user has the required role
+       const hasNoPermission = !roles.includes("Admin") && !roles.includes("Marker") && !roles.includes("User");
+   
+       if (hasNoPermission) {
+           return navigate("/"); // Redirect to the homepage if no permission
+       }
 
     return (
         <div

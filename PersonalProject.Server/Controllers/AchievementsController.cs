@@ -48,18 +48,14 @@ namespace PersonalProject.Server.Controllers
                 return BadRequest(new { Message = "Achievement data is required." });
             }
 
-            // Validate UnlockCondition for PassingStreak achievements
-            if (achievementDto.Type == AchievementType.PassingStreak && !int.TryParse(achievementDto.UnlockCondition, out _))
-            {
-                return BadRequest(new { Message = "UnlockCondition must be a valid integer for PassingStreak achievements." });
-            }
+       
 
             var achievement = new Achievement
             {
                 Title = achievementDto.Title,
                 Description = achievementDto.Description,
                 RewardCoins = achievementDto.RewardCoins,
-                UnlockCondition = achievementDto.UnlockCondition,
+                RequiredStreak = achievementDto.RequiredStreak,
                 Type = achievementDto.Type
             };
 
@@ -136,13 +132,13 @@ namespace PersonalProject.Server.Controllers
 
         [Required]
         public string Description { get; set; } = string.Empty;
+        public int RequiredStreak { get; set; }
 
         [Required]
         [Range(0, int.MaxValue)]
         public int RewardCoins { get; set; } = 0;
 
-        [Required]
-        public string UnlockCondition { get; set; } = string.Empty;
+       
 
         [Required]
         [JsonConverter(typeof(JsonStringEnumConverter))] 

@@ -51,7 +51,10 @@ div {
   margin: 0 auto;
   padding: 10px;
 }
-
+.exmhdr{
+  margin-left: -32rem;
+  font-size: 25px;
+}
 
 header {
   display: flex;
@@ -122,6 +125,11 @@ ul {
     color: #b96805;
     text-align:center;
 
+}
+.homeListButton:hover{
+
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3) !important;
+  color: #0056b3 !important;
 }
 .Bon {
  background: linear-gradient(32deg, rgb(169, 106, 106) 45%, rgba(183,121,37,1) 100%) !important;

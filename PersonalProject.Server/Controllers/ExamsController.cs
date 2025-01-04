@@ -386,19 +386,19 @@ namespace PersonalProject.Server.Controllers
                 XGraphics gfx = XGraphics.FromPdfPage(page);
 
                
-                XFont titleFont = new XFont("Arial", 36, XFontStyle.Bold);  // font
-                XFont subtitleFont = new XFont("Arial", 24, XFontStyle.Bold);  // font
+                XFont titleFont = new XFont("Arial", 36, XFontStyle.Bold);  
+                XFont subtitleFont = new XFont("Arial", 24, XFontStyle.Bold); 
                 XFont textFont = new XFont("Arial", 14);  // font
 
-                XBrush blackBrush = new XSolidBrush(XColor.FromArgb(0, 0, 0));  // text
-                XBrush certFlixBrush = new XSolidBrush(XColor.FromArgb(96, 125, 139));  // Color 
+                XBrush blackBrush = new XSolidBrush(XColor.FromArgb(0, 0, 0));
+                XBrush certFlixBrush = new XSolidBrush(XColor.FromArgb(96, 125, 139));
 
                 
-                XColor outerBorderColor = XColor.FromArgb(255, 140, 0);  // Outer border
-                XColor innerBorderColor = XColor.FromArgb(96, 125, 139);  // Inner border
+                XColor outerBorderColor = XColor.FromArgb(255, 140, 0);  
+                XColor innerBorderColor = XColor.FromArgb(96, 125, 139); 
 
-                XPen outerBorderPen = new XPen(outerBorderColor, 6);  // Outer border
-                XPen innerBorderPen = new XPen(innerBorderColor, 3);  // Inner border 
+                XPen outerBorderPen = new XPen(outerBorderColor, 6);  
+                XPen innerBorderPen = new XPen(innerBorderColor, 3);  
 
                 // Set page size and margins
                 page.Width = 700;
@@ -573,31 +573,83 @@ namespace PersonalProject.Server.Controllers
                 if (dto.GradingData.TryGetValue(answer.QuestionId, out var selectedAnswerId))
                 {
                     answer.SelectedAnswerId = selectedAnswerId;
-
                     answer.IsCorrect = answer.Question?.AnswerOptions?.Any(a => a.Id == selectedAnswerId && a.IsCorrect) ?? false;
                 }
             }
 
-            submission.Score = submission.Answers.Count(a => a.IsCorrect);
-            submission.IsPassed = submission.Score >= submission.Certificate.PassingScore;
+            // Calculate the raw score (number of correct answers)
+            int correctAnswers = submission.Answers.Count(a => a.IsCorrect);
 
+            // Calculate the percentage score
+            int totalQuestions = submission.Certificate.Questions.Count;
+            double percentageScore = totalQuestions > 0 ? Math.Round((double)correctAnswers / totalQuestions * 100) : 0;
+
+            // Update submission score and pass status
+            submission.Score = (int)percentageScore;
+            submission.IsPassed = percentageScore >= submission.Certificate.PassingScore;
+
+            // Handle marker assignment
             var markerAssignment = submission.MarkerAssignments.FirstOrDefault();
             if (markerAssignment != null)
             {
+                if (_context.Entry(markerAssignment).State == EntityState.Detached)
+                {
+                    _context.Attach(markerAssignment);
+                }
                 markerAssignment.IsMarked = true;
+                Console.WriteLine($"MarkerAssignment for Submission ID {submission.Id} is now marked.");
+            }
+            else
+            {
+                return BadRequest("No marker assignment found for this submission.");
             }
 
+            // Update or create the UserCertificate
+            var userCertificate = await _context.UserCertificates
+                .FirstOrDefaultAsync(uc => uc.UserId == submission.UserId && uc.CertId == submission.CertId);
+
+            if (userCertificate != null)
+            {
+                userCertificate.Score = (int)percentageScore;
+                userCertificate.IsPassed = submission.IsPassed;
+                userCertificate.DateTaken = DateTime.UtcNow;
+            }
+            else
+            {
+                userCertificate = new UserCertificate
+                {
+                    UserId = submission.UserId,
+                    CertId = submission.CertId,
+                    Score = (int)percentageScore,
+                    IsPassed = submission.IsPassed,
+                    DateTaken = DateTime.UtcNow
+                };
+                _context.UserCertificates.Add(userCertificate);
+            }
+
+            // Save changes to the database
             await _context.SaveChangesAsync();
 
+            // Return the response
             return Ok(new
             {
                 submission.Id,
-                submission.Score,
+                Score = percentageScore,
                 submission.IsPassed,
-                IsMarked = markerAssignment?.IsMarked ?? false
+                IsMarked = markerAssignment?.IsMarked ?? false,
+                UserCertificate = new
+                {
+                    userCertificate.Id,
+                    userCertificate.Score,
+                    userCertificate.IsPassed,
+                    userCertificate.DateTaken
+                }
             });
-        }
+        
 
+       
+        }
+        
         [HttpGet("user-certificates/{userId}")]
         public async Task<IActionResult> GetUserCertificates(string userId)
         {
