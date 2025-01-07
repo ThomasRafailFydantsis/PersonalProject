@@ -12,8 +12,8 @@ using PersonalProject.Server.Data;
 namespace PersonalProject.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250101003615_Initial1")]
-    partial class Initial1
+    [Migration("20250107165405_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -173,12 +173,18 @@ namespace PersonalProject.Server.Migrations
                     b.Property<string>("IconPath")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RequiredStreak")
+                        .HasColumnType("int");
+
                     b.Property<int>("RewardCoins")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.Property<string>("UnlockCondition")
                         .IsRequired()
@@ -274,6 +280,12 @@ namespace PersonalProject.Server.Migrations
                     b.Property<int>("Gold")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsAuth")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastExamDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
@@ -290,6 +302,9 @@ namespace PersonalProject.Server.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("PassingStreak")
+                        .HasColumnType("int");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
@@ -587,6 +602,9 @@ namespace PersonalProject.Server.Migrations
                     b.Property<bool>("IsPassed")
                         .HasColumnType("bit");
 
+                    b.Property<bool?>("LastExamPassed")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("Score")
                         .HasColumnType("int");
 
@@ -780,7 +798,7 @@ namespace PersonalProject.Server.Migrations
                     b.HasOne("PersonalProject.Server.Models.Achievement", "Achievement")
                         .WithMany()
                         .HasForeignKey("AchievementId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PersonalProject.Server.Models.ExamSubmission", null)

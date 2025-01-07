@@ -107,7 +107,7 @@ const ExamPage = () => {
             {!examStarted && !result && (
                 <div className="text-center">
                     <button className="btn btn-primary" onClick={handleStartExam}>
-                        Start Exam
+                     {exam.cost ==0 ? 'start Quiz' : "Start Exam" }   
                     </button>
                 </div>
             )}
@@ -129,7 +129,7 @@ const ExamPage = () => {
         onClick={handleSubmit}
         disabled={Object.keys(selectedAnswers).length !== exam?.questions?.length}
     >
-        Submit Exam
+       {exam.cost ==0 ? 'Submit Quiz' : "Submit Exam" } 
     </button>
     <button className="btn btn-secondary" onClick={() => navigate(-1)}>
         Go Back

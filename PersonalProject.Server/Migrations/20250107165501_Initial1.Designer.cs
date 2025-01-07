@@ -12,8 +12,8 @@ using PersonalProject.Server.Data;
 namespace PersonalProject.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250102134311_AchievementsAdd")]
-    partial class AchievementsAdd
+    [Migration("20250107165501_Initial1")]
+    partial class Initial1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -173,6 +173,9 @@ namespace PersonalProject.Server.Migrations
                     b.Property<string>("IconPath")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RequiredStreak")
+                        .HasColumnType("int");
+
                     b.Property<int>("RewardCoins")
                         .HasColumnType("int");
 
@@ -276,6 +279,9 @@ namespace PersonalProject.Server.Migrations
 
                     b.Property<int>("Gold")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsAuth")
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastExamDate")
                         .HasColumnType("datetime2");
@@ -596,6 +602,9 @@ namespace PersonalProject.Server.Migrations
                     b.Property<bool>("IsPassed")
                         .HasColumnType("bit");
 
+                    b.Property<bool?>("LastExamPassed")
+                        .HasColumnType("bit");
+
                     b.Property<int?>("Score")
                         .HasColumnType("int");
 
@@ -789,7 +798,7 @@ namespace PersonalProject.Server.Migrations
                     b.HasOne("PersonalProject.Server.Models.Achievement", "Achievement")
                         .WithMany()
                         .HasForeignKey("AchievementId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PersonalProject.Server.Models.ExamSubmission", null)

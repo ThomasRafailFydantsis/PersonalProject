@@ -95,7 +95,7 @@ function AfterLogin() {
     if (hasNoPermission) {
         return <div>Access denied</div>;
     }
-    
+    console.log(leaderboardData);
     // Sorting functions for each tab
     const sortByCoins = leaderboardData?.sort((a, b) => (b.coins || 0) - (a.coins || 0));
     const sortByScore = leaderboardData?.sort((a, b) => (b.highestScore || 0) - (a.highestScore || 0));
@@ -128,11 +128,13 @@ function AfterLogin() {
         </thead>
         <tbody>
             {sortByCoins.map((user, index) => (
-               <tr
-               key={index}
-               style={{
-                   backgroundColor: sortByCoins.filter(u => u.id === userData.id) ? "red" : "transparent"
-               }}>
+                 <tr
+                 key={index}
+                 style={{
+                    backgroundColor: user.id === userData.id ? "grey" : "transparent",
+                    color: user.id === userData.id ? "aliceblue" : "black",
+                 }}
+                >
                     <td>{index + 1}</td>
                     <td>{maskUsername(user.userName)}</td>
                     <td>{user.coins}</td>
@@ -151,8 +153,15 @@ function AfterLogin() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {sortByScore.map((user, index) => (
-                                            <tr key={index}>
+                                        {sortByScore.map((user, index) => ( user.highestScore !== null &&
+                                                <tr
+                                                key={index}
+                                                style={{
+                                                 
+                                                    backgroundColor: user.id === userData.id ? "grey" : "transparent",
+                                                    color: user.id === userData.id ? "aliceblue" : "black",
+                                                }}
+                                            >
                                                 <td>{index + 1}</td>
                                                 <td>{maskUsername(user.userName)}</td>
                                                 <td>{user.highestScore}%</td>
@@ -174,11 +183,17 @@ function AfterLogin() {
                                     </thead>
                                     <tbody>
                                         {sortByAchievements.map((user, index) => (
-                                            <tr key={index}>
-                                                <td>{index + 1}</td>
-                                                <td>{maskUsername(user.userName)}</td>
-                                                <td>{user.totalAchievements}</td>
-                                            </tr>
+                                           <tr
+                                           key={index}
+                                           style={{
+                                            backgroundColor: user.id === userData.id ? "grey" : "transparent",
+                                            color: user.id === userData.id ? "aliceblue" : "black",
+                                           }}
+                                       >
+                                           <td>{index + 1}</td>
+                                           <td>{maskUsername(user.userName)}</td>
+                                           <td>{user.totalAchievements}</td>
+                                       </tr>
                                         ))}
                                     </tbody>
                                 </table>

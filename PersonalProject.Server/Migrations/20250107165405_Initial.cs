@@ -21,7 +21,9 @@ namespace PersonalProject.Server.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RewardCoins = table.Column<int>(type: "int", nullable: false),
                     IconPath = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UnlockCondition = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    UnlockCondition = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    RequiredStreak = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -50,9 +52,12 @@ namespace PersonalProject.Server.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ProfileImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PassingStreak = table.Column<int>(type: "int", nullable: false),
+                    LastExamDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Address1 = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Coins = table.Column<int>(type: "int", nullable: false),
                     Gold = table.Column<int>(type: "int", nullable: false),
+                    IsAuth = table.Column<bool>(type: "bit", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -329,7 +334,8 @@ namespace PersonalProject.Server.Migrations
                     DateTaken = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsPassed = table.Column<bool>(type: "bit", nullable: false),
                     IsCertificateGenerated = table.Column<bool>(type: "bit", nullable: false),
-                    CertificateFilePath = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    CertificateFilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastExamPassed = table.Column<bool>(type: "bit", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -395,7 +401,7 @@ namespace PersonalProject.Server.Migrations
                         column: x => x.AchievementId,
                         principalTable: "Achievements",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserAchievements_AspNetUsers_UserId",
                         column: x => x.UserId,

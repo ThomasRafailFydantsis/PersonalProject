@@ -9,7 +9,7 @@ import Header from "./Header";
 const CertForm = () => {
     const { certId } = useParams();
     const navigate = useNavigate();
-  const { isAuthenticated, userData, roles, AuthError, loading, revalidateAuth , isAuthLoading} = useAuth();
+    const { isAuthenticated, userData, roles, AuthError, loading, revalidateAuth, isAuthLoading } = useAuth();
 
     const [certName, setCertName] = useState("");
     const [questions, setQuestions] = useState([]);
@@ -45,28 +45,40 @@ const CertForm = () => {
 
     const isAdminOrMarker = roles.includes("Admin") || roles.includes("Marker");
 
-  
-
-   useEffect(() => {
-       
+    useEffect(() => {
         const fetchData = async () => {
             if (certId) {
                 try {
-                    
                     const examData = await ExamService.fetchExam(certId);
                     setCertName(examData.certName);
                     setCategory(examData.category);
                     setCost(examData.cost);
                     setReward(examData.reward);
                     setAchievements(examData.achievements);
-                    setQuestions(examData.questions);
+                    setQuestions(examData.questions || []);
                 } catch (error) {
                     setError(error.message || "Failed to fetch exam data.");
-                } 
+                }
             }
         };
-       fetchData();
-   }, [certId]);
+        fetchData();
+    }, [certId]);
+
+    const handleAddQuestion = () => {
+        setQuestions((prevQuestions) => [
+            ...prevQuestions,
+            {
+                text: "",
+                correctAnswer: "",
+                answerOptions: [
+                    { text: "", isCorrect: false },
+                    { text: "", isCorrect: false },
+                    { text: "", isCorrect: false },
+                    { text: "", isCorrect: false },
+                ],
+            },
+        ]);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -89,7 +101,7 @@ const CertForm = () => {
         return <div>Loading...</div>;
     }
 
-    if (AuthError &&isAdminOrMarker && isAuthenticated === false) {
+    if (AuthError && isAdminOrMarker && isAuthenticated === false) {
         return (
             <div>
                 <h3>Error</h3>
@@ -103,14 +115,11 @@ const CertForm = () => {
         return <div>Authenticating...</div>;
     }
 
-
     const hasNoPermission = !roles.includes("Admin") && !roles.includes("Marker") && !roles.includes("User");
 
     if (hasNoPermission) {
         return navigate("/"); // Redirect to the homepage if no permission
     }
-    
-
 
     return (
         <div
@@ -250,10 +259,21 @@ const CertForm = () => {
                         ))}
                     </div>
                 ))}
+                <button
+                    type="button"
+                    className="btn btn-secondary mt-3"
+                    onClick={handleAddQuestion}
+                >
+                    Add Question
+                </button>
                 <button type="submit" className="btn btn-primary mt-3">
                     Submit
                 </button>
-                <button type="button" className="btn btn-danger mt-3 ms-2" onClick={() => navigate(-1)}>
+                <button
+                    type="button"
+                    className="btn btn-danger mt-3 ms-2"
+                    onClick={() => navigate(-1)}
+                >
                     Back
                 </button>
             </form>

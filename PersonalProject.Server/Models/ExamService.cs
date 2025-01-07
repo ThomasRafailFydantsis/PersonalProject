@@ -84,7 +84,7 @@ namespace PersonalProject.Server.Models
                     .OrderByDescending(c => c.DateTaken)
                     .ToList();
 
-                int streakCount = 1; 
+                int streakCount = 0; 
                 foreach (var cert in userCertificates)
                 {
                     if (cert.DateTaken == DateTime.UtcNow) continue; 
@@ -260,9 +260,9 @@ namespace PersonalProject.Server.Models
 
             foreach (var cert in userCertificates)
             {
-                if (cert.DateTaken == DateTime.UtcNow) continue; // Skip the current exam
-                if (cert.IsPassed) streakCount++; // Increment streak for consecutive passes
-                else break; // Stop counting on the first failed exam
+                if (cert.DateTaken == DateTime.UtcNow) continue; 
+                if (cert.IsPassed) streakCount++; 
+                else break; 
             }
 
             user.PassingStreak = streakCount;

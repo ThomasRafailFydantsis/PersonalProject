@@ -164,7 +164,6 @@ namespace PersonalProject.Server.Controllers
                         AchievementId = achievementId 
                     });
                 }
-
                 cert.Questions = examUpdateDto.Questions.Select(q => new Question
                 {
                     Id = q.Id,

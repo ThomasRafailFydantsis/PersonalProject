@@ -20,15 +20,11 @@ namespace PersonalProject.Server.Controllers
         {
             _context = context;
         }
-
-        // GET: api/ExamCategories
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ExamCategory>>> GetExamCategory()
         {
             return await _context.ExamCategory.ToListAsync();
         }
-
-        // GET: api/ExamCategories/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ExamCategory>> GetExamCategory(int id)
         {
@@ -41,9 +37,6 @@ namespace PersonalProject.Server.Controllers
 
             return examCategory;
         }
-
-        // PUT: api/ExamCategories/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutExamCategory(int id, ExamCategory examCategory)
         {
@@ -72,9 +65,6 @@ namespace PersonalProject.Server.Controllers
 
             return NoContent();
         }
-
-        // POST: api/ExamCategories
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<ExamCategory>> PostExamCategory(ExamCategory examCategory)
         {
@@ -83,8 +73,6 @@ namespace PersonalProject.Server.Controllers
 
             return CreatedAtAction("GetExamCategory", new { id = examCategory.Id }, examCategory);
         }
-
-        // DELETE: api/ExamCategories/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteExamCategory(int id)
         {

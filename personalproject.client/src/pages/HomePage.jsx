@@ -6,9 +6,9 @@ import { useAuth } from '../components/AuthProvider';
 import { Modal, Button, Carousel} from 'react-bootstrap';
 import {FaRegUserCircle,FaFacebook,FaTwitter, FaInstagram } from 'react-icons/fa';
 import HomeCerts from '../components/HomeCerts';
-import img1 from '../imgs/2bros.jpg';
-import img2 from '../imgs/coding.jpg';
-import img3 from '../imgs/kineza.jpg';
+//import img1 from '../imgs/2bros.jpg';
+//import img2 from '../imgs/coding.jpg';
+//import img3 from '../imgs/kineza.jpg';
 import img4 from '../imgs/tetragwnh-laptop.jpg';
 import img5 from '../imgs/tetragwnh-programming.jpg';
 import img6 from '../imgs/istockphoto-1205715897-612x612.jpg';
@@ -32,11 +32,6 @@ const HomePage = () => {
   const [activeItem, setActiveItem] = useState(null);
   const [showModal2, setShowModal2] = useState(false);
   const navigate = useNavigate();
-    
-
-    const handleItemClick = (index) => {
-        setActiveItem(index); 
-    };
 
     const handleAuthRedirect = (targetRoute) => {
         if (!isAuthenticated) {
@@ -71,19 +66,28 @@ const HomePage = () => {
         setErrorMessage("All fields are required.");
         return;
     }
-    if (password.length < 6) {
-        setErrorMessage("Password must be at least 6 characters long.");
-        return;
-    }
+    const enter = `\n`;
+    const passwordErrors = [];
+    if (password.length < 8) passwordErrors.push("Password must be at least 8 characters long.");
+    if (!/[a-z]/.test(password)) passwordErrors.push(`Password must include at least one lowercase letter.${enter}`);
+    if (!/[A-Z]/.test(password)) passwordErrors.push("Password must include at least one uppercase letter.");
+    if (!/\d/.test(password)) passwordErrors.push("Password must include at least one digit.");
+    if (!/\W/.test(password)) passwordErrors.push("Password must include at least one special character.");
+    if (passwordErrors.length > 0) {
+      setErrorMessage(passwordErrors.map(error => <span key={error}>{error}<br /></span>));
+      return;
+      }
+
     if (!/\S+@\S+\.\S+/.test(email)) {
         setErrorMessage("Please enter a valid email.");
         return;
     }
+    
     try {
         const registrationResponse = await AuthService.register(username, email, password, firstName, lastName);
         if (registrationResponse) {
             
-            const token = await AuthService.login(username, password);
+            await AuthService.login(username, password);
             await revalidateAuth();
             navigate('/dashboard'); 
             if (redirectAfterAuth) {
@@ -116,7 +120,6 @@ const handleScrollToSection = (sectionId, index) => {
   const section = document.querySelector(sectionId);
 
   if (section) {
-      // Scroll to the top of the section with smooth behavior
       section.scrollIntoView({
           behavior: "smooth",
           block: "start",
@@ -126,12 +129,10 @@ const handleScrollToSection = (sectionId, index) => {
       const sectionHeight = section.offsetHeight;
       const additionalOffset = viewportHeight - sectionHeight;
 
-      // Adjust the scroll if the section is too small to fill the screen
       if (additionalOffset > 0) {
           window.scrollBy({ top: -additionalOffset / 2, behavior: "smooth" });
       }
 
-      // Update active nav item
       setActiveItem(index);
   }
 };
@@ -222,7 +223,7 @@ const handleScrollToSection = (sectionId, index) => {
         <div  >
             <h3>Learning with <span style={{color: '#FF8C00'}}>Certflix</span></h3>
             <p style={{width: '19rem'}}>We provide high-quality courses designed to help you master new programming languages and enhance your career opportunities.
-              After completing a course, you'll have the knowledge and skills needed to succeed in your chosen field. With Certflix, you can learn at your own pace, on your own schedule, and in your own time zone.
+              After completing a course, you will have the knowledge and skills needed to succeed in your chosen field. With Certflix, you can learn at your own pace, on your own schedule, and in your own time zone.
              
             </p>
         </div>
@@ -301,33 +302,13 @@ const handleScrollToSection = (sectionId, index) => {
 <div id="scrollspyHeading6" style={{backgroundColor: 'aliceblue'}} className="full-screen-section">
           <h1  style={{textAlign: 'center',color: '#607d8b',marginBottom: '50px'}}>Join the <span style={{color: '#FF8C00'}}>Certflix</span> Community</h1>
           <h5 style={{textAlign: 'center',color: '#607d8b',marginBottom: '30px'}}>Sign up today and start your journey!</h5>
-  
-                
-                    
                     <button
                         onClick={() => { setShowModal(true); setActiveTab('signup'); }}
                         className='green-button'
                     >
                         Register
                     </button>
-               
-                   
                     </div>
-                {/* <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b',boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', marginLeft: '100px' }}>
-                    <div className="card-body">
-                        <h5 className="card-title">Already have an account?</h5>
-                        <p className="card-text">Log in to access <br /> your certificates!</p>
-                    </div>
-                    <button
-                        onClick={() => { setShowModal(true); setActiveTab('signin'); }}
-                        style={{ marginTop: '25px' }}
-                        className='green-button'
-                    >
-                        Login
-                    </button>
-                </div> */}
-          
-        
          <footer className="footer">
   <div className="container">
     <div className="row">
@@ -452,11 +433,11 @@ const handleScrollToSection = (sectionId, index) => {
             Sign Up
         </button>
     </div>
-
       {errorMessage && (
-        <p style={{ color: 'red', marginBottom: '20px' }}>{errorMessage}</p>
+        <div style={{ color: 'red', marginBottom: '20px' }}>
+        {errorMessage}
+      </div>
       )}
-
       {activeTab === 'signin' ? (
         <form onSubmit={handleLogin} style={{margin:'0 auto', background: 'aliceblue',color: '#607d8b' }}>
           <div style={{ marginBottom: '20px' }}>
@@ -490,7 +471,10 @@ const handleScrollToSection = (sectionId, index) => {
           </button>
         </form>
       ) : (
-        <form onSubmit={handleRegister} style={{margin:'0 auto', background: 'aliceblue',color: '#607d8b' }}>
+        <form  onSubmit={(e) => {
+          e.preventDefault(); // Prevent default form submission behavior
+          handleRegister(e);
+        }}  style={{margin:'0 auto', background: 'aliceblue',color: '#607d8b' }}>
           <div style={{ marginBottom: '20px' }}>
             <label htmlFor="firstName" style={{ display: 'block' }}>
               First Name:
@@ -559,6 +543,7 @@ const handleScrollToSection = (sectionId, index) => {
           <button className='regButton' style={{margin:'0 auto',alignSelf: 'center',padding: '10px ', width: '27rem ', background: 'linear-gradient(32deg, rgb(169, 106, 106) 45%, rgba(183,121,37,1) 100%)',border: '1px solid rgba(89, 107, 99, 0.4)', borderRadius: '5px',color: 'aliceblue', boxShadow: '0 6px 10px rgba(0, 0, 0, 0.1)' }} type="submit">
             Sign Up
           </button>
+         
         </form>
       )}
     </Modal.Body>

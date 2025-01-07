@@ -55,7 +55,7 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef}) => {
                     <li>
                         <Link to="/usercertificates" onClick={toggleSidebar}>
                             <IoBagCheckSharp size={20}/>
-                            {isOpen && <span>Exams</span>}
+                            {isOpen && <span>Cart</span>}
                         </Link>
                     </li>
                     <li>

@@ -120,7 +120,7 @@ function UserCertificates() {
     }
 
     return (
-        <div style={{marginLeft: isSidebarOpen ? "300px" : "0px", transition: "margin-left 0.3s ease-in-out" , paddingTop: '80px'}}>
+        <div style={{marginLeft: isSidebarOpen ? "300px" : "0px", transition: "margin-left 0.3s ease-in-out" , paddingTop: '80px', paddingBottom: '20px'}}>
             <Header toggleSidebar={toggleSidebar} />
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
             <h3 style={{ textAlign: 'center', color:'darkgreen' }}>Here you can find your Exams <br/> <span style={{fontSize: '20px'}}>Tip: You can try again if you fail </span></h3>

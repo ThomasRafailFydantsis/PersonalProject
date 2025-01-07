@@ -17,6 +17,7 @@ const CreateCert = () => {
     const [cost, setCost] = useState(0);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [categoryId, setCategoryId] = useState(0);
+    const [categories , setCategories] = useState([]);
 
     const sidebarRef = useRef(null);
 
@@ -71,6 +72,19 @@ const CreateCert = () => {
         updatedQuestions[questionIndex].answerOptions.push({ id: null, text: "", isCorrect: false });
         setQuestions(updatedQuestions);
     };
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axios.get("https://localhost:7295/api/ExamCategories");
+                setCategories(response.data);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+        };
+    
+        fetchCategories();
+    }, []);
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -150,7 +164,14 @@ const CreateCert = () => {
                     <label>Exam Title:</label>
                     <input type="text" value={certName} onChange={handleCertNameChange} required style={{ width: "100%" }} />
                     <label>Category:</label>
-                    <input type="number" value={categoryId} onChange={handleCategoryChange} required style={{ width: "100%" }}/>
+                    <select type="number" value={categoryId} onChange={handleCategoryChange} required style={{ width: "100%", height: "2.5rem" }}>
+                        <option  value="">Select a category</option>
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                                {category.name}
+                            </option>
+                        ))}
+                    </select>
                     <label>Passing Score:</label>
                     <input type="number" value={passingScore} onChange={handlePassingScoreChange} required style={{ width: "100%" }} />
                     <label>Reward:</label>
