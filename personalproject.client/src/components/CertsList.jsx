@@ -89,7 +89,7 @@ function CertsList({ id: userId }) {
 
     return (
         <div style={{ maxWidth: "800px", margin: "0 auto" }}>
-            <h1 style={{ textAlign: "center", color: "#607d8b" }}>Shop</h1>
+            <h3 style={{ textAlign: "center", color: "#607d8b" }}>Shop</h3>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                 <Form.Group style={{ display: "flex", alignItems: "center" }}>
                     <Form.Label style={{ fontWeight: "bold", marginRight: "10px", color: "#607d8b" }}>Filter by Category</Form.Label>

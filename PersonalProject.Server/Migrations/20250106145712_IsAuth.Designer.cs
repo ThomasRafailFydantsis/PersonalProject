@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonalProject.Server.Data;
 
@@ -11,9 +12,11 @@ using PersonalProject.Server.Data;
 namespace PersonalProject.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250106145712_IsAuth")]
+    partial class IsAuth
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -276,9 +279,6 @@ namespace PersonalProject.Server.Migrations
 
                     b.Property<int>("Gold")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsAuth")
-                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastExamDate")
                         .HasColumnType("datetime2");

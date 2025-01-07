@@ -6,6 +6,7 @@ import { useAuth } from "../components/AuthProvider";
 import { RxCheck } from "react-icons/rx";
 import Sidebar from "../components/Sidebar1";
 import { HiArrowNarrowUp, HiArrowNarrowDown } from "react-icons/hi";
+import {Spinner} from 'react-bootstrap';
 
 const AssignMarkerPage = () => {
     const [submissions, setSubmissions] = useState([]);
@@ -19,6 +20,7 @@ const AssignMarkerPage = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isSorted, setIsSorted] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const sidebarRef = useRef(null);
 
@@ -45,7 +47,7 @@ const AssignMarkerPage = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                setLoading(true);
+              
                 setError(null);
 
                 const submissionsResponse = await axios.get(
@@ -60,11 +62,12 @@ const AssignMarkerPage = () => {
                 setSubmissions(submissionsResponse.data);
                 setFilterAssignments(submissionsResponse.data); // Initialize with all submissions
                 setMarkers(markers);
+                setIsLoading(false);
             } catch (err) {
                 setError("Failed to fetch data. Please try again later.");
                 console.error(err);
             } finally {
-                setLoading(false);
+                
             }
         };
 
@@ -159,7 +162,7 @@ const AssignMarkerPage = () => {
         >
             <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen} />
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
-            <h2
+            <h4
                 style={{
                     textAlign: "center",
                     marginTop: "20px",
@@ -168,7 +171,7 @@ const AssignMarkerPage = () => {
                 }}
             >
                 Assign Marker
-            </h2>
+            </h4>
             
             <div style={{ textAlign: "center" }}>
             {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
@@ -176,7 +179,13 @@ const AssignMarkerPage = () => {
                     {filterAssignments.length === submissions.length ? "Show Unassigned" : "Show All"}
                 </button>
             </div>
-            <div style={{ overflow: "scroll", height: "600px" }}>
+            
+            {isLoading ? (
+          <div><Spinner style={{marginLeft:"47rem", marginTop:"1rem", textAlign:"center"}} animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner></div>
+        ):(
+            <div style={{ overflow: "scroll", height: "35.7rem" }}>
                 <table
                     border="1"
                     style={{
@@ -204,7 +213,8 @@ const AssignMarkerPage = () => {
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    
+                 <tbody>
                         {filterAssignments.map((submission) => {
                             const isAssigned = submission.isMarked;
                             return (
@@ -246,9 +256,12 @@ const AssignMarkerPage = () => {
                                 </tr>
                             );
                         })}
+                    
                     </tbody>
+       
                 </table>
             </div>
+             )}
         </div>
     );
 };

@@ -19,7 +19,7 @@ namespace PersonalProject.Server.Models
         public int Reward { get; set; }
         public int CategoryId { get; set; }
         public virtual ExamCategory? Category { get; set; }
-        public ICollection<CertAchievement> CertAchievements { get; set; } 
+        public ICollection<CertAchievement> CertAchievements { get; set; }     
     }
 }
 

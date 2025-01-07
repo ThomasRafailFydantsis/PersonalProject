@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import { useAuth } from "../components/AuthProvider";
 import Sidebar from "../components/Sidebar1";
 import { useRef } from "react";
+import Spinner from 'react-bootstrap/Spinner';
 
 const UserTable = () => {
   const { isAuthenticated, userData, roles, AuthError, loading, revalidateAuth } = useAuth();
@@ -16,6 +17,7 @@ const UserTable = () => {
   const isAdmin = roles.includes("Admin");
   const [isSorted, setIsSorted] = useState(false); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
         
   // Create ref for the sidebar
   const sidebarRef = useRef(null);
@@ -60,6 +62,7 @@ const UserTable = () => {
           });
           setUsers(response.data);
           setFilteredUsers(response.data);
+          setIsLoading(false);
         } catch (err) {
           console.error(err);
           setError("Failed to fetch user data.");
@@ -166,7 +169,7 @@ const UserTable = () => {
           <option value="Marker">Markers</option>
         </select>
       </div>
-      <div style={{margin:"0 auto", height: "38rem", overflow: "scroll",border: "none", marginTop: "20px",marginLeft: isSidebarOpen ? "300px" : "0px", transition: "margin-left 0.3s ease-in-out" }}>
+      <div style={{margin:"0 auto", height: "37rem", overflow: "scroll",border: "none", marginTop: "20px",marginLeft: isSidebarOpen ? "300px" : "0px", transition: "margin-left 0.3s ease-in-out" }}>
       <table style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <thead style={{position: "sticky", top: "0"}}>
           <tr>
@@ -186,6 +189,11 @@ const UserTable = () => {
             <th style={{ width: "300px" }}>Actions</th>
           </tr>
         </thead>
+        {isLoading ? (
+          <><Spinner style={{marginLeft:"33rem", marginTop:"10rem"}} animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner></>
+        ):(
         <tbody>
           {sortedUsers.map((user) => (
             <tr key={user.id}>
@@ -220,7 +228,8 @@ const UserTable = () => {
             </tr>
           ))}
         </tbody>
-        
+       
+        )}
       </table>
       </div>
     </div>

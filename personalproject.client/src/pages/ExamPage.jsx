@@ -69,15 +69,19 @@ const ExamPage = () => {
     };
 
     const handleSubmit = async () => {
+        const totalQuestions = exam?.questions?.length || 0;
+        const answeredQuestions = Object.keys(selectedAnswers).length;
+    
+        if (answeredQuestions !== totalQuestions) {
+            setSubmitError(`Please answer all ${totalQuestions} questions before submitting.`);
+            return;
+        }
+    
         if (timeLeft > 0 && !window.confirm("Are you sure you want to submit the exam?")) return;
-
+    
         try {
             const answerIds = Object.values(selectedAnswers);
-            if (!exam?.questions || answerIds.length !== exam.questions.length) {
-                setSubmitError("Please answer all questions.");
-                return;
-            }
-
+    
             const resultData = await ExamService.submitExamAnswers(userId, certId, answerIds);
             setResult(resultData); 
         } catch (err) {
@@ -120,16 +124,19 @@ const ExamPage = () => {
         ))}
         {submitError && <ErrorMessage message={submitError} />}
         <div className="mt-4 d-flex justify-content-center">
-            <button className="green-button" onClick={handleSubmit}>
-                Submit Exam
-            </button>
-            <button className="btn btn-secondary" onClick={() => navigate(-1)}>
-                Go Back
-            </button>
-        </div>
+    <button
+        className="green-button"
+        onClick={handleSubmit}
+        disabled={Object.keys(selectedAnswers).length !== exam?.questions?.length}
+    >
+        Submit Exam
+    </button>
+    <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+        Go Back
+    </button>
+</div>
         </>
         )}
-
             {result && <ResultBlock result={result} navigate={navigate} />}
         </div>
     );
@@ -187,7 +194,7 @@ const QuestionBlock = ({ question, handleAnswerChange, index }) => (
 
                             }}
                         >
-                            {String.fromCharCode(97 + optionIndex)}
+                            {String.fromCharCode(97 + optionIndex)} )
                         </span>
                         {option.text}
                     </label>

@@ -131,6 +131,7 @@ namespace PersonalProject.Server.Controllers
         }
 
         [HttpPut("update/{certId}")]
+        [ServiceFilter(typeof(CustomJsonSerializationFilter))]
         public async Task<IActionResult> UpdateExam(int certId, [FromBody] ExamUpdateDto examUpdateDto)
         {
             if (examUpdateDto == null || string.IsNullOrEmpty(examUpdateDto.CertName) || !examUpdateDto.Questions.Any())
@@ -388,11 +389,11 @@ namespace PersonalProject.Server.Controllers
                
                 XFont titleFont = new XFont("Arial", 36, XFontStyle.Bold);  
                 XFont subtitleFont = new XFont("Arial", 24, XFontStyle.Bold); 
-                XFont textFont = new XFont("Arial", 14);  // font
+                XFont textFont = new XFont("Arial", 14);  
 
                 XBrush blackBrush = new XSolidBrush(XColor.FromArgb(0, 0, 0));
                 XBrush certFlixBrush = new XSolidBrush(XColor.FromArgb(96, 125, 139));
-
+                XFont Signature = new XFont ("Blackadder ITC", 12, XFontStyle.Bold);
                 
                 XColor outerBorderColor = XColor.FromArgb(255, 140, 0);  
                 XColor innerBorderColor = XColor.FromArgb(96, 125, 139); 
@@ -440,11 +441,11 @@ namespace PersonalProject.Server.Controllers
                     new XRect(w, e + 300 + verticalSpacing, page.Width - 2 * margin, textHeight), XStringFormats.TopLeft);
 
                 // Signature line 
-                gfx.DrawString("Signature: ______________________", textFont, blackBrush,
+                gfx.DrawString("Issued by: Certflix", textFont, blackBrush,
                     new XRect(w, e + 330 + verticalSpacing, page.Width - 2 * margin, textHeight), XStringFormats.TopLeft);
 
                 // Owner of the certificate 
-                gfx.DrawString("Owner : Antwnhs Remos", textFont, blackBrush,
+                gfx.DrawString("CEO : Antwnhs Remos", textFont, blackBrush,
                     new XRect(w, e + 360 + verticalSpacing, page.Width - 2 * margin, textHeight), XStringFormats.TopLeft);
 
                 // Save the document to the memory stream

@@ -42,6 +42,8 @@ namespace PersonalProject.Server.Controllers
                 {
                     return NotFound("Certificate not found.");
                 }
+                 
+               
 
                 var existingAssociation = await _context.UserCertificates
                     .FirstOrDefaultAsync(uc => uc.UserId == model.UserId && uc.CertId == model.CertId);

@@ -19,5 +19,6 @@ namespace PersonalProject.Server.Models
      public string? Address1 { get; set; }
      public int Coins { get; set; } = 0; 
      public int Gold { get; set; } = 0;
+     public bool IsAuth { get; set; } 
     }
 }

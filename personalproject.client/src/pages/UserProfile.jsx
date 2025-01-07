@@ -6,6 +6,7 @@ import UserProfileImageUpload from "../components/UserProfileImageUpload";
 import Sidebar from "../components/Sidebar1";
 import notUploaded from "../imgs/notUploaded.png";
 import UserAchievements from "../components/UserAchievements";
+import { useNavigate } from "react-router-dom";
 
 const UserProfile = () => {
     const { isAuthenticated, userData, AuthError, imagePath } = useAuth();
@@ -14,6 +15,7 @@ const UserProfile = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [image, setImage] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const navigate = useNavigate();
         
     const sidebarRef = useRef(null);
 
@@ -75,6 +77,7 @@ const UserProfile = () => {
             });
             alert("Profile updated successfully!");
             setIsEditing(false);
+            navigate("/userprofile");
         } catch (err) {
             console.error("Error updating profile:", err);
         }

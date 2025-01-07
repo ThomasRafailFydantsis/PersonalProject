@@ -148,6 +148,14 @@ namespace PersonalProject.Server.Controllers
 
             var roles = await _userManager.GetRolesAsync(user);
 
+            if(user.PhoneNumber ==null && user.Address1 == null)
+            {
+                user.IsAuth = false;
+            }
+            else
+            {
+                user.IsAuth = true;
+            }
 
             var userData = new
             {
@@ -160,7 +168,8 @@ namespace PersonalProject.Server.Controllers
                 user.PhoneNumber,
                 user.Coins,
                 user.ProfileImagePath,
-                Roles = roles
+                Roles = roles,
+                user.IsAuth 
             };
 
             return Ok(userData);

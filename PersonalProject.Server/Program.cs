@@ -69,12 +69,12 @@ internal class Program
         builder.Logging.AddConsole();
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(options =>
+        builder.Services.AddSwaggerGen(c =>
         {
-         
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
 
-            options.OperationFilter<FileUploadOperationFilter>();
-            options.EnableAnnotations();
+            c.OperationFilter<FileUploadOperationFilter>();
+            c.SchemaGeneratorOptions.UseAllOfForInheritance = true;
         });
 
         var app = builder.Build();

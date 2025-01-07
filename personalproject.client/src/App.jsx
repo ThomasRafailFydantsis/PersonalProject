@@ -9,6 +9,7 @@ import NotAuthorized from './pages/NotAuthorized';
 import ExamPage from './pages/ExamPage';
 import CertForm from './components/CertForm';
 import CreateCert from './components/CreateCert';
+import Contact from './pages/Contact';
 import AssignMarkerPage from './pages/AssignMarkerPage';
 import MarkerAssignmentsPage from './pages/MarkerAssignmentPage';
 import GradeExamPage from './pages/GradeExamPage';
@@ -43,6 +44,7 @@ const App = () => {
         <Route path='/AuthPage' caseSensitive={false} element={<AuthPage />} />
         <Route path="/certs/:id" caseSensitive={false} element={<ProductPage />} />
         <Route path="/afterLogin" caseSensitive={false} element={<AfterLogin />} />
+        <Route path='/Contactus' caseSensitive={false} element={<Contact />} />
       </Routes>
     </Router>
   );

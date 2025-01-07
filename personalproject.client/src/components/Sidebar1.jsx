@@ -9,9 +9,12 @@ import notUploaded from "../imgs/notUploaded.png";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { LuListTodo } from "react-icons/lu";
+import { VscLibrary } from "react-icons/vsc";
+import { MdOutlineLeaderboard } from "react-icons/md";
 
-const Sidebar = ({ isOpen, toggleSidebar, sidebarRef,imagePath }) => {
-  const { isAuthenticated, userData, roles, handleLogout } = useAuth();
+
+const Sidebar = ({ isOpen, toggleSidebar, sidebarRef}) => {
+  const { isAuthenticated, userData, roles, handleLogout ,imagePath } = useAuth();
   const [admin, setAdmin] = useState(false);
   const [marker, setMarker] = useState(false);
   const navigate = useNavigate();
@@ -38,33 +41,39 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef,imagePath }) => {
             <nav>
                 <ul style={{ marginTop: "-18px",marginBottom: "28px" }}>
                     <li>
-                        <Link to="/dashboard" onClick={toggleSidebar}>
-                            <FaHome />
-                            {isOpen && <span>Home</span>}
+                        <Link  to="/dashboard" onClick={toggleSidebar}>
+                            <VscLibrary size={20}/>
+                            {isOpen && <span>Exams</span>}
                         </Link>
                     </li>
                     <li>
                         <Link to="/userprofile" onClick={toggleSidebar}>
-                            <FaRegUserCircle />
+                            <FaRegUserCircle size={20}/>
                             {isOpen && <span>Profile</span>}
                         </Link>
                     </li>
                     <li>
                         <Link to="/usercertificates" onClick={toggleSidebar}>
-                            <IoBagCheckSharp />
+                            <IoBagCheckSharp size={20}/>
                             {isOpen && <span>Exams</span>}
                         </Link>
                     </li>
                     <li>
                         <Link to="/MyCertificate" onClick={toggleSidebar}>
-                            <PiCertificateDuotone />
+                            <PiCertificateDuotone size={20} />
                             {isOpen && <span>Results</span>}
+                        </Link>
+                    </li>
+                    <li>
+                        <Link to="/afterlogin" onClick={toggleSidebar}>
+                        <MdOutlineLeaderboard size={20} />
+                            {isOpen && <span>Leaderboards</span>}
                         </Link>
                     </li>
                     {admin && (
                         <li>
                             <Link to="/CreateCert" onClick={toggleSidebar}>
-                                <IoCreateOutline />
+                                <IoCreateOutline size={20}/>
                                 {isOpen && <span>Create</span>}
                             </Link>
                         </li>
@@ -72,7 +81,7 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef,imagePath }) => {
                     {marker && (
                         <li>
                             <Link to="/marker/assignments" onClick={toggleSidebar}>
-                                <LuListTodo />
+                                <LuListTodo size={20}/>
                                 {isOpen && <span>Assignments</span>}
                             </Link>
                         </li>
@@ -80,7 +89,7 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef,imagePath }) => {
                     {admin && (
                         <li>
                             <Link to="/usertable" onClick={toggleSidebar}>
-                                <FaUsersGear />
+                                <FaUsersGear size={20} />
                                 {isOpen && <span>UserTable</span>}
                             </Link>
                         </li>
@@ -88,14 +97,14 @@ const Sidebar = ({ isOpen, toggleSidebar, sidebarRef,imagePath }) => {
                     {admin && (
                         <li>
                             <Link to="/assignMarker" onClick={toggleSidebar}>
-                                <LuListTodo />
-                                {isOpen && <span>Submissions</span>}
+                                <LuListTodo size={20} />
+                                {isOpen && <span >Submissions</span>}
                             </Link>
                         </li>
                     )}
                     <li>
                         <button className="logout-btn" onClick={handleUserLogout} >
-                            <FiLogOut />
+                            <FiLogOut size={20} />
                             {isOpen && <span>Logout</span>}
                         </button>
                     </li>

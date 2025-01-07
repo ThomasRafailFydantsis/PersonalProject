@@ -63,7 +63,7 @@ function Dashboard() {
     if (isAuthenticated === null) {
         return <div>Authenticating...</div>;
     }
-
+console.log(userData)
     // Check if user has the required role
     const hasNoPermission = !roles.includes("Admin") && !roles.includes("Marker") && !roles.includes("User");
 

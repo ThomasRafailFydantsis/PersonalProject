@@ -18,7 +18,7 @@ div {
 .crsl .carousel-control-next {
     color: #FF8C00; 
    width: 50px;
-    opacity: 0.51; 
+    opacity: 0.41; 
     margin-top: 250px;
     margin-top: -0px;
     background-color: #607d8b;
@@ -36,11 +36,18 @@ div {
     font-size: 24px;
    
 }
-.crsl{
- 
-  width: 100%;
+.programming{
+  display: flex !important;
+  flex-direction: column !important;
 }
-
+/* .crsl{
+ 
+  width: 700px !important;
+  color: #0056b3 !important;
+} */
+#tab{
+  color: #9a5400;
+}
 .modal-container .custom-modal .btn {
   width: 120px;
   margin: 0 5px;
@@ -82,6 +89,10 @@ header {
 .header h1{
   font-size: 40px;
   text-align: center;
+
+}
+.header-title{
+  margin-left: -1.5rem;
 }
 .header-nav a {
   color: #fff; 
@@ -432,12 +443,10 @@ button{
 }
 .sidebar {
   position: fixed;
-  top: 60px;
+  top: 45px;
   left: 0;
   height: 100%;
-  width: 240px;
-  
-
+  width: 190px;
   transform: translateX(-100%);
   transition: transform 0.3s ease, width 0.3s ease, all 0.3s ease;
   z-index: 1000;
@@ -447,10 +456,15 @@ button{
   border-radius: 0%;
   opacity: 0.8;
 }
+.highlight-row {
+  background-color: #84bea8 !important; /* Light blue background */
+}
 
 .sidebar.open {
   transform: translateX(0);
   background: linear-gradient(32deg, rgb(169, 106, 106) 45%, rgba(183,121,37,1) 100%) ;
+  
+  
 }
 
 .sidebar.collapsed {
@@ -465,6 +479,7 @@ button{
   list-style: none;
   padding: 0;
   margin-top: 40px;
+  margin-left: 5px;
   
 }
 
@@ -480,14 +495,16 @@ button{
 .sidebar nav ul li button {
   text-decoration: none;
   color: white;
-  font-size: 18px;
+  font-size: 30px;
   display: flex;
   align-items: center;
-  padding: 10px;
+  padding: 5px;
   transition: color 0.3s ease, background-color 0.3s ease;
   border: none;
   background: none;
   color: black;
+  font-size: 25px ;
+ 
 }
 
 header a:hover{
@@ -508,12 +525,17 @@ header a:hover{
 }
 
 .sidebar nav ul li svg {
-  font-size: 20px;
+  font-size: 16px !important;
   margin-right: 10px;
+  
+}
+.sidebar span {
+  font-size:15px !important;
 }
 
-.sidebar.collapsed nav ul li svg {
+.sidebar.collapsed nav ul li svg  {
   margin: 0 auto;
+  font-size: 25px ;
 }
 
 .sidebar.collapsed nav ul li span {
@@ -707,9 +729,11 @@ div::-webkit-scrollbar-track {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 0.5rem 2rem;
   background-color: aliceblue;
   color: #607d8b;
+  height: 45px;
+  font-size: 24px;
 }
 .cert-image {
   width: 100%;

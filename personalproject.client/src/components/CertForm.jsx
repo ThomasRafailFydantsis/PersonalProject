@@ -9,7 +9,7 @@ import Header from "./Header";
 const CertForm = () => {
     const { certId } = useParams();
     const navigate = useNavigate();
-  const { isAuthenticated, userData, roles, AuthError, loading, revalidateAuth } = useAuth();
+  const { isAuthenticated, userData, roles, AuthError, loading, revalidateAuth , isAuthLoading} = useAuth();
 
     const [certName, setCertName] = useState("");
     const [questions, setQuestions] = useState([]);
@@ -45,23 +45,14 @@ const CertForm = () => {
 
     const isAdminOrMarker = roles.includes("Admin") || roles.includes("Marker");
 
-    useEffect(() => {
-        if (!isAuthLoading) {
-            if (!isAuthenticated || !isAdminOrMarker) {
-                navigate("/login");
-            } else if (certId) {
-                fetchData(certId);
-            } else {
-                setLoading(false);
-            }
-        }
-    }, [certId, isAuthenticated, isAdminOrMarker, isAuthLoading, navigate]);
+  
 
-   
+   useEffect(() => {
+       
         const fetchData = async () => {
             if (certId) {
                 try {
-                    setLoading(true);
+                    
                     const examData = await ExamService.fetchExam(certId);
                     setCertName(examData.certName);
                     setCategory(examData.category);
@@ -71,12 +62,11 @@ const CertForm = () => {
                     setQuestions(examData.questions);
                 } catch (error) {
                     setError(error.message || "Failed to fetch exam data.");
-                } finally {
-                    setLoading(false);
-                }
+                } 
             }
         };
-      
+       fetchData();
+   }, [certId]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -89,36 +79,38 @@ const CertForm = () => {
         }
     };
 
-     useEffect(() => {
-           if (!loading && isAuthenticated && !userData) {
-               revalidateAuth();
-           }
-       }, [loading, isAuthenticated, userData, revalidateAuth]);
-   
-       if (loading) {
-           return <div>Loading...</div>;
-       }
-   
-       if (AuthError && isAuthenticated === false) {
-           return (
-               <div>
-                   <h3>Error</h3>
-                   <p>{AuthError}</p>
-                   <button onClick={() => window.location.reload()}>Retry</button>
-               </div>
-           );
-       }
-   
-       if (isAuthenticated === null) {
-           return <div>Authenticating...</div>;
-       }
-   
-       // Check if user has the required role
-       const hasNoPermission = !roles.includes("Admin") && !roles.includes("Marker") && !roles.includes("User");
-   
-       if (hasNoPermission) {
-           return navigate("/"); // Redirect to the homepage if no permission
-       }
+    useEffect(() => {
+        if (!loading && isAuthenticated && !userData) {
+            revalidateAuth();
+        }
+    }, [loading, isAuthenticated, userData, revalidateAuth]);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    if (AuthError &&isAdminOrMarker && isAuthenticated === false) {
+        return (
+            <div>
+                <h3>Error</h3>
+                <p>{AuthError}</p>
+                <button onClick={() => window.location.reload()}>Retry</button>
+            </div>
+        );
+    }
+
+    if (isAuthenticated === null) {
+        return <div>Authenticating...</div>;
+    }
+
+
+    const hasNoPermission = !roles.includes("Admin") && !roles.includes("Marker") && !roles.includes("User");
+
+    if (hasNoPermission) {
+        return navigate("/"); // Redirect to the homepage if no permission
+    }
+    
+
 
     return (
         <div

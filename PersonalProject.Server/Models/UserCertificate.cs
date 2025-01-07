@@ -30,5 +30,6 @@ namespace PersonalProject.Server.Models
 
         public string? CertificateFilePath { get; set; } 
         public bool? LastExamPassed { get; set; }
+       
     }
 }

@@ -6,10 +6,10 @@ function ExamHdr({ timeLeft }) {
 
     return (
         <header className="headerHome  ">
-            <h1>Certflix</h1>
+            <h1 style={{fontSize:"40px"}}>Certflix</h1>
             {formattedTime && (
-                <div  className="header-timer">
-                    <h2 className="h5 exmhdr" style={{textAlign:"center", marginLeft:"-150pxpx"}}>Time Left: {formattedTime}</h2>
+                <div style={{textAlign:"center"}} >
+                    <h2 className="h5" style={{marginLeft:"-120px"}} >Time Left: {formattedTime}</h2>
                 </div>
             )}
         </header>

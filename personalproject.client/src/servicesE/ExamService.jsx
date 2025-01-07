@@ -32,17 +32,16 @@ const ExamService = {
 
 
     submitExam: async (certId, certName, category, cost, reward, achievements, questions) => {
-        const url = certId
-            ? `https://localhost:7295/api/Exam/update/${certId}`
-            : 'https://localhost:7295/api/Exam/create';
-        const method = certId ? 'put' : 'post';
+        const url =`https://localhost:7295/api/Exam/update/${certId}`
+        
+      
     
         const payload = {
             certName,
-            categoryId: category, // Fixed category reference
+            categoryId: category, 
             cost,
             reward,
-            achievementIds: achievements.map((a) => a.id), // Ensure achievements are mapped to IDs
+            achievementIds: achievements.map((a) => a.id),
             questions: questions.map((q) => ({
                 id: q.id || 0,
                 text: q.text,
@@ -56,8 +55,9 @@ const ExamService = {
         };
     
         try {
-            const response = await axios[method](url, payload);
+            const response = await axios.put(url, payload);
             return response.data;
+
         } catch (error) {
             console.error('Error submitting exam:', error);
             throw 'Failed to submit the exam.';

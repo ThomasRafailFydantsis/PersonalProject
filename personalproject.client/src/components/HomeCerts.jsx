@@ -47,13 +47,13 @@ function HomeCerts({ onAuthRedirect }) {
 
     return (
         <div style={{ maxWidth: "1100px", margin: "0 auto", overflow: "hidden" }}>
-            <h1 style={{ textAlign: "center", color: "#607d8b" }}>
+            <h1 style={{ textAlign: "center", color: "#607d8b", marginBottom: "20px" }}>
                 Our <span style={{ color: "#FF8C00" }}>Products</span>
             </h1>
-            <h3 style={{ textAlign: "center", color: "#607d8b" }}>
+            <h5 style={{ textAlign: "center", color: "#607d8b" }}>
                 These helped thousands of students land their dream job
-            </h3>
-            <h4 style={{ textAlign: "center", color: "#607d8b" }}>Start your journey NOW</h4>
+            </h5>
+            <h6 style={{ textAlign: "center", color: "#607d8b" }}>Start your journey NOW</h6>
 
             <div style={{ position: "relative", marginTop: "72px" }}>
                 {/* Left Navigation Button */}
@@ -87,7 +87,8 @@ function HomeCerts({ onAuthRedirect }) {
                         display: "flex",
                         overflowX: "auto",
                         padding: "10px 0",
-                        scrollbarWidth: "thin",
+                        scrollbarWidth: "0px",
+                        scrollbarColor: "aliceblue aliceblue",
                     }}
                 >
                     {certs.map((cert) => (
@@ -96,7 +97,7 @@ function HomeCerts({ onAuthRedirect }) {
                             key={cert.certId}
                             style={{
                                 flex: "0 0 auto",
-                                width: "200px",
+                                width: "170px",
                                 margin: "0 10px",
                                 textAlign: "center",
                                 border: "1px solid #ddd",

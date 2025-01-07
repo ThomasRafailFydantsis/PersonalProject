@@ -3,6 +3,7 @@ import axios from "axios";
 import { useAuth } from "./AuthProvider";
 import { FaCheck } from "react-icons/fa";
 import { ImCoinDollar } from "react-icons/im";
+import { useNavigate } from "react-router-dom";
 const AddCertificateButton = ({ certId }) => {
     const { userData, coins } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
@@ -12,6 +13,8 @@ const AddCertificateButton = ({ certId }) => {
     const [isOwned, setIsOwned] = useState(false);
     const [cost, setCost] = useState(0);
     const [userCoins, setUserCoins] = useState(coins);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -63,7 +66,7 @@ const AddCertificateButton = ({ certId }) => {
 
             }
         } catch (error) {
-            console.error("Error adding certificate:", error);
+            console.error( error);
             setErrorMessage(
                 error.response?.data || "Failed to add certificate. Please try again."
             );
@@ -75,6 +78,7 @@ const AddCertificateButton = ({ certId }) => {
     const buttonText = useMemo(() => {
         if (isLoading) return "Processing...";
         if (cost > 0) return ` ${cost}`;
+        // if (userData.isAuth === false) return "Authenticate";
         return "Free";
     }, [cost, isLoading]);
 
@@ -89,16 +93,15 @@ const AddCertificateButton = ({ certId }) => {
                     Owned <FaCheck />
                 </p>
             ) : (
-                <button
-                    onClick={addCertificateToUser}
-                    className="green-button"
-                    disabled={isLoading || cost > userCoins}
-                >
-                  <ImCoinDollar />  {buttonText}
-                </button>
-                // <Modal show={handleOpenScheduler }
+                <>
+               {userData.isAuth === false ? (<button className="green-button"  onClick={()=> navigate("/userprofile")}>Authenticate</button>) :(<button onClick={addCertificateToUser} className="green-button" > <ImCoinDollar />{buttonText}</button>) }
+               
+                
+               </>
             )}
+            {errorMessage && <p style={{color: "black", fontSize: "12px"}} >{errorMessage}</p>}
         </>
+
     );
 };
 

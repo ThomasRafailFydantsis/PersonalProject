@@ -6,6 +6,7 @@ import Sidebar from "../components/Sidebar1";
 import axios from "axios";
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
+import {Spinner} from 'react-bootstrap';
 
 function AfterLogin() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -94,49 +95,55 @@ function AfterLogin() {
     if (hasNoPermission) {
         return <div>Access denied</div>;
     }
-
+    
     // Sorting functions for each tab
     const sortByCoins = leaderboardData?.sort((a, b) => (b.coins || 0) - (a.coins || 0));
     const sortByScore = leaderboardData?.sort((a, b) => (b.highestScore || 0) - (a.highestScore || 0));
     const sortByAchievements = leaderboardData?.sort((a, b) => (b.totalAchievements || 0) - (a.totalAchievements || 0));
-
+    
     return (
-        <div style={{ marginTop: "4rem", minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: "inherit" }}>
+        <div style={{ marginTop: "4rem", minHeight: "100%", display: "flex", flexDirection: "column", backgroundColor: "inherit" }}>
             <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen} />
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
-
             <div>
-                <h1>Welcome back, {userData?.userName || "User"}</h1>
-
+              <h2 style={{ textAlign: "center", color: "#607d8b" }}>Leaderboard</h2>
+            </div>
+            <div>
                 {loadingLeaderboard ? (
-                    <p>Loading leaderboard...</p>
+                    <><Spinner style={{marginLeft:"0rem", marginTop:"10rem"}} animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner></>
                 ) : leaderboardData ? (
-                    <div>
-                        <Tabs className="tabs" defaultActiveKey="home" id="uncontrolled-tab-example" >
+                    <div >
+                        <Tabs className="tabs" defaultActiveKey="home" id="uncontrolled-tab-example"  >
                             {/* Tab for Most Coins */}
-                            <Tab s eventKey="home" title="Most Coins">
+                            <Tab id="tab" eventKey="home" title="Most Coins" style={{height:"33rem", overflow:"auto"}}>
+    <table>
+        <thead style={{position:"sticky", top:"0"}}>
+            <tr>
+                <th>Rank</th>
+                <th>Username</th>
+                <th>Coins</th>
+            </tr>
+        </thead>
+        <tbody>
+            {sortByCoins.map((user, index) => (
+               <tr
+               key={index}
+               style={{
+                   backgroundColor: sortByCoins.filter(u => u.id === userData.id) ? "red" : "transparent"
+               }}>
+                    <td>{index + 1}</td>
+                    <td>{maskUsername(user.userName)}</td>
+                    <td>{user.coins}</td>
+                </tr>
+            ))}
+        </tbody>
+    </table>
+</Tab>
+                            <Tab eventKey="profile" title="Highest Score" style={{height:"33rem", overflow:"auto"}}>
                                 <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Rank</th>
-                                            <th>Username</th>
-                                            <th>Coins</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {sortByCoins.map((user, index) => (
-                                            <tr key={index}>
-                                                <td>{index + 1}</td>
-                                                <td>{maskUsername(user.userName)}</td>
-                                                <td>{user.coins}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </Tab>
-                            <Tab eventKey="profile" title="Highest Score">
-                                <table>
-                                    <thead>
+                                    <thead style={{position:"sticky", top:"0"}}>
                                         <tr>
                                             <th>Rank</th>
                                             <th>Username</th>
@@ -156,9 +163,9 @@ function AfterLogin() {
                             </Tab>
 
                             {/* Tab for Most Achievements */}
-                            <Tab eventKey="contact" title="Most Achievements">
+                            <Tab eventKey="contact" title="Most Achievements" style={{height:"33rem", overflow:"auto"}}>
                                 <table>
-                                    <thead>
+                                    <thead style={{position:"sticky", top:"0"}}>
                                         <tr>
                                             <th>Rank</th>
                                             <th>Username</th>
@@ -177,9 +184,7 @@ function AfterLogin() {
                                 </table>
                             </Tab>
                         </Tabs>
-                        <div>
-                            <h2 style={{ marginTop: "2rem", textAlign: "center", color: "#607d8b" }}>Leaderboard</h2>
-                        </div>
+                        
                     </div>
                 ) : (
                     <p>No leaderboard data available.</p>

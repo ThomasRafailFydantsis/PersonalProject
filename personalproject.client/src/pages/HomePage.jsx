@@ -4,16 +4,18 @@ import AuthService from '../servicesE/AuthService';
 import { useEffect } from 'react';
 import { useAuth } from '../components/AuthProvider';
 import { Modal, Button, Carousel} from 'react-bootstrap';
-import {FaRegUserCircle } from 'react-icons/fa';
+import {FaRegUserCircle,FaFacebook,FaTwitter, FaInstagram } from 'react-icons/fa';
 import HomeCerts from '../components/HomeCerts';
 import img1 from '../imgs/2bros.jpg';
 import img2 from '../imgs/coding.jpg';
 import img3 from '../imgs/kineza.jpg';
 import img4 from '../imgs/tetragwnh-laptop.jpg';
 import img5 from '../imgs/tetragwnh-programming.jpg';
-import img6 from '../imgs/coinToCert.png';
-import img7 from '../imgs/bookToCoin.png';
-import img8 from '../imgs/achieve.png';
+import img6 from '../imgs/istockphoto-1205715897-612x612.jpg';
+import img7 from '../imgs/istockphoto-1271367687-612x612.jpg';
+import img8 from '../imgs/istockphoto-1302155443-612x612.jpg';
+import img9 from '../imgs/istockphoto-1311896951-612x612.jpg';
+
 
 const HomePage = () => {
   const [showModal, setShowModal] = useState(false);
@@ -120,7 +122,6 @@ const handleScrollToSection = (sectionId, index) => {
           block: "start",
       });
 
-      // Optionally, adjust scrolling if the section is smaller than the viewport height
       const viewportHeight = window.innerHeight;
       const sectionHeight = section.offsetHeight;
       const additionalOffset = viewportHeight - sectionHeight;
@@ -139,13 +140,14 @@ const handleScrollToSection = (sectionId, index) => {
 
        <>
        <header className={`headerHome ${transparent ? "header-transparent" : ""}`}>
-    <a href="/" className="header-title"><h1 style={{fontSize:"40px"}}>Certflix</h1></a>
+    <a  href="/" className="header-title"><h1 style={{fontSize:"40px"}}>Certflix</h1></a>
     <ul className="header-nav" style={{marginTop:"1rem"}}>
     {[
-        { text: "Start", href: "#scrollspyHeading1" },
-        { text: "Progress", href: "#scrollspyHeading2" },
-        { text: "Programming", href: "#scrollspyHeading3" },
-        { text: "Goal", href: "#scrollspyHeading4" },
+        { text: "Home", href: "#scrollspyHeading1" },
+        { text: "About", href: "#scrollspyHeading2" },
+        { text: "Products", href: "#scrollspyHeading3" },
+       
+        // { text: "Goal", href: "#scrollspyHeading4" },
         { text: "Reviews", href: "#scrollspyHeading5" },
         { text: "Join us", href: "#scrollspyHeading6" },
     ].map((item, index) => (
@@ -160,78 +162,119 @@ const handleScrollToSection = (sectionId, index) => {
             <a href={item.href}>{item.text}</a>
         </li>
     ))}
-</ul>
-    <Button onClick={() => { setShowModal(true); setActiveTab('signup'); }} style={{ backgroundColor: 'transparent', border: 'none', color:"#FF8C00" }}>
+     </ul>
+    <Button onClick={() => { setShowModal(true); setActiveTab('signin'); }} style={{ backgroundColor: 'transparent', border: 'none', color:"#FF8C00" }}>
         <FaRegUserCircle size={30} />
     </Button>
-</header>
+     </header>
        </>
-
-     
-       <div id="scrollspyHeading1" className="full-screen-section" style={{ backgroundColor: 'aliceblue' }}>
+       <div id="scrollspyHeading1" className="full-screen-section"  style={{ backgroundColor: 'aliceblue', display: 'flex',flexDirection: 'column', justifyContent: 'center', alignItems: 'space-between' }}>
     <div className="text-center my-5" style={{color: '#607d8b ', boxShadow: '0 0px 0px rgba(0, 0, 0, 0.4)'}}>
         <h1  >Welcome to < span style={{color: '#FF8C00'}}>Certflix</span></h1>
-        <h3 className="my-3" >
+        <h5 className="my-3" >
             Learning to code is like learning a new language. The more you practice, the easier it becomes.
-        </h3>
+        </h5>
+        <>
+       <Carousel className='crsl'  style={{margin:'0px auto',width: '40rem', color: '#607d8b' , boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', marginTop: '4rem'}}>
+       <Carousel.Item interval={10000} style={{marginTop: '-30px'}}>
+            <img
+                className="d-block w-100"
+                src={img7}
+                alt="Third slide"
+                style={{paddingTop: '14px', height: '400px', maxWidth: '100%'}}
+                
+            />
+            <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
+                <h3>Create the future</h3>
+                <p>In the age of information, knowledge is power, and Certflix is here to empower you</p>
+            </Carousel.Caption>
+        </Carousel.Item>
+        <Carousel.Item interval={10000} style={{marginTop: '-30px'}}> 
+        <img
+                className="d-block w-100"
+                src={img8}
+                alt="Third slide"
+                style={{paddingTop: '14px', height: '400px',  maxWidth: '100%'}}
+            />
+            <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
+                <h3>Succeed in your career</h3>
+                <p>Our oroducts are specifically designed to help you succeed in your career, land your dreamjob</p>
+            </Carousel.Caption>
+        </Carousel.Item>
+        <Carousel.Item interval={10000} style={{marginTop: '-30px'}}>
+        <img
+                className="d-block w-100"
+                src={img9}
+                alt="Third slide"
+                style={{paddingTop: '14px', height: '400px', maxWidth: '100%'}}
+            />
+            <Carousel.Caption style={{backgroundColor: 'rgba(0, 0, 0, 0.7)'}}>
+                <h3 >Learn with passion</h3>
+                <p>Be able to learn and master new programming languages</p>
+            </Carousel.Caption>
+        </Carousel.Item>
+    </Carousel>
+    </>
     </div>
-    <HomeCerts onAuthRedirect={handleAuthRedirect} />
-   
     </div>
-    
-    <div id="scrollspyHeading2" style={{ backgroundColor: '#e9f6ef' }} className="full-screen-section">
-  
-      <button onClick={() => { setShowModal2(true)}} style={{ backgroundColor: 'transparent', border: 'none', color:"#FF8C00" }}>
-        <FaRegUserCircle size={30} />
-    </button>
-    </div>
-    <div id="scrollspyHeading3" className="full-screen-section">
-    <div  className="d-flex justify-content-between align-items-center my-5" style={{maxWidth:'1200px', margintop : '30px'}}>
-        <div className="col-md-6">
+    <div id="scrollspyHeading2" style={{backgroundColor: 'rgba(190, 231, 212, 0.7)'}} className="full-screen-section programming">
+      <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '50px'}}>
+        <div  >
             <h3>Learning with <span style={{color: '#FF8C00'}}>Certflix</span></h3>
-            <p>We provide high-quality courses designed to help you master new programming languages and enhance your career opportunities.</p>
+            <p style={{width: '19rem'}}>We provide high-quality courses designed to help you master new programming languages and enhance your career opportunities.
+              After completing a course, you'll have the knowledge and skills needed to succeed in your chosen field. With Certflix, you can learn at your own pace, on your own schedule, and in your own time zone.
+             
+            </p>
         </div>
-        <div className="col-md-6">
+        <div style={{marginLeft: '0.5rem'}} >
             <img
                 src={img5}
                 className="img-fluid"
                 alt="Learning Image"
+                style={{height: '19.5rem', width: '19.5rem'}}
             />
         </div>
-    </div>
-    </div> 
-    <div id="scrollspyHeading4" className="full-screen-section">
-
-    <div  className="d-flex justify-content-between align-items-center my-5" style={{maxWidth:'1200px'}}>
-        <div className="col-md-6">
+       </div>
+        <div style={{display: 'flex', justifyContent: 'space-between'}}  >
+        <div style={{marginRight: '0.5rem'}} >
             <img
                 src={img4}
                 className="img-fluid"
                 alt="Learning Image"
+                style={{height: '19.5rem', width: '19.5rem'}}
             />
         </div>
-        <div className="col-md-6"  style={{paddingLeft: '20px'}}>
+        <div >
             <h3>Interactive Learning</h3>
-            <p>We offer interactive quizzes, coding challenges, and more to ensure you understand the concepts you learn.</p>
+            <p style={{width: '19rem'}}>We offer interactive quizzes, coding challenges, and more to ensure you understand the concepts you learn.
+              Our interactive learning platform allows you to practice and test your knowledge in a fun and engaging way.
+            </p>
+        </div>
         </div>
     </div>
+    <div id="scrollspyHeading3"style={{backgroundColor: 'aliceblue'}} className="full-screen-section">
+  <HomeCerts onAuthRedirect={handleAuthRedirect} />
   </div>
   <div id="scrollspyHeading5"  style={{ backgroundColor: '#e9f6ef' }} className="full-screen-section">
 
-    <div  className="my-5 text-center" style={{maxWidth:'1200px', marginTop: '30px'}}>
+    {/* <div  className="my-5 text-center" style={{maxWidth:'1200px', marginTop: '30px'}}>
         <h3>Things You Can Do with <span style={{color: '#FF8C00'}}>Certflix</span></h3>
         <ul className="list-unstyled">
             <li><i className="fas fa-check-circle"></i> Access a wide variety of programming courses.</li>
             <li><i className="fas fa-check-circle"></i> Earn certificates for completing courses.</li>
             <li><i className="fas fa-check-circle"></i> Track your progress with personalized dashboards.</li>
         </ul>
-    </div>
+    </div> */}
     
  
     <div className="my-5 text-center" >
         <h2>User Reviews</h2>
-        <h3>What our students have to say about <span style={{color: '#FF8C00'}}>Certflix</span></h3>
-        <div style={{paddingTop: '30px'}}></div>
+        <h6>What our students have to say about <span style={{color: '#FF8C00'}}>Certflix</span></h6>
+        <div style={{paddingTop: '30px'}}>
+          <h5 > 
+            
+          </h5>
+        </div>
         <div className="d-flex  " style={{maxWidth:'1200px', marginTop: '30px'}}>
      
             <div className="card" style={{ width: '18rem', height:"15rem", marginRight: '20px' }}>
@@ -240,15 +283,12 @@ const handleScrollToSection = (sectionId, index) => {
                     <footer className="blockquote-footer">John Doe</footer>
                 </div>
             </div>
-
-           
             <div className="card" style={{ width: '16rem', marginRight: '20px' }}>
                 <div className="card-body my-5" >
                     <p className="card-text">`The interactive lessons and quizzes made learning fun and easy!`</p>
                     <footer className="blockquote-footer">Jane Smith</footer>
                 </div>
             </div>
-
             <div className="card" style={{ width: '18rem' }}>
                 <div className="card-body my-5">
                     <p className="card-text">`Thanks to Certflix, I got my first job as a developer!`</p>
@@ -258,24 +298,22 @@ const handleScrollToSection = (sectionId, index) => {
         </div>
     </div>
 </div>
-<div id="scrollspyHeading6" className="full-screen-section">
+<div id="scrollspyHeading6" style={{backgroundColor: 'aliceblue'}} className="full-screen-section">
           <h1  style={{textAlign: 'center',color: '#607d8b',marginBottom: '50px'}}>Join the <span style={{color: '#FF8C00'}}>Certflix</span> Community</h1>
-          <h3 style={{textAlign: 'center',color: '#607d8b',marginBottom: '130px'}}>Sign up today and start your journey!</h3>
-    <div  className="d-flex justify-content-center my-5" style={{display: 'flex', flexWrap: 'wrap' }}>
-                <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b',boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', }}>
-                    <div className="card-body">
-                        <h5 className="card-title">New to <span style={{ color: '#FF8C00' }}>Certflix?</span></h5>
-                        <p className="card-text">Sign up today and start your journey!</p>
-                    </div>
+          <h5 style={{textAlign: 'center',color: '#607d8b',marginBottom: '30px'}}>Sign up today and start your journey!</h5>
+  
+                
+                    
                     <button
                         onClick={() => { setShowModal(true); setActiveTab('signup'); }}
                         className='green-button'
                     >
                         Register
                     </button>
-                </div>
-
-                <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b',boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', marginLeft: '100px' }}>
+               
+                   
+                    </div>
+                {/* <div className="card" style={{ width: '18rem', margin: '10px', backgroundColor: '#e9f6ef', color: '#607d8b',boxShadow: '0 6px 10px rgba(0, 0, 0, 0.4)', marginLeft: '100px' }}>
                     <div className="card-body">
                         <h5 className="card-title">Already have an account?</h5>
                         <p className="card-text">Log in to access <br /> your certificates!</p>
@@ -287,9 +325,8 @@ const handleScrollToSection = (sectionId, index) => {
                     >
                         Login
                     </button>
-                </div>
-            </div>
-         </div>
+                </div> */}
+          
         
          <footer className="footer">
   <div className="container">
@@ -305,15 +342,15 @@ const handleScrollToSection = (sectionId, index) => {
         <ul className="footer-links">
           <li><a href="#">Home</a></li>
           <li><a href="#">About</a></li>
-          <li><a href="#">Contact</a></li>
+          <li><a target="_blank" href="/contactus">Contact</a></li>
         </ul>
       </div>
       <div className="col-md-4 text-center">
         <h4 className="footer-heading">Follow Us</h4>
         <ul className="footer-social-links">
-          <li><a href="#"><i className="fab fa-facebook-f"></i> Facebook</a></li>
-          <li><a href="#"><i className="fab fa-twitter"></i> Twitter</a></li>
-          <li><a href="#"><i className="fab fa-instagram"></i> Instagram</a></li>
+          <li><a target="_blank" href="https://www.facebook.com"><i className="fab fa-facebook-f"></i> <FaFacebook />Facebook</a></li>
+          <li><a href="#"><i className="fab fa-twitter"></i><FaTwitter /> Twitter</a></li>
+          <li><a href="#"><i className="fab fa-instagram"></i><FaInstagram /> Instagram</a></li>
         </ul>
       </div>
     </div>

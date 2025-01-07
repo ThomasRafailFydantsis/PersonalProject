@@ -95,14 +95,14 @@ function Header({ toggleSidebar, isOpen }) {
         </button>
       </div>
       <div className="logo" style={{ flex: 1, textAlign: "center",  }}>
-      <h1 >  <a style={{fontSize: "3rem", color:"linear-gradient(32deg, rgb(169, 106, 106) 45%, rgba(183,121,37,1) 100%)"}} href="/dashboard">
+      <h1 >  <a style={{fontSize: "2.5rem", color:"linear-gradient(32deg, rgb(169, 106, 106) 45%, rgba(183,121,37,1) 100%)"}} href="/dashboard">
          Certflix
         </a></h1>
       </div>
       <nav className="header-nav" style={{ position: "absolute", right: "1px" }}>
         <div style={{ display: "flex", alignItems: "center" }} className="user-dropdown">
-          <h3 style={{ cursor: "context-menu", color: "#607d8b", border:"1px solid #FF8C00", borderRadius:"9px",padding:"2px", marginTop:"12px", backgroundColor:"rgba(255, 140, 0, 0.1)" }}>
-            <span style={{ color: "#FF8C00", }}>Coins</span>Earned : {coins}</h3>
+          <h4 style={{ cursor: "context-menu", color: "#607d8b", border:"1px solid #FF8C00", borderRadius:"9px",padding:"2px", marginTop:"12px", backgroundColor:"rgba(255, 140, 0, 0.1)" }}>
+            <span style={{ color: "#FF8C00", }}>Coins</span>Earned : {coins}</h4>
           {/* <button
             onClick={handleToggleDropdown}
             style={{
