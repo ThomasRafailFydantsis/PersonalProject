@@ -7,7 +7,7 @@ import Sidebar from "../components/Sidebar1";
 const MyCertificate = () => {
     const [certificates, setCertificates] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState(false);
     const { isAuthenticated, userData, AuthError, revalidateAuth } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -44,7 +44,7 @@ const MyCertificate = () => {
                 setCertificates(response.data);
             } catch (err) {
                 console.error("Error fetching certificates:", err);
-                setError("Failed to fetch certificates.");
+                setError(true);
             } finally {
                 setLoading(false);
             }
@@ -72,7 +72,6 @@ const MyCertificate = () => {
     };
 
     if (loading) return <p>Loading...</p>;
-    if (error) return <p style={{ color: "red" }}>{error}</p>;
     if (AuthError) return <div>{AuthError}</div>;
     if (!isAuthenticated) return <div>You are not logged in. Please log in.</div>;
 console.log(certificates);
@@ -81,8 +80,8 @@ console.log(certificates);
             <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen} />
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
             <h2 style={{ textAlign: "center", marginTop: "60px", color: "#607d8b" }}>Results</h2>
-            {certificates.length === 0 ? (
-                <p>No certificates available.</p>
+            {error ? (
+                <p style={{ color: "red", textAlign: "center" }}>No certificates available.</p>
             ) : (
                 <table>
                     <thead>
@@ -98,7 +97,6 @@ console.log(certificates);
                         {certificates.map((cert) => {
                             let status = "Pending";
                             let action = "-";
-
                             if (cert.isPassed && cert.isMarked) {
                                 status = "Passed & Marked";
                                 action = cert.certificateDownloadable ? (

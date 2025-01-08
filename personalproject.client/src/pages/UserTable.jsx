@@ -183,10 +183,10 @@ const UserTable = () => {
               </button>
             </th>
             <th style={{ width: "300px" }}>Name</th>
-            <th style={{ width: "300px" }}>HighScore</th>
-            <th style={{ width: "300px" }}>LowestScore</th>
+            <th style={{ width: "300px" }}>Highest Score</th>
+            <th style={{ width: "300px" }}>Lowest Score</th>
             <th style={{ width: "300px" }}>Role</th>
-            <th style={{ width: "300px" }}>Actions</th>
+            <th style={{ width: "300px" }}>Delete</th>
           </tr>
         </thead>
         {isLoading ? (

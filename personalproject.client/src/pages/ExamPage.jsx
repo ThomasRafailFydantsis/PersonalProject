@@ -5,12 +5,9 @@ import { useAuth } from "../components/AuthProvider";
 import ExamHdr from "../components/ExamHdr";
 
 const ExamPage = () => {
-    const { certId } = useParams();
+    const {certId } = useParams();
     const navigate = useNavigate();
-    const { isAuthenticated, AuthError, revalidateAuth, userData} = useAuth();
-    
-
-    
+    const {isAuthenticated, AuthError, revalidateAuth, userData} = useAuth();
     const [exam, setExam] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

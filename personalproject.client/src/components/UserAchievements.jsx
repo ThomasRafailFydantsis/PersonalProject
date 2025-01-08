@@ -7,7 +7,7 @@ const UserAchievements = () => {
   const { userData } = useAuth();
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchAchievements = async () => {
@@ -22,7 +22,7 @@ const UserAchievements = () => {
         
         setAchievements(response.data);
       } catch (err) {
-        setError("An error occurred while fetching achievements.");
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -35,15 +35,13 @@ const UserAchievements = () => {
     return <div>Loading...</div>;
   }
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+ 
 
   return (
     <div >
       <h2 style={{ textAlign: 'center', margin:"2rem"}}>User Achievements</h2>
-      {achievements.length === 0 ? (
-        <p>No achievements found.</p>
+      {error ? (
+        <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '1.2rem' }}>Complete free exams to get achievements</p>
       ) : (
         <div className="card-container">
         {achievements.map((achievement, index) => (

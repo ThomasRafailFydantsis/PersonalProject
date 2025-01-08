@@ -46,7 +46,7 @@ namespace PersonalProject.Server.Models
 
             var user = await _context.Users
                 .Include(u => u.UserAchievements)
-                .Include(u => u.UserCertificates) // Include certificates for streak calculation
+                .Include(u => u.UserCertificates) 
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
@@ -208,6 +208,7 @@ namespace PersonalProject.Server.Models
             int totalQuestions = exam.Questions.Count;
             return totalQuestions > 0 ? (int)Math.Round((double)correctAnswers / totalQuestions * 100) : 0;
         }
+
         public async Task<List<UserCertificate>> GetUserResultsAsync(string userId)
         {
             return await _context.UserCertificates
@@ -251,7 +252,6 @@ namespace PersonalProject.Server.Models
                 }
             }
 
-            // Calculate the passing streak
             var userCertificates = user.UserCertificates
                                         .OrderByDescending(c => c.DateTaken)
                                         .ToList();
@@ -283,11 +283,8 @@ namespace PersonalProject.Server.Models
 
                 user.Coins += streakAchievement.RewardCoins;
             }
-
             await _context.SaveChangesAsync();
         }
-
-
     }
     public class QuestionDto
     {

@@ -150,30 +150,30 @@ namespace PersonalProject.Server.Controllers
         }
         [ServiceFilter(typeof(CustomJsonSerializationFilter))]
         [HttpPut("/description")]
-        public async Task<ActionResult<Certs>> UpdateCert([FromBody] CertDto1 certDto1)
+        public async Task<ActionResult<Certs>> UpdateCert([FromBody] CertDto2 certDto2)
         {
-            if (certDto1 == null || certDto1.CertId <= 0)
+            if (certDto2 == null || certDto2.CertId <= 0)
             {
                 return BadRequest("Invalid certification data.");
             }
 
             var cert = await _context.Certs
                 .Include(c => c.Descriptions)
-                .FirstOrDefaultAsync(c => c.CertId == certDto1.CertId);
+                .FirstOrDefaultAsync(c => c.CertId == certDto2.CertId);
 
             if (cert == null)
             {
-                return NotFound($"Certification with ID {certDto1.CertId} not found.");
+                return NotFound($"Certification with ID {certDto2.CertId} not found.");
             }
 
             // Update the main cert properties
             //cert.CertName = certDto1.CertName;
             //cert.ImagePath = certDto1.ImagePath;
-            cert.Description = certDto1.MainDescription;
+            cert.Description = certDto2.MainDescription;
 
             // Update the descriptions
             cert.Descriptions.Clear();
-            foreach (var descriptionDto in certDto1.Descriptions)
+            foreach (var descriptionDto in certDto2.Descriptions)
             {
                 cert.Descriptions.Add(new Description
                 {
@@ -209,6 +209,14 @@ namespace PersonalProject.Server.Controllers
         public List<DescriptionDto> Descriptions { get; set; }
         public int Reward { get; set; }
         public List<AchievementDto> Achievements { get; set; } 
+    }
+    public class CertDto2
+    {
+        public int CertId { get; set; }
+
+        public string? MainDescription { get; set; }
+
+        public List<DescriptionDto> Descriptions { get; set; }
     }
     public class DescriptionDto
     {
