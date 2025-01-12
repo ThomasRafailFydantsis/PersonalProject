@@ -77,7 +77,8 @@ const UserProfile = () => {
             });
             alert("Profile updated successfully!");
             setIsEditing(false);
-            navigate("/userprofile");
+            
+
         } catch (err) {
             console.error("Error updating profile:", err);
         }

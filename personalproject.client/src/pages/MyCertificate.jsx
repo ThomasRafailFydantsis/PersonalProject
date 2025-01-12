@@ -81,7 +81,7 @@ console.log(certificates);
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
             <h2 style={{ textAlign: "center", marginTop: "60px", color: "#607d8b" }}>Results</h2>
             {error ? (
-                <p style={{ color: "red", textAlign: "center" }}>No certificates available.</p>
+                <p style={{ color: "#607d8b", textAlign: "center" }}>Your results page is empty, try completing Premium exams first.</p>
             ) : (
                 <table>
                     <thead>

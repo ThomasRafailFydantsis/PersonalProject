@@ -76,7 +76,7 @@ namespace PersonalProject.Server.Models
 
             int totalQuestions = certificate.Questions.Count;
             int scorePercentage = totalQuestions > 0 ? (int)Math.Round((double)correctAnswers / totalQuestions * 100) : 0;
-            bool isPassed = scorePercentage >= certificate.PassingScore;
+            bool isPassed = correctAnswers >= certificate.PassingScore;
             if (isPassed)
             {
               
@@ -256,7 +256,7 @@ namespace PersonalProject.Server.Models
                                         .OrderByDescending(c => c.DateTaken)
                                         .ToList();
 
-            int streakCount = 1; // Start with the current exam as passed
+            int streakCount = 1; // Start with the current exam as passed, in swagger it should start with 3 if we want to start passing streak from 2 .
 
             foreach (var cert in userCertificates)
             {

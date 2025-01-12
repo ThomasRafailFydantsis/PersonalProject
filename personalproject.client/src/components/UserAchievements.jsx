@@ -41,7 +41,7 @@ const UserAchievements = () => {
     <div >
       <h2 style={{ textAlign: 'center', margin:"2rem"}}>User Achievements</h2>
       {error ? (
-        <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '1.2rem' }}>Complete free exams to get achievements</p>
+        <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '1.2rem' }}>Complete exams to get achievements</p>
       ) : (
         <div className="card-container">
         {achievements.map((achievement, index) => (

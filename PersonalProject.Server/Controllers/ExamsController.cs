@@ -55,6 +55,7 @@ namespace PersonalProject.Server.Controllers
                     exam.Reward,
                     exam.Description,
                     exam.CategoryId,
+                    exam.PassingScore,
                     Category = new
                     {
                         exam.Category.Id,
@@ -129,7 +130,45 @@ namespace PersonalProject.Server.Controllers
 
             return CreatedAtAction(nameof(GetExamById), new { certId = cert.CertId }, cert);
         }
+        [HttpPut("updatePassingScore/{certId}")]
+        public async Task<IActionResult> UpdatePassingScore(int certId, [FromBody] int passingScore)
+        {
+            if (certId <= 0)
+            {
+                return BadRequest("Invalid CertId.");
+            }
 
+            if (passingScore < 0)
+            {
+                return BadRequest("Passing score must be a non-negative integer.");
+            }
+
+            try
+            {
+                var cert = await _context.Certs.FirstOrDefaultAsync(c => c.CertId == certId);
+
+                if (cert == null)
+                {
+                    return NotFound("Exam not found.");
+                }
+
+                cert.PassingScore = passingScore;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    Message = "Passing score updated successfully.",
+                    cert.CertId,
+                    cert.PassingScore
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating passing score: {ex.Message}");
+                return StatusCode(500, "Internal server error.");
+            }
+        }
         [HttpPut("update/{certId}")]
         [ServiceFilter(typeof(CustomJsonSerializationFilter))]
         public async Task<IActionResult> UpdateExam(int certId, [FromBody] ExamUpdateDto examUpdateDto)
@@ -154,16 +193,18 @@ namespace PersonalProject.Server.Controllers
                 cert.CategoryId = examUpdateDto.CategoryId;
                 cert.Cost = examUpdateDto.Cost;
                 cert.Reward = examUpdateDto.Reward;
+           
 
-                cert.CertAchievements.Clear(); 
+                cert.CertAchievements.Clear();
                 foreach (var achievementId in examUpdateDto.AchievementIds)
                 {
                     cert.CertAchievements.Add(new CertAchievement
                     {
                         CertId = cert.CertId,
-                        AchievementId = achievementId 
+                        AchievementId = achievementId
                     });
                 }
+
                 cert.Questions = examUpdateDto.Questions.Select(q => new Question
                 {
                     Id = q.Id,
@@ -213,7 +254,8 @@ namespace PersonalProject.Server.Controllers
                     .Select(ua => new
                     {
                         title = ua.Achievement.Title, 
-                        description = ua.Achievement.Description 
+                        description = ua.Achievement.Description ,
+                        reward = ua.Achievement.RewardCoins
                     })
                     .ToList();
 
@@ -577,7 +619,7 @@ namespace PersonalProject.Server.Controllers
                 }
             }
 
-            // Calculate the raw score (number of correct answers)
+            // Calculate the number of correct answers
             int correctAnswers = submission.Answers.Count(a => a.IsCorrect);
 
             // Calculate the percentage score
@@ -729,6 +771,7 @@ namespace PersonalProject.Server.Controllers
         public List<int> AchievementIds { get; set; } // Changed to List<int>
         public int Reward { get; set; }
         public int CategoryId { get; set; }
+       
     }
 
     public class AnswerOptionDto

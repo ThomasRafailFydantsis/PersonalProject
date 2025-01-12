@@ -48,7 +48,6 @@ const GradeExamPage = () => {
         revalidateAuth();
     }, []);
 
-    // Fetch submission details and initialize grading data
     useEffect(() => {
         const fetchSubmissionDetails = async () => {
             try {
@@ -63,7 +62,7 @@ const GradeExamPage = () => {
 
                 // Initialize grading data with current selectedAnswerId values
                 const initialGradingData = submission.answers.reduce((acc, answer) => {
-                    acc[answer.questionId] = answer.selectedAnswerId || null; // Pre-fill with existing data
+                    acc[answer.questionId] = answer.selectedAnswerId || null; 
                     return acc;
                 }, {});
                 setGradingData(initialGradingData);
@@ -91,7 +90,7 @@ const GradeExamPage = () => {
         try {
             const payload = {
                 examSubmissionId: parseInt(examSubmissionId, 10),
-                gradingData, // Send gradingData in expected format
+                gradingData, // Send gradingData 
             };
 
             const response = await axios.post(
@@ -133,7 +132,7 @@ const GradeExamPage = () => {
         <div >
              <Header toggleSidebar={toggleSidebar} isOpen={isSidebarOpen}/>
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} sidebarRef={sidebarRef} />
-            <div style={{ padding: "20px", textAlign: "center", color: "#607d8b", top: "100px" }}>
+            <div style={{ marginTop: "40px", padding: "20px", textAlign: "center", color: "#607d8b", top: "100px" }}>
 
             <h1 >Grade Submission:</h1>
             <h2>Candidate: {submissionDetails?.candidateName}</h2>
@@ -155,7 +154,7 @@ const GradeExamPage = () => {
            
             <h3>Answers</h3>
             </div>
-            <table>
+            <table style={{ width: "90%", marginRight:"1.2rem" }}>
                 <thead>
                     <tr>
                         <th>Question</th>
@@ -169,20 +168,25 @@ const GradeExamPage = () => {
                             <td>{answer.questionText}</td>
                             <td>{answer.correctAnswer}</td>
                             <td>
+                                <div style={{ display: "flex", flexDirection: "row", maxwidth: "500px" }}>
                                 {answer.answerOptions.map((option) => (
-                                    <label key={option.id} style={{ display: "flex", marginBottom: "5px" }}>
+                                    <label key={option.id} style={{  marginBottom: "5px" }}>
+                                         {option.text} {option.isCorrect ? "(Correct)" : ""}
                                         <input
+                                            style={{  }}
                                             type="radio"
                                             name={`question-${answer.questionId}`}
                                             value={option.id}
                                             checked={gradingData[answer.questionId] === option.id}
                                             onChange={() =>
                                                 handleRadioChange(answer.questionId, option.id)
+                                            
                                             }
                                         />
-                                        {option.text} {option.isCorrect ? "(Correct)" : ""}
+                                       
                                     </label>
                                 ))}
+                                </div>
                             </td>
                         </tr>
                     ))}

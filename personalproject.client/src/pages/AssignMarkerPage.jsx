@@ -14,7 +14,7 @@ const AssignMarkerPage = () => {
     const [selectedMarkers, setSelectedMarkers] = useState({});
     const [filterAssignments, setFilterAssignments] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const { isAuthenticated, roles, AuthError, revalidateAuth } = useAuth();
     const navigate = useNavigate();
@@ -64,7 +64,7 @@ const AssignMarkerPage = () => {
                 setMarkers(markers);
                 setIsLoading(false);
             } catch (err) {
-                setError("Failed to fetch data. Please try again later.");
+                setError(true);
                 console.error(err);
             } finally {
                 

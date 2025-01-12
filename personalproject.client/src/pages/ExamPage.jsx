@@ -93,7 +93,7 @@ const ExamPage = () => {
     if (error) return <ErrorMessage message={error} />;
     if (AuthError) return <ErrorMessage message={AuthError} />;
     if (!isAuthenticated) return <WarningMessage message="You are not logged in. Please log in." />;
-
+ console.log(result);
     return (
         <div className="container my-4" style={{ paddingTop: "100px" }}>
             <ExamHdr timeLeft={examStarted ? timeLeft : null} />
@@ -238,7 +238,7 @@ const ResultBlock = ({ result, navigate }) => (
                 <ul className="list-group">
                     {result.achievements.map((achievement, index) => (
                         <li key={index} className="list-group-item">
-                            <strong>{achievement.title}</strong>: {achievement.description}
+                            <strong>{achievement.title}</strong>: {achievement.description} <span style={{ color: "#FF8C00", fontSize: "14px" }}>Coins earned:{achievement.reward}</span>
                         </li>
                     ))}
                 </ul>
